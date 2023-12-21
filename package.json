@@ -1,0 +1,18 @@
+{
+  "name": "com.tony_bean_is_alive.nonsensicalkit.core",
+  "displayName": "NonsensicalKit.Core",
+  "version": "0.0.1",
+  "unity": "2021.3",
+  "license": "MIT",
+  "description": "NonsensicalKit.Core\u4e3aNonsensicalKit\u7684\u6838\u5fc3\u5305\uff0c\u6b64\u5de5\u5177\u96c6\u7684\u4efb\u610f\u5176\u4ed6\u5305\u90fd\u4f9d\u8d56\u4e8e\u6b64\u5305\u3002\r\n\u6b64\u5305\u5305\u542b\u9879\u76ee\u7b80\u6613\u6846\u67b6\u3001\u5404\u79cd\u5de5\u5177\u7c7b",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "samples": [
+    {
+      "displayName": "ServiceTemplates",
+      "description": "\u670d\u52a1\u7c7b\u9884\u5236\u4f53\u6a21\u677f",
+      "path": "Samples~/ServiceTemplates"
+    }
+  ]
+}
