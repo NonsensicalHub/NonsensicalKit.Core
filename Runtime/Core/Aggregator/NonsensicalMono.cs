@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 简化Aggregator的操作以及自动化注销操作

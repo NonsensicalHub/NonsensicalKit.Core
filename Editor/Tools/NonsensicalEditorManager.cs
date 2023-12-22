@@ -5,7 +5,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core.Tools
+namespace NonsensicalKit.Core.Editor.Tools
 {
     /// <summary>
     /// 编辑器总管理类，用于管理一些通用但使用较消耗性能的属性

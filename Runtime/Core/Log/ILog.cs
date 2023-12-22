@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace NonsensicalKit.Editor.Log
+namespace NonsensicalKit.Core.Log
 {
     public interface ILog
     {

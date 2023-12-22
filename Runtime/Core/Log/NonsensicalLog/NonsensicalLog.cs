@@ -1,5 +1,5 @@
-using NonsensicalKit.Editor.Service;
-using NonsensicalKit.Editor.Service.Config;
+using NonsensicalKit.Core.Service;
+using NonsensicalKit.Core.Service.Config;
 using NonsensicalKit.Tools;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Log.NonsensicalLog
+namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
     /// <summary>
     /// 可以在一定程度上进行配置的日志类

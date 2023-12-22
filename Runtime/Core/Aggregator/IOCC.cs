@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 控制反转容器InversionOfControlContainer

@@ -8,7 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace NonsensicalKit.Editor.Service.Config
+namespace NonsensicalKit.Core.Service.Config
 {
     [ServicePrefab("Services/ConfigService")]
     public class ConfigService : NonsensicalMono, IMonoService

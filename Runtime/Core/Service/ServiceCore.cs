@@ -1,5 +1,5 @@
-using NonsensicalKit.Editor.Log;
-using NonsensicalKit.Editor.Setting;
+using NonsensicalKit.Core.Log;
+using NonsensicalKit.Core.Setting;
 using NonsensicalKit.Tools;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Service
+namespace NonsensicalKit.Core.Service
 {
     public static class ServiceCore
     {

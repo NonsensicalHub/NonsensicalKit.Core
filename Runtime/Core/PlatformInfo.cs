@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 运行平台相关信息

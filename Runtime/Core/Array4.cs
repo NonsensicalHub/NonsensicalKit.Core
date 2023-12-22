@@ -1,6 +1,6 @@
 using System;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 使用一维数组实现四维数组

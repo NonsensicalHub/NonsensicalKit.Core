@@ -1,7 +1,6 @@
-using UnityEngine;
-using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
+using UnityEngine.TestTools;
 
 namespace Nonsensicalkit.Core.Tests
 {

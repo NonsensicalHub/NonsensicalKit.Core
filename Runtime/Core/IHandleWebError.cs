@@ -1,6 +1,6 @@
 using UnityEngine.Networking;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// UnityWebRequest错误处理接口

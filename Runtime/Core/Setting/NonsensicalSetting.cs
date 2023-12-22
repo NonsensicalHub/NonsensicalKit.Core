@@ -1,9 +1,9 @@
-using NonsensicalKit.Editor.Log;
-using NonsensicalKit.Editor.Service;
+using NonsensicalKit.Core.Log;
+using NonsensicalKit.Core.Service;
 using NonsensicalKit.Tools;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Setting
+namespace NonsensicalKit.Core.Setting
 {
     public class NonsensicalSetting : ScriptableObject
     {

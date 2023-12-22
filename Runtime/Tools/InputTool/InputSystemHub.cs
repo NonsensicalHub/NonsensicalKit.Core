@@ -1,5 +1,5 @@
 #if ENABLE_INPUT_SYSTEM
-using NonsensicalKit.Editor;
+using NonsensicalKit.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;

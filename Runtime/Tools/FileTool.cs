@@ -1,4 +1,4 @@
-using NonsensicalKit.Editor.Log;
+using NonsensicalKit.Core.Log;
 using System;
 using System.Collections.Generic;
 using System.IO;

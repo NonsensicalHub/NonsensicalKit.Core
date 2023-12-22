@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core.Tools
+namespace NonsensicalKit.Core.Editor.Tools
 {
     /// <summary>
     /// 快速命名工具，可以将一个节点树的所有名称复制到另一个相同结构的节点树上

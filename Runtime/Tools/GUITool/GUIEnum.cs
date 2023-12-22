@@ -1,4 +1,4 @@
-using NonsensicalKit.Editor;
+using NonsensicalKit.Core;
 
 namespace NonsensicalKit.Tools.GUITool
 {

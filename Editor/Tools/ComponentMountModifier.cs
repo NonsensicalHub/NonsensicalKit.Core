@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core.Tools
+namespace NonsensicalKit.Core.Editor.Tools
 {
     /// <summary>
     /// 批量添加组件

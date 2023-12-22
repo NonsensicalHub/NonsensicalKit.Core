@@ -1,4 +1,4 @@
-namespace NonsensicalKit.Editor.Log.NonsensicalLog
+namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
     /// <summary>
     /// 每条消息都有一个等级（不可以为OFF）,设定Log等级后，仅会Log大于等于设定等级的消息

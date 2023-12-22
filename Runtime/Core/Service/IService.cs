@@ -1,6 +1,6 @@
 using System;
 
-namespace NonsensicalKit.Editor.Service
+namespace NonsensicalKit.Core.Service
 {
     public interface IService
     {

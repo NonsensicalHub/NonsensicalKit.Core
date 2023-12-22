@@ -1,6 +1,6 @@
 using System;
 
-namespace NonsensicalKit.Editor.Service
+namespace NonsensicalKit.Core.Service
 {
     /// <summary>
     /// 配置服务类预制体路径

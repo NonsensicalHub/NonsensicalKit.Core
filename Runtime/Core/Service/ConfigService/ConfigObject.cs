@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Service.Config
+namespace NonsensicalKit.Core.Service.Config
 {
     /// <summary>
     /// Config对象类应继承此类

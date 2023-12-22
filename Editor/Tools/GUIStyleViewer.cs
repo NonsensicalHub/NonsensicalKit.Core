@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core.Tools
+namespace NonsensicalKit.Core.Editor.Tools
 {
     /// <summary>
     /// 查看内置GUI，方便设置编辑器工具格式

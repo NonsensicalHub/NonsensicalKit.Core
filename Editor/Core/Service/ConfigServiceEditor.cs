@@ -1,11 +1,11 @@
-using NonsensicalKit.Editor.Service.Config;
+using NonsensicalKit.Core.Service.Config;
 using NonsensicalKit.Tools;
 using System.IO;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core.Service.Config
+namespace NonsensicalKit.Core.Editor.Service.Config
 {
     public class ConfigServiceEditor : IPreprocessBuildWithReport
     {

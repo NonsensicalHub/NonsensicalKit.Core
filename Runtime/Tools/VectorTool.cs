@@ -1,4 +1,4 @@
-using NonsensicalKit.Editor;
+using NonsensicalKit.Core;
 using System.Collections.Generic;
 using UnityEngine;
 

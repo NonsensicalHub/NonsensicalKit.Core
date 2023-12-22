@@ -1,10 +1,10 @@
-using NonsensicalKit.Editor.Setting;
+using NonsensicalKit.Core.Setting;
 using NonsensicalKit.Tools;
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Log
+namespace NonsensicalKit.Core.Log
 {
     public static class LogCore
     {

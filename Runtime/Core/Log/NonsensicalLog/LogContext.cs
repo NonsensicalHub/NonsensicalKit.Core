@@ -1,6 +1,6 @@
 using System;
 
-namespace NonsensicalKit.Editor.Log.NonsensicalLog
+namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
     /// <summary>
     /// 日志上下文

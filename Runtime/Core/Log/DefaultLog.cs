@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Log
+namespace NonsensicalKit.Core.Log
 {
     public class DefaultLog : ILog
     {

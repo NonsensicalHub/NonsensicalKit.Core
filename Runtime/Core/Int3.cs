@@ -1,4 +1,4 @@
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 限定值为Int的三位向量

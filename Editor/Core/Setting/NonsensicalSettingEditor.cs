@@ -1,9 +1,9 @@
-using NonsensicalKit.Editor.Setting;
+using NonsensicalKit.Core.Setting;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core.Setting
+namespace NonsensicalKit.Core.Editor.Setting
 {
     public class NonsensicalSettingEditor
     {

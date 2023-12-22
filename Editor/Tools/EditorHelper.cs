@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace NonsensicalKit.Editor.Core.Tools
+namespace NonsensicalKit.Core.Editor.Tools
 {
     /// <summary>
     /// 用于改变编辑器设置的工具类

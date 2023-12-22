@@ -1,10 +1,10 @@
-using NonsensicalKit.Editor;
+using NonsensicalKit.Core;
 using NonsensicalKit.Tools;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core
+namespace NonsensicalKit.Core.Editor
 {
     [CustomPropertyDrawer(typeof(TypeQualifiedStringAttribute))]
     public class TypeQualifiedStringPropertyDrawer : PropertyDrawer

@@ -1,4 +1,4 @@
-namespace NonsensicalKit.Editor.Log.NonsensicalLog
+namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
     public enum LogStrategy
     {

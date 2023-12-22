@@ -1,6 +1,6 @@
 using System;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 待处理异常

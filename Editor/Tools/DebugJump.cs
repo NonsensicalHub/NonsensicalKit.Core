@@ -1,10 +1,10 @@
-using NonsensicalKit.Editor.Log;
-using NonsensicalKit.Editor.Log.NonsensicalLog;
+using NonsensicalKit.Core.Log;
+using NonsensicalKit.Core.Log.NonsensicalLog;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Core.Tools
+namespace NonsensicalKit.Core.Editor.Tools
 {
     /// <summary>
     /// 用于改变双击console中信息后的跳转,跳过无效条目

@@ -1,4 +1,4 @@
-using NonsensicalKit.Editor;
+using NonsensicalKit.Core;
 using NonsensicalKit.Tools;
 using NUnit.Framework;
 using System;

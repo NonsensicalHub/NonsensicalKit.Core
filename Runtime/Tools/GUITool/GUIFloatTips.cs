@@ -1,6 +1,4 @@
-using NonsensicalKit.Editor;
-using System.Collections;
-using System.Collections.Generic;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.GUITool

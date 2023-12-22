@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /* 经简单测试，循环十万次调用单一方法时，publish的时间消耗是直接引用调用的20倍，但大量调用时间仍在可接受范围内
      * 消息聚合器应当只用于模块之间的通信，且当通信过于频繁时不应使用，模块内部使用应直接引用的方式进行值的传递

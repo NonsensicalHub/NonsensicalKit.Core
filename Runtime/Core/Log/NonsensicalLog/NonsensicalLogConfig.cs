@@ -1,7 +1,7 @@
-using NonsensicalKit.Editor.Service.Config;
+using NonsensicalKit.Core.Service.Config;
 using UnityEngine;
 
-namespace NonsensicalKit.Editor.Log.NonsensicalLog
+namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
     [CreateAssetMenu(fileName = "New NonsensicalLogConfig", menuName = "ScriptableObjects/NonsensicalLogConfig")]
     public class NonsensicalLogConfig : ConfigObject

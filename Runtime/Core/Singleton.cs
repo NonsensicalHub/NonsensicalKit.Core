@@ -1,6 +1,6 @@
 using System;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 不继承MonoBehaviour的单例类基类

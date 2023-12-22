@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace NonsensicalKit.Editor
+namespace NonsensicalKit.Core
 {
     /// <summary>
     /// Vector3的可序列化替代品
