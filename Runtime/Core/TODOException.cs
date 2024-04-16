@@ -10,7 +10,7 @@ namespace NonsensicalKit.Core
     public class TODOException : Exception
     {
         private readonly string _message;
-        
+
         public TODOException()
         {
             _message = "待处理";

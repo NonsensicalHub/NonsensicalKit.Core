@@ -187,7 +187,7 @@ namespace NonsensicalKit.Tools.NetworkTool
     public class WebSocketWrap
     {
         //连接状态改变
-        public Action<WebSocketState> OnWebSocketState { get; set;}
+        public Action<WebSocketState> OnWebSocketState { get; set; }
         //连接失败
         public Action OnConnectError { get; set; }
         //数据返回

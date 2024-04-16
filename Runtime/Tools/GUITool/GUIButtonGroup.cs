@@ -24,7 +24,7 @@ namespace NonsensicalKit.Tools.GUITool
 
         private void OnGUI()
         {
-            if (_style==null)
+            if (_style == null)
             {
                 _style = UnityEngine.GUI.skin.button;
                 _style.fontSize = m_fontSize;

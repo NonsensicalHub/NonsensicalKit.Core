@@ -116,7 +116,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 }
                 if (_input.IsMouseRightButtonHold)
                 {
-                    AdjustRotation(new Vector2( _input.CrtMousePos.x, -_input.CrtMousePos.x));
+                    AdjustRotation(new Vector2(_input.CrtMousePos.x, -_input.CrtMousePos.x));
                 }
                 if (m_canMove)
                 {

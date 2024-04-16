@@ -29,12 +29,12 @@ namespace NonsensicalKit.Tools.NetworkTool
             unityWebRequest.downloadHandler = new DownloadHandlerTexture(true);
             yield return unityWebRequest.SendWebRequest();
         }
-        public static IEnumerator QuickPost(this UnityWebRequest unityWebRequest,string url, Dictionary<string, string> formData, Dictionary<string, string> header)
+        public static IEnumerator QuickPost(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> formData, Dictionary<string, string> header)
         {
             unityWebRequest.method = "Post";
             unityWebRequest.url = url;
             IncreaseHeader(unityWebRequest, header);
-            var form=CreateForm(formData);
+            var form = CreateForm(formData);
             byte[] array = null;
             array = form.data;
             if (array.Length == 0)
@@ -131,7 +131,7 @@ namespace NonsensicalKit.Tools.NetworkTool
         #region Post
         public static IEnumerator Post(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, string.Empty))
+            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST"))
             {
                 IncreaseHeader(unityWebRequest, header);
                 yield return SendRequest(unityWebRequest, callback, iHandleWebError);
@@ -139,7 +139,7 @@ namespace NonsensicalKit.Tools.NetworkTool
         }
         public static IEnumerator Post(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback, Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, string.Empty))
+            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST"))
             {
                 IncreaseHeader(unityWebRequest, header);
                 if (uploadProcessCallback == null && downloadProcessCallback == null)

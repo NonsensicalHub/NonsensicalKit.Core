@@ -2,13 +2,13 @@ using NonsensicalKit.Core;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 
-/* Note: animations are called via the controller for both the character and capsule using animator null checks
- */
-
-namespace NonsensicalKit.Tools.CameraTool
+namespace NonsensicalKit.Tools.PlayerController
 {
+    /// <summary>
+    /// 第一人称控制器，尚未完善
+    /// </summary>
     [RequireComponent(typeof(CharacterController))]
-    public class FirstPersonController : NonsensicalMono
+    public class FirstPersonPlayerController : NonsensicalMono
     {
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
@@ -42,6 +42,7 @@ namespace NonsensicalKit.Tools.CameraTool
         [Tooltip("What layers the character uses as ground")]
         [SerializeField] private LayerMask m_groundLayers;
 
+
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
         [SerializeField] private GameObject m_cinemachineCameraTarget;
@@ -49,6 +50,9 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] private float m_topClamp = 90.0f;
         [Tooltip("How far in degrees can you move the camera down")]
         [SerializeField] private float m_bottomClamp = -90.0f;
+        [SerializeField] private GameObject _mainCamera;
+
+        public bool CanControl { get => _canControl; set => _canControl = value; }
 
         // cinemachine
         private float _cinemachineTargetPitch;
@@ -64,13 +68,10 @@ namespace NonsensicalKit.Tools.CameraTool
         private float _fallTimeoutDelta;
 
         private CharacterController _controller;
-        private GameObject _mainCamera;
-
         private const float _threshold = 0.01f;
-
         private InputHub _input;
+        private bool _canControl = true;
 
-        protected bool _canControl=true;
 
         private Vector3 _startPos;
         private Quaternion _startRot;
@@ -142,11 +143,10 @@ namespace NonsensicalKit.Tools.CameraTool
             _input.OnSpaceKeyEnter -= OnJumpKeyEnter;
         }
 
-        protected void ResetState()
+        public void ResetState()
         {
             transform.localPosition = _startPos;
             transform.localRotation = _startRot;
-
         }
 
         private void GroundedCheck()
@@ -159,11 +159,11 @@ namespace NonsensicalKit.Tools.CameraTool
         private void CameraRotation()
         {
             // if there is an input
-            var crtLook = new Vector2(_input.CrtMousePos.x, -_input.CrtMousePos.x);
+            var crtLook = new Vector2(_input.CrtMouseMove.x, -_input.CrtMouseMove.y);
             if (crtLook.sqrMagnitude >= _threshold)
             {
-                _cinemachineTargetPitch += crtLook.y * m_rotationSpeed * Time.deltaTime;
-                _rotationVelocity = crtLook.x * m_rotationSpeed * Time.deltaTime;
+                _cinemachineTargetPitch += crtLook.y * m_rotationSpeed * 0.02f;
+                _rotationVelocity = crtLook.x * m_rotationSpeed * 0.02f;
 
                 // clamp our pitch rotation
                 _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, m_bottomClamp, m_topClamp);
@@ -208,19 +208,17 @@ namespace NonsensicalKit.Tools.CameraTool
                 _speed = targetSpeed;
             }
 
-            // normalise input direction
-            Vector3 inputDirection = new Vector3(_input.CrtMove.x, 0.0f, _input.CrtMove.y).normalized;
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
             if (_input.CrtMove != Vector2.zero)
             {
                 // move
-                inputDirection = transform.right * _input.CrtMove.x + transform.forward * _input.CrtMove.y;
+                Vector3 inputDirection = (transform.right * _input.CrtMove.x + transform.forward * _input.CrtMove.y).normalized;
+                // move the player
+                _controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
             }
 
-            // move the player
-            _controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
         }
 
         private void JumpAndGravity()

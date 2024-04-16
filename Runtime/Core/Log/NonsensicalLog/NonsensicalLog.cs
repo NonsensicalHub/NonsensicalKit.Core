@@ -45,7 +45,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
             ServiceCore.AfterServiceCoreInit += OnServiceCoreInit;
         }
 
-         ~NonsensicalLog()
+        ~NonsensicalLog()
         {
             _sb.Clear();
             _sw?.Flush();
@@ -54,29 +54,29 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
             _fs?.Close();
         }
 
-        public void Debug(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Debug(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.DEBUG, obj, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.DEBUG, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Info(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Info(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.INFO, obj, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.INFO, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Warning(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Warning(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.WARNING, obj, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.WARNING, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Error(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Error(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.ERROR, obj, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.ERROR, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Fatal(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Fatal(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.FATAL, obj, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.FATAL, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
         private void TryLog(LogContext info)
@@ -93,7 +93,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
 
         private void Log(LogContext info)
         {
-            if (info.LogLevel< _logLevel)
+            if (info.LogLevel < _logLevel)
             {
                 return;
             }
@@ -133,14 +133,14 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
                 {
                     case LogLevel.DEBUG:
                     case LogLevel.INFO:
-                        UnityEngine.Debug.Log(_sb.ToString());
+                        UnityEngine.Debug.Log(_sb.ToString(), info.Context);
                         break;
                     case LogLevel.WARNING:
-                        UnityEngine.Debug.LogWarning(_sb.ToString());
+                        UnityEngine.Debug.LogWarning(_sb.ToString(), info.Context);
                         break;
                     case LogLevel.ERROR:
                     case LogLevel.FATAL:
-                        UnityEngine.Debug.LogError(_sb.ToString());
+                        UnityEngine.Debug.LogError(_sb.ToString(), info.Context);
                         break;
                     case LogLevel.OFF:
                         break;
@@ -167,7 +167,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
 
         private void Flush()
         {
-            while (_buffer.Count>0)
+            while (_buffer.Count > 0)
             {
                 Log(_buffer.Dequeue());
             }
@@ -196,7 +196,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
                     _logDateTime = data.RuntimeLogDateTime;
                     _logClassInfo = data.RuntimeLogCallerInfo;
                 }
-                if (_logStrategy.Length==0)
+                if (_logStrategy.Length == 0)
                 {
                     _logLevel = LogLevel.OFF;
                 }
@@ -206,7 +206,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
                     switch (item)
                     {
                         case LogStrategy.Console:
-                            _logConsole =true;
+                            _logConsole = true;
                             break;
                         case LogStrategy.PersistentFile:
                             _logPersistentFile = true;

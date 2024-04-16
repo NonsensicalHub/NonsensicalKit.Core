@@ -20,11 +20,11 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
     }
 
     [System.Serializable]
-    public class NonsensicalLogConfigData:ConfigData
+    public class NonsensicalLogConfigData : ConfigData
     {
         public LogLevel EditorLogLevel = LogLevel.DEBUG;
         public LogLevel RuntimeLogLevel = LogLevel.OFF;
-        public LogStrategy[] EditorLogStrategy = new LogStrategy[] { LogStrategy .Console};
+        public LogStrategy[] EditorLogStrategy = new LogStrategy[] { LogStrategy.Console };
         public LogStrategy[] RuntimeLogStrategy = new LogStrategy[] { };
         public bool EditorLogDateTime = false;
         public bool RuntimeLogDateTime = false;

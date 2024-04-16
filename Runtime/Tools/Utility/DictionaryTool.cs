@@ -20,11 +20,11 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        public static void ActionAdd<Key>(this Dictionary<Key, Action> dictionary, Key key, Action value) 
+        public static void ActionAdd<Key>(this Dictionary<Key, Action> dictionary, Key key, Action value)
         {
             if (dictionary.ContainsKey(key))
             {
-                dictionary[key]+=value;
+                dictionary[key] += value;
             }
             else
             {

@@ -21,6 +21,9 @@ namespace NonsensicalKit.Tools.InputTool
         public Action<Vector2> OnMoveChanged { get; set; }
 
         public Action OnSpaceKeyEnter { get; set; }
+        public Action OnFKeyEnter { get; set; }
+        public Action<bool> OnLeftShiftKeyChanged { get; set; }
+        public Action<bool> OnLeftAltKeyChanged { get; set; }
 
         public float CrtZoom { get; private set; }
 
@@ -28,6 +31,7 @@ namespace NonsensicalKit.Tools.InputTool
         public bool IsMouseRightButtonHold { get; private set; }
         public bool IsMouseMiddleButtonHold { get; private set; }
         public bool IsLeftShiftKeyHold { get; private set; }
+        public bool IsLeftAltKeyHold { get; private set; }
 
         public Vector2 CrtMove { get; private set; }
         public Vector2 CrtMousePos { get; private set; }

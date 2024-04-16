@@ -411,7 +411,7 @@ namespace NonsensicalKit.Core
         public static void AddListener<T>(Enum index, Action<T> handler)
         {
             ObjectAggregator<T>.Instance.AddListener(Convert.ToInt32(index), handler);
-        }   
+        }
         public static void RemoveListener<T>(Enum index, Action<T> handler)
         {
             ObjectAggregator<T>.Instance.RemoveListener(Convert.ToInt32(index), handler);

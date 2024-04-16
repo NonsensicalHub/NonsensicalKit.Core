@@ -38,29 +38,29 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Debug(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public static void Debug(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            Logger.Debug(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
+            Logger.Debug(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
         }
 
-        public static void Info(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public static void Info(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            Logger.Info(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
+            Logger.Info(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
         }
 
-        public static void Warning(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public static void Warning(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            Logger.Warning(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
+            Logger.Warning(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
         }
 
-        public static void Error(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public static void Error(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            Logger.Error(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
+            Logger.Error(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
         }
 
-        public static void Fatal(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public static void Fatal(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            Logger.Fatal(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
+            Logger.Fatal(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
         }
     }
 }

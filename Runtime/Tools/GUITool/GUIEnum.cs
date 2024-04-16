@@ -5,6 +5,6 @@ namespace NonsensicalKit.Tools.GUITool
     [AggregatorEnum]
     public enum GUIEnum
     {
-        ShowGUITips=10400
+        ShowGUITips = 10400
     }
 }

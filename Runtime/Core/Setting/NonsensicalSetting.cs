@@ -1,7 +1,9 @@
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service;
-using NonsensicalKit.Tools;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace NonsensicalKit.Core.Setting
 {
@@ -10,11 +12,11 @@ namespace NonsensicalKit.Core.Setting
         private const string SETTING_NAME = "NonsensicalSetting";
 
         [SerializeField, TypeQualifiedString(typeof(ILog))]
-        protected string _runningLogger;
+        private string _runningLogger;
         public string RunningLogger { get { return _runningLogger; } }
 
         [SerializeField, TypeQualifiedString(typeof(IService))]
-        protected string[] _runningServices;
+        private string[] _runningServices;
         public string[] RunningServices { get { return _runningServices; } }
 
         private static NonsensicalSetting _crtSetting;
@@ -47,7 +49,17 @@ namespace NonsensicalKit.Core.Setting
             var setting = Resources.Load<NonsensicalSetting>(SETTING_NAME);
             if (setting == null)
             {
-                Debug.LogError($"未检测到配置文件:{SETTING_NAME},请使用\"NonsensicalKit/Init NonsensicalSetting|初始化配置文件\"生成配置文件");
+                if (PlatformInfo.IsEditor)
+                {
+#if UNITY_EDITOR
+                    setting = CreateDefaultSettings();
+                    AssetDatabase.CreateAsset(setting, $"Assets/Resources/{SETTING_NAME}.asset");
+#endif
+                }
+                else
+                {
+                    Debug.LogError($"未检测到配置文件:{SETTING_NAME},请使用\"NonsensicalKit/Init NonsensicalSetting|初始化配置文件\"生成配置文件");
+                }
             }
             return setting;
         }
@@ -57,10 +69,11 @@ namespace NonsensicalKit.Core.Setting
         {
             var defaultAsset = CreateInstance<NonsensicalSetting>();
 
-            defaultAsset._runningLogger =nameof(DefaultLog);
+            defaultAsset._runningLogger = nameof(DefaultLog);
 
-            var services = ReflectionTool.GetConcreteTypesString<IService>().ToArray();
-            defaultAsset._runningServices = services;
+            //var services = ReflectionTool.GetConcreteTypesString<IService>().ToArray();
+            //defaultAsset._runningServices = services;
+            defaultAsset._runningServices = new string[0];
 
             return defaultAsset;
         }

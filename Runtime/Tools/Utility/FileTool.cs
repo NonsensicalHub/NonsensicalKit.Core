@@ -280,12 +280,12 @@ namespace NonsensicalKit.Tools
             openFileName.initialDir = Application.streamingAssetsPath.Replace('/', '\\');//默认路径
             openFileName.title = "选择文件";
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008 | 0x00000200;
+            openFileName.dlgOwner = Win32API.GetForegroundWindow();
 
             // Create buffer for file names
             string fileNames = new String(new char[2048]);
             openFileName.file = Marshal.StringToBSTR(fileNames);
             openFileName.maxFile = fileNames.Length;
-            openFileName.dlgOwner = Win32API.GetForegroundWindow();
 
             if (Win32API.Comdlg32.GetOpenFileName(openFileName))
             {
@@ -490,7 +490,7 @@ namespace NonsensicalKit.Tools
             }
             catch (Exception)
             {
-               LogCore.Warning("文件写入错误");
+                LogCore.Warning("文件写入错误");
                 return false;
             }
         }
@@ -665,7 +665,6 @@ namespace NonsensicalKit.Tools
                 public int reservedInt = 0;
                 public int flagsEx = 0;
             }
-
             [DllImport("user32.dll")]
             public static extern IntPtr GetForegroundWindow();
 

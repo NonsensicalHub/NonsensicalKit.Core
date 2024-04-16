@@ -87,14 +87,14 @@ namespace NonsensicalKit.Core
         public List<T> GetAll()
         {
             List<T> list = new List<T>();
-            if (_fallBack==null)
+            if (_fallBack == null)
             {
                 return list;
             }
-            var ds=  _fallBack.GetInvocationList();
+            var ds = _fallBack.GetInvocationList();
             foreach (Func<T> item in ds)
             {
-                if (item!=null)
+                if (item != null)
                 {
                     list.Add(item());
                 }
@@ -190,7 +190,7 @@ namespace NonsensicalKit.Core
                     }
                 }
             }
-            
+
             return list;
         }
 

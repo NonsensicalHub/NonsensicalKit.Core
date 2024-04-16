@@ -13,6 +13,21 @@
       "displayName": "ServiceTemplates",
       "description": "\u670d\u52a1\u7c7b\u9884\u5236\u4f53\u6a21\u677f",
       "path": "Samples~/ServiceTemplates"
+    },
+    {
+      "displayName": "PlayerController",
+      "description": "角色控制器示例",
+      "path": "Samples~/PlayerController"
+    },
+    {
+      "displayName": "ShowIFSample",
+      "description": "控制显示编辑器扩展属性示例",
+      "path": "Samples~/ShowIFSample"
+    },
+    {
+      "displayName": "NonsensicalCameraTemplate",
+      "description": "Nonsensical摄像机示例",
+      "path": "Samples~/NonsensicalCameraTemplate"
     }
   ]
 }

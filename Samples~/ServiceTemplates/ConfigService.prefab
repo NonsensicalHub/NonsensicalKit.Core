@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4589327347218857783}
-  - component: {fileID: 4589327347218857782}
+  - component: {fileID: 8276319312653239022}
   m_Layer: 0
   m_Name: ConfigService
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4589327347218857782
+--- !u!114 &8276319312653239022
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,7 +41,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 4589327347218857785}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9af5d45b222044469368ca3323d7628, type: 3}
+  m_Script: {fileID: 11500000, guid: f0cbf41678323fb4399d47208db2bb4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConfigDatas: []
+  m_autoMode: 1
+  m_configDatas: []

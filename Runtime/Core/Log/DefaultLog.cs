@@ -11,7 +11,7 @@ namespace NonsensicalKit.Core.Log
 
         public DefaultLog()
         {
-            if (PlatformInfo.IsEditor == false)
+            if (PlatformInfo.IsEditor)
             {
                 _sb = new StringBuilder();
                 UnityEngine.Debug.Log($"StartDefaultLog\r\n" +
@@ -22,58 +22,58 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Debug(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Debug(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (PlatformInfo.IsEditor == false)
+            if (PlatformInfo.IsEditor)
             {
                 _sb.Clear();
                 _sb.Append("Debug: ");
                 BuildString(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
-                UnityEngine.Debug.Log(_sb.ToString());
+                UnityEngine.Debug.Log(_sb.ToString(), context);
             }
         }
 
-        public void Info(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Info(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (PlatformInfo.IsEditor == false)
+            if (PlatformInfo.IsEditor)
             {
                 _sb.Clear();
                 _sb.Append("Info: ");
                 BuildString(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
-                UnityEngine.Debug.Log(_sb.ToString());
+                UnityEngine.Debug.Log(_sb.ToString(), context);
             }
         }
 
-        public void Warning(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Warning(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (PlatformInfo.IsEditor == false)
+            if (PlatformInfo.IsEditor)
             {
                 _sb.Clear();
                 _sb.Append("Warning: ");
                 BuildString(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
-                UnityEngine.Debug.LogWarning(_sb.ToString());
+                UnityEngine.Debug.LogWarning(_sb.ToString(), context);
             }
         }
 
-        public void Error(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Error(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (PlatformInfo.IsEditor == false)
+            if (PlatformInfo.IsEditor)
             {
                 _sb.Clear();
                 _sb.Append("Error: ");
                 BuildString(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
-                UnityEngine.Debug.LogError(_sb.ToString());
+                UnityEngine.Debug.LogError(_sb.ToString(), context);
             }
         }
 
-        public void Fatal(object obj, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Fatal(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (PlatformInfo.IsEditor == false)
+            if (PlatformInfo.IsEditor)
             {
                 _sb.Clear();
                 _sb.Append("Fatal: ");
                 BuildString(obj, tags, callerMemberName, callerFilePath, callerLineNumber);
-                UnityEngine.Debug.LogError(_sb.ToString());
+                UnityEngine.Debug.LogError(_sb.ToString(), context);
             }
         }
 

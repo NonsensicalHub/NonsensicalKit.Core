@@ -1,5 +1,5 @@
-using NonsensicalKit.Tools.NetworkTool;
 using NonsensicalKit.Tools;
+using NonsensicalKit.Tools.NetworkTool;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +13,8 @@ namespace NonsensicalKit.Core.Service.Config
     [ServicePrefab("Services/ConfigService")]
     public class ConfigService : NonsensicalMono, IMonoService
     {
+        [Tooltip("每次运行或打包前，自动搜索所有Config并设置")]
+        [SerializeField] private bool m_autoMode = true;
         [Tooltip("所有管理的配置文件，可以通过右键-Set All Config来快速设置项目内所有配置文件")]
         [SerializeField] private ConfigObject[] m_configDatas;
 
@@ -68,35 +70,6 @@ namespace NonsensicalKit.Core.Service.Config
             InitCompleted?.Invoke();
         }
 
-        /// <summary>
-        /// Build时会调用此方法，将序列化序列化对象写入StreamingAssets文件夹里的json文件
-        /// </summary>
-        public void WriteConfigs()
-        {
-            _configs = new Dictionary<string, ConfigData>();
-            for (int i = 0; i < m_configDatas.Length; i++)
-            {
-                var data = m_configDatas[i].GetData();
-                string crtID = data.ConfigID;
-                if (!_configs.ContainsKey(crtID))
-                {
-                    try
-                    {
-                        string json = Tools.JsonTool.SerializeObject(data);
-                        FileTool.WriteTxt(GetFilePath(data), json);
-                    }
-                    catch (Exception)
-                    {
-                        Debug.Log("配置json文件写入失败");
-                    }
-                }
-                else
-                {
-                    Debug.LogError("相同类型配置的ID重复:" + crtID);
-                    break;
-                }
-            }
-        }
         #endregion
 
         #region GetValue
@@ -297,7 +270,7 @@ namespace NonsensicalKit.Core.Service.Config
         /// <returns></returns>
         private string GetFilePath(ConfigData configData)
         {
-            string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs", configData.GetType().ToString() + "_" + configData.ConfigID  + ".json");
+            string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs", configData.GetType().ToString() + "_" + configData.ConfigID + ".json");
             return configFilePath;
         }
         #endregion
@@ -308,13 +281,13 @@ namespace NonsensicalKit.Core.Service.Config
         /// 搜索项目内所有配置文件并赋值
         /// </summary>
         [ContextMenu("Set All Config")]
-        private void FindAndSetAllConfig()
+        public void FindAndSetAllConfig()
         {
             var v = GetAllInstances<ConfigObject>();
             m_configDatas = v;
             UnityEditor.EditorUtility.SetDirty(gameObject);
         }
-        public T[] GetAllInstances<T>() where T : ScriptableObject
+        private T[] GetAllInstances<T>() where T : ScriptableObject
         {
             string[] guids = UnityEditor.AssetDatabase.FindAssets("t:" + typeof(T).Name);  //FindAssets uses tags check documentation for more info
             T[] a = new T[guids.Length];
@@ -342,6 +315,53 @@ namespace NonsensicalKit.Core.Service.Config
             }
 
             UnityEditor.EditorUtility.SetDirty(gameObject);
+        }
+
+        public void OnBeforeBuild()
+        {
+            if (m_autoMode)
+            {
+                FindAndSetAllConfig();
+            }
+            WriteConfigs();
+        }
+
+        public void OnBeforePlay()
+        {
+            if (m_autoMode)
+            {
+                FindAndSetAllConfig();
+            }
+        }
+
+        /// <summary>
+        /// Build时会调用此方法，将序列化序列化对象写入StreamingAssets文件夹里的json文件
+        /// </summary>
+        private void WriteConfigs()
+        {
+            _configs = new Dictionary<string, ConfigData>();
+            for (int i = 0; i < m_configDatas.Length; i++)
+            {
+                var data = m_configDatas[i].GetData();
+                string crtID = data.ConfigID;
+                if (!_configs.ContainsKey(crtID))
+                {
+                    try
+                    {
+                        string json = Tools.JsonTool.SerializeObject(data);
+                        FileTool.WriteTxt(GetFilePath(data), json);
+                    }
+                    catch (Exception)
+                    {
+                        Debug.Log("配置json文件写入失败");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("相同类型配置的ID重复:" + crtID);
+                    break;
+                }
+            }
         }
 #endif
         #endregion

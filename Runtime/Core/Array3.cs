@@ -84,7 +84,7 @@ namespace NonsensicalKit.Core
 
         public int GetIndex(int index0, int index1, int index2)
         {
-            return index0 * _step0 + index1 * _step1 + index2 ;
+            return index0 * _step0 + index1 * _step1 + index2;
         }
     }
 }

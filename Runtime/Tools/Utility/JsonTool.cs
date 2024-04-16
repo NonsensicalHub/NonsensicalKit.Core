@@ -106,8 +106,8 @@ namespace NonsensicalKit.Tools
             T data = DeserializeObject<T>(dataJson);
 
             return data;
-        } 
-        
+        }
+
         /// <summary>
         /// https://stackoverflow.com/a/78612
         /// Perform a deep Copy of the object, using Json as a serialization method. NOTE: Private members are not cloned using this method.

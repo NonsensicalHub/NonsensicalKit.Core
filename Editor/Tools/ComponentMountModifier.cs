@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -47,30 +48,39 @@ namespace NonsensicalKit.Core.Editor.Tools
             {
                 for (int i = 0; i < ComponentMountModifierPanel.Components.Length; i++)
                 {
-                    Object[] tArray = Resources.FindObjectsOfTypeAll(typeof(Transform));
+                    List<Transform> tArray = GetSelectComponent<Transform>();
 
                     foreach (var item in tArray)
                     {
-                        Transform temp = item as Transform;
-
-                        Undo.RecordObject(temp, temp.gameObject.name);
+                        Undo.RecordObject(item, item.gameObject.name);
                         if (ComponentMountModifierPanel.IsMount[i] == true)
                         {
-                            if (temp.GetComponent(ComponentMountModifierPanel.Components[i].GetClass()) == null)
+                            if (item.GetComponent(ComponentMountModifierPanel.Components[i].GetClass()) == null)
                             {
-                                temp.gameObject.AddComponent(ComponentMountModifierPanel.Components[i].GetClass());
+                                item.gameObject.AddComponent(ComponentMountModifierPanel.Components[i].GetClass());
                             }
                         }
                         else
                         {
-                            if (temp.GetComponent(ComponentMountModifierPanel.Components[i].GetClass()) != null)
+                            if (item.GetComponent(ComponentMountModifierPanel.Components[i].GetClass()) != null)
                             {
-                                DestroyImmediate(temp.gameObject.GetComponent(ComponentMountModifierPanel.Components[i].GetClass()));
+                                DestroyImmediate(item.gameObject.GetComponent(ComponentMountModifierPanel.Components[i].GetClass()));
                             }
                         }
                     }
                 }
             }
+        }
+        private List<T> GetSelectComponent<T>()
+        {
+            var v = NonsensicalEditorManager.SelectGameobjects;
+            List<T> components = new List<T>();
+
+            foreach (var item in v)
+            {
+                components.AddRange(item.GetComponentsInChildren<T>());
+            }
+            return components;
         }
     }
 }

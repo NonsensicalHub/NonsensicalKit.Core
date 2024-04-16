@@ -29,7 +29,7 @@ namespace NonsensicalKit.Tools
 
         public static string ReplaceNoBreakingSpace(string str)
         {
-            return str.Replace(" ", no_breaking_space); 
+            return str.Replace(" ", no_breaking_space);
         }
 
         // Note that Color32 and Color implictly convert to each other. You may pass a Color object to this method without first casting it.
@@ -54,10 +54,14 @@ namespace NonsensicalKit.Tools
             }
             return new Color32(r, g, b, a);
         }
-
-        public static string ToLongString(this Vector3 v3)
+        public static string ToRealString(this Vector2 v2)
         {
-            return $"({v3.x:f5},{v3.y:f5},{v3.z:f5})";
+            return $"Vector2({v2.x},{v2.y})";
+        }
+
+        public static string ToRealString(this Vector3 v3)
+        {
+            return $"Vector3({v3.x},{v3.y},{v3.z})";
         }
 
         public static bool CheckBom(byte[] data)
@@ -77,7 +81,6 @@ namespace NonsensicalKit.Tools
                 return false;
             }
             return str[0] == 65279;
-
         }
 
         public static string TrimBOM(this string str)
@@ -92,7 +95,7 @@ namespace NonsensicalKit.Tools
         public static string TrimClone(string str)
         {
             int le = str.Length;
-            if (le<7)
+            if (le < 7)
             {
                 return str;
             }
@@ -260,7 +263,7 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static bool Contains(this string[] stringArray, string check)
         {
-            if (stringArray!=null)
+            if (stringArray != null)
             {
                 foreach (var item in stringArray)
                 {

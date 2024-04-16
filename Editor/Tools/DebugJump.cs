@@ -11,14 +11,14 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// </summary>
     public class DebugJump
     {
-        public static string[] JumpString = new string[] { nameof(DefaultLog), nameof(NonsensicalLog) ,nameof(LogCore) };
+        public static string[] JumpString = new string[] { nameof(DefaultLog), nameof(NonsensicalLog), nameof(LogCore) };
 
         [UnityEditor.Callbacks.OnOpenAsset(0)]
         private static bool OnOpenAsset(int instanceID, int line)
         {
             string instanceName = EditorUtility.InstanceIDToObject(instanceID).name;
 
-            bool flag=false;
+            bool flag = false;
             //只处理需要处理的信息
             foreach (var item in JumpString)
             {
@@ -60,7 +60,7 @@ namespace NonsensicalKit.Core.Editor.Tools
                     int splitIndex = pathline.LastIndexOf(":");
                     string path = pathline.Substring(0, splitIndex);
                     line = System.Convert.ToInt32(pathline.Substring(splitIndex + 1));
-                    string fullPath ;
+                    string fullPath;
                     if (path.Contains("Assets"))
                     {
                         //当路径为Assets内时，Unity会省略前面的部分，需要自行补全

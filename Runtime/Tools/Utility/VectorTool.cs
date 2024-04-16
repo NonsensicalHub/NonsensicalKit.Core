@@ -48,11 +48,80 @@ namespace NonsensicalKit.Tools
             return hits[minIndex];
         }
 
+        /// <summary>
+        /// 判断两个线段是否在同一条直线上
+        /// </summary>
+        /// <param name="line1Point1"></param>
+        /// <param name="line1Point2"></param>
+        /// <param name="line2Point1"></param>
+        /// <param name="line2Point2"></param>
+        /// <returns></returns>
+        public static bool IsOnSameStraightLine(Vector3 line1Point1, Vector3 line1Point2, Vector3 line2Point1, Vector3 line2Point2)
+        {
+            if (!IsNear(line2Point1, line1Point1) && !IsNear(line2Point1, line1Point2) && !IsEnoughParallel(line2Point1 - line1Point1, line2Point1 - line1Point2))
+            {
+                return false;
+            }
+            if (!IsNear(line2Point2, line1Point1) && !IsNear(line2Point2, line1Point2) && !IsEnoughParallel(line2Point2 - line1Point1, line2Point2 - line1Point2))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 判断两个线段是否在同一条直线上
+        /// </summary>
+        /// <param name="line1Point1"></param>
+        /// <param name="line1Point2"></param>
+        /// <param name="line2Point1"></param>
+        /// <param name="line2Point2"></param>
+        /// <returns></returns>
+        public static bool IsOnSameStraightLineScale(Vector3 line1Point1, Vector3 line1Point2, Vector3 line2Point1, Vector3 line2Point2)
+        {
+            line1Point1 *= 1000000;
+            line1Point2 *= 1000000;
+            line2Point1 *= 1000000;
+            line2Point2 *= 1000000;
+            if (!IsNear(line2Point1, line1Point1) && !IsNear(line2Point1, line1Point2) && !IsEnoughParallel(line2Point1 - line1Point1, line2Point1 - line1Point2))
+            {
+                return false;
+            }
+            if (!IsNear(line2Point2, line1Point1) && !IsNear(line2Point2, line1Point2) && !IsEnoughParallel(line2Point2 - line1Point1, line2Point2 - line1Point2))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static float StraightLineAngle(Vector3 dir1,Vector3 dir2)
+        {
+           var angle= Vector3.Angle(dir1,dir2);
+            if (angle>90)
+            {
+                return 180 - angle;
+            }
+            return angle;
+        }
+
+        /// <summary>
+        ///  两个向量是否足够平行
+        /// </summary>
+        /// <param name="dir1"></param>
+        /// <param name="dir2"></param>
+        /// <param name="thershold"></param>
+        /// <returns></returns>
+        public static bool IsEnoughParallel(Vector3 dir1, Vector3 dir2, float thershold = 0.999998f)
+        {
+            //return Mathf.Abs(Vector3.Dot(dir1.normalized, dir2.normalized)) > thershold;
+            return Vector3.Dot(dir1.normalized, dir2.normalized) > thershold;
+        }
+
         public static List<Vector2> GetLineCrossUprightRect(Vector2 p1, Vector2 p2, Vector2 min, Vector2 max)
         {
             List<Vector2> result = new List<Vector2>();
 
-            var v1 = GetHorizonCross(min.y, p1, p2,min.x,max.x);
+            var v1 = GetHorizonCross(min.y, p1, p2, min.x, max.x);
             if (v1 != null)
             {
                 result.Add((Vector2)v1);
@@ -76,7 +145,7 @@ namespace NonsensicalKit.Tools
             return result;
         }
 
-        private static Vector2? GetHorizonCross(float y, Vector2 p1, Vector2 p2,float rectMinX,float rectMaxX)
+        private static Vector2? GetHorizonCross(float y, Vector2 p1, Vector2 p2, float rectMinX, float rectMaxX)
         {
             if (p1.y == p2.y)
             {
@@ -89,11 +158,11 @@ namespace NonsensicalKit.Tools
 
             float k = (p2.y - p1.y) / (p2.x - p1.x);
             float a = p1.y - k * p1.x;
-            float x = (y-a) / k;
+            float x = (y - a) / k;
             float minX = Mathf.Min(p1.x, p2.x);
             float maxX = Mathf.Max(p1.x, p2.x);
 
-            if (minX < x && x < maxX&& rectMinX < x && x < rectMaxX)
+            if (minX < x && x < maxX && rectMinX < x && x < rectMaxX)
             {
                 return new Vector2(x, y);
             }
@@ -102,7 +171,8 @@ namespace NonsensicalKit.Tools
                 return null;
             }
         }
-        private static Vector2? GetVerticalCross(float x, Vector2 p1, Vector2 p2,float rectMinY, float rectMaxY)
+
+        private static Vector2? GetVerticalCross(float x, Vector2 p1, Vector2 p2, float rectMinY, float rectMaxY)
         {
             if (p1.x == p2.x)
             {
@@ -114,10 +184,10 @@ namespace NonsensicalKit.Tools
             }
             float k = (p2.y - p1.y) / (p2.x - p1.x);
             float a = p1.y - k * p1.x;
-            float y = k * x+a;
+            float y = k * x + a;
             float minY = Mathf.Min(p1.y, p2.y);
             float maxY = Mathf.Max(p1.y, p2.y);
-            if (minY < y && y < maxY && rectMinY < y &&y < rectMaxY)
+            if (minY < y && y < maxY && rectMinY < y && y < rectMaxY)
             {
                 return new Vector2(x, y);
             }
@@ -182,17 +252,6 @@ namespace NonsensicalKit.Tools
         }
 
         /// <summary>
-        /// 判断两条直线是否平行
-        /// </summary>
-        /// <returns>是否</returns>
-        public static bool IsParallel(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
-        {
-            float k1 =Mathf.Abs( (p2.y - p1.y) / (p2.x - p1.x));
-            float k2 = Mathf.Abs((p4.y - p3.y) / (p4.x - p3.x));
-            return k1 == k2 ;
-        }
-
-        /// <summary>
         /// 获取二维平面两直线交点
         /// 当直线平行或垂直与水平面时结果有误，因为此时k为NaN或无穷大
         /// </summary>
@@ -230,6 +289,68 @@ namespace NonsensicalKit.Tools
             }
 
             return distance;
+        }
+
+        public static float NatureAngle(this float _value)
+        {
+            while (true)
+            {
+                if (_value > 360)
+                {
+                    _value -= 360;
+                }
+                else if (_value <0)
+                {
+                    _value += 360;
+                }
+                else
+                {
+                    return _value;
+                }
+            }
+        }
+
+        public static float AngleNear(this float _value, float targetValue)
+        {
+            while (true)
+            {
+                if (_value == targetValue)
+                {
+                    return _value;
+                }
+                else if (_value > targetValue)
+                {
+                    if (_value - 360 > targetValue)
+                    {
+                        _value -= 360;
+                    }
+                    else if (Mathf.Abs(_value - targetValue) < Mathf.Abs(_value - 360 - targetValue))
+                    {
+                        return _value;
+                    }
+                    else
+                    {
+                        _value -= 360;
+                        return _value;
+                    }
+                }
+                else
+                {
+                    if (_value + 360 < targetValue)
+                    {
+                        _value += 360;
+                    }
+                    else if (Mathf.Abs(_value - targetValue) < Mathf.Abs(_value + 360 - targetValue))
+                    {
+                        return _value;
+                    }
+                    else
+                    {
+                        _value += 360;
+                        return _value;
+                    }
+                }
+            }
         }
 
         public static Vector3 AngleNear(this Vector3 _value, Vector3 targetValue)
@@ -443,13 +564,13 @@ namespace NonsensicalKit.Tools
         }
 
         /// <summary>
-        /// 根据面的法向量求出点在面上的投影
+        /// 根据面的法向量求出向量在面上的投影
         /// https://blog.csdn.net/weixin_41485242/article/details/95066693
         /// </summary>
         /// <returns></returns>
-        public static Vector3 PointProjection(Vector3 point, Vector3 normal)
+        public static Vector3 PointProjection(Vector3 a, Vector3 normal)
         {
-            return point - (Vector3.Dot(point, normal) / normal.magnitude) * normal;
+            return a - (Vector3.Dot(a, normal) / normal.magnitude) * normal;
         }
 
         /// <summary>
@@ -479,15 +600,15 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static Vector3 GetFootDrop(Vector3 singlePoint, Vector3 linePoint1, Vector3 linePoint2)
         {
-            float numerator = (linePoint1.x - singlePoint.x) * (linePoint2.x - linePoint1.x)
-                + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
-                + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
             float denominator = (linePoint2.x - linePoint1.x) * (linePoint2.x - linePoint1.x) + (linePoint2.y - linePoint1.y) * (linePoint2.y - linePoint1.y) + (linePoint2.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
 
             if (denominator == 0)
             {
                 return Vector3.zero;
             }
+            float numerator = (linePoint1.x - singlePoint.x) * (linePoint2.x - linePoint1.x)
+                + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
+                + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
             float k = -numerator / denominator;
             Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y, k * (linePoint2.z - linePoint1.z) + linePoint1.z);
 
@@ -667,7 +788,7 @@ namespace NonsensicalKit.Tools
         }
 
         /// <summary>
-        /// 是否平行
+        /// 两个向量是否平行
         /// </summary>
         /// <param name="dir1"></param>
         /// <param name="dir2"></param>
@@ -724,13 +845,45 @@ namespace NonsensicalKit.Tools
             //当两个向量平行时，Vector3.Cross求出来的公垂线为Vector3.Zero
             if (normal == Vector3.zero)
             {
-                //随意一个向量求公垂线
+                //随意取一个向量求公垂线（这里取Vector3.up）
                 normal = Vector3.Cross(dir1, Vector3.up);
 
                 //当仍然与随意取的向量平行时
                 if (normal == Vector3.zero)
                 {
-                    //拿一个与之前向量不平行的向量求公垂线
+                    //拿一个与之前向量不平行的向量求公垂线（这里取Vector3.forward）
+                    normal = Vector3.Cross(dir1, Vector3.forward);
+                }
+            }
+
+            return normal.normalized;
+        }
+
+        /// <summary>
+        /// 求两个向量的公垂线，当两个向量平行时，随机返回一个与这两个向量垂直的向量
+        /// </summary>
+        /// <param name="vector3"></param>
+        /// <param name="dir1"></param>
+        /// <param name="dir2"></param>
+        /// <returns></returns>
+        public static Vector3 GetCommonVerticalLineScale(Vector3 dir1, Vector3 dir2)
+        {
+            dir1 *= 100;
+            dir2 *= 100;
+
+            Vector3 normal = Vector3.Cross(dir1, dir2);
+
+
+            //当两个向量平行时，Vector3.Cross求出来的公垂线为Vector3.Zero
+            if (normal == Vector3.zero)
+            {
+                //随意取一个向量求公垂线（这里取Vector3.up）
+                normal = Vector3.Cross(dir1, Vector3.up);
+
+                //当仍然与随意取的向量平行时
+                if (normal == Vector3.zero)
+                {
+                    //拿一个与之前向量不平行的向量求公垂线（这里取Vector3.forward）
                     normal = Vector3.Cross(dir1, Vector3.forward);
                 }
             }
@@ -864,14 +1017,20 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static bool IsNear(Vector3 vec1, Vector3 vec2)
         {
-            if (MathTool.IsNear(Vector3.Distance(vec1, vec2), 0))
-            {
-                return true;
-            }
-            else
+            if (MathTool.IsNear(vec1.x, vec2.x) == false)
             {
                 return false;
             }
+            if (MathTool.IsNear(vec1.y, vec2.y) == false)
+            {
+                return false;
+            }
+            if (MathTool.IsNear(vec1.z, vec2.z) == false)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

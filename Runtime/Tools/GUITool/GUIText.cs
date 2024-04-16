@@ -10,7 +10,7 @@ namespace NonsensicalKit.Tools.GUITool
 
         protected virtual void OnGUI()
         {
-            UnityEngine.GUI.Label(new Rect(m_xOfset,m_yOfset,0,0), m_text);
+            UnityEngine.GUI.Label(new Rect(m_xOfset, m_yOfset, 0, 0), m_text);
         }
     }
 }

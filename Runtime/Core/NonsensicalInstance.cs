@@ -65,7 +65,7 @@ namespace NonsensicalKit.Core
                     }
                 }
             }
-            if (errorCount>0)
+            if (errorCount > 0)
             {
                 Debug.Log($"枚举值检测到重复,共发现{errorCount}个重复");
             }

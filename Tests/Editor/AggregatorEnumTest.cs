@@ -9,9 +9,9 @@ namespace Nonsensicalkit.Core.Editor.Tests
 {
     class AggregatorEnumTest
     {
-		[Test]
-		public void AggregatorEnumChecker() 
-		{
+        [Test]
+        public void AggregatorEnumChecker()
+        {
             StringBuilder sb = new StringBuilder();
             int errorCount = 0;
             Dictionary<int, string> keyValuePairs = new Dictionary<int, string>();
@@ -33,11 +33,11 @@ namespace Nonsensicalkit.Core.Editor.Tests
                     }
                 }
             }
-            if (errorCount>0)
+            if (errorCount > 0)
             {
                 sb.Insert(0, $"枚举值重复检测完毕,共发现{errorCount}个重复");
             }
-            Assert.That(errorCount ==0, sb.ToString()) ;
+            Assert.That(errorCount == 0, sb.ToString());
         }
     }
 }

@@ -24,11 +24,11 @@ namespace NonsensicalKit.Tools
                 _assemblyBuffer = AppDomain.CurrentDomain.GetAssemblies();
             }
 
-            Type type; 
+            Type type;
             for (int i = 0; i < _assemblyBuffer.Length; i++)
             {
                 type = _assemblyBuffer[i].GetType(typeName);
-                if (type!=null)
+                if (type != null)
                 {
                     return type;
                 }
@@ -90,7 +90,7 @@ namespace NonsensicalKit.Tools
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static List<Type> GetConcreteTypes<T1,T2>()
+        public static List<Type> GetConcreteTypes<T1, T2>()
         {
             if (_assemblyBuffer == null)
             {
@@ -136,7 +136,7 @@ namespace NonsensicalKit.Tools
             return types;
         }
 
-        public static List<Type> GetEnumByAttribute<T>() where T: Attribute
+        public static List<Type> GetEnumByAttribute<T>() where T : Attribute
         {
             if (_assemblyBuffer == null)
             {
@@ -161,7 +161,7 @@ namespace NonsensicalKit.Tools
                 {
                     foreach (Type t in assemblyTypes)
                     {
-                        if (t.IsEnum && t.GetCustomAttribute(typeof(T))!=null )
+                        if (t.IsEnum && t.GetCustomAttribute(typeof(T)) != null)
                         {
                             enums.Add(t);
                         }
@@ -226,7 +226,7 @@ namespace NonsensicalKit.Tools
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static List<string> GetConcreteTypesString<T1,T2>()
+        public static List<string> GetConcreteTypesString<T1, T2>()
         {
             if (_assemblyBuffer == null)
             {
@@ -250,11 +250,11 @@ namespace NonsensicalKit.Tools
                 {
                     foreach (Type t in assemblyTypes)
                     {
-                        if ( t.IsAbstract)
+                        if (t.IsAbstract)
                         {
                             continue;
                         }
-                        if (typeof(T1).IsAssignableFrom(t)==false)
+                        if (typeof(T1).IsAssignableFrom(t) == false)
                         {
                             continue;
                         }

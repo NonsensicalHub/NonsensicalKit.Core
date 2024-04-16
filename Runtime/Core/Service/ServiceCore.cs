@@ -37,11 +37,12 @@ namespace NonsensicalKit.Core.Service
                 if (_runningService.Contains(type.Name))
                 {
                     LogCore.Info($"服务[{type.Name}]开始初始化");
-
                     var newService = Activator.CreateInstance(type) as IClassService;
+                    _services.Add(type, newService);
+
                     if (newService.IsReady)
                     {
-                        OnServiceIsReady(type, newService);
+                        LogCore.Info($"服务[{type.Name}]完成初始化");
 
                         var context = typeof(ServiceContext<>).MakeGenericType(type);
                         var info = context.GetField("Callback", BindingFlags.Public | BindingFlags.Static);
@@ -93,9 +94,11 @@ namespace NonsensicalKit.Core.Service
 
                     var newService = gameObject.GetComponent(type) as IMonoService;
 
+                    _services.Add(type, newService);
+
                     if (newService.IsReady)
                     {
-                        OnServiceIsReady(type, newService);
+                        LogCore.Info($"服务[{type.Name}]完成初始化");
 
                         var context = typeof(ServiceContext<>).MakeGenericType(type);
                         var info = context.GetField("Callback", BindingFlags.Public | BindingFlags.Static);
@@ -135,8 +138,7 @@ namespace NonsensicalKit.Core.Service
             }
         }
 
-
-        public static bool TryGet<T>(out T service) where T : class, IService 
+        public static bool TryGet<T>(out T service) where T : class, IService
         {
             if (_services.ContainsKey(typeof(T)))
             {
@@ -164,26 +166,13 @@ namespace NonsensicalKit.Core.Service
 
             if (_services.ContainsKey(typeof(T)))
             {
-                callback(_services[typeof(T)] as T);
+                if (_services[typeof(T)].IsReady)
+                {
+                    callback(_services[typeof(T)] as T);
+                }
             }
-            else
-            {
-                ServiceContext<T>.Callback += callback;
-            }
-        }
 
-
-        private static void OnServiceIsReady(Type type, IService service)
-        {
-            LogCore.Info($"服务[{type.Name}]完成初始化");
-            if (_services.ContainsKey(type))
-            {
-                throw new TODOException($"服务[{type}]重复");
-            }
-            else
-            {
-                _services.Add(type, service);
-            }
+            ServiceContext<T>.Callback += callback;
         }
 
         private class ServiceContext<T> where T : class, IService
@@ -206,7 +195,7 @@ namespace NonsensicalKit.Core.Service
             {
                 Service.InitCompleted -= OnInitCompleted;
                 Callback?.Invoke(Service as T);
-                ServiceCore.OnServiceIsReady(Type, Service);
+                LogCore.Info($"服务[{Type.Name}]完成初始化");
                 Dispose();
             }
 
@@ -216,6 +205,5 @@ namespace NonsensicalKit.Core.Service
                 Instance = null;
             }
         }
-
     }
 }

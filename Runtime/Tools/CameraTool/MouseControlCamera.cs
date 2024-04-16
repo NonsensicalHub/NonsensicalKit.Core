@@ -170,7 +170,7 @@ namespace NonsensicalKit.Tools.CameraTool
                         }
                     }
                 }
-                if ((m_mouseReverse&&_input.IsMouseLeftButtonHold)||(!m_mouseReverse&&_input.IsMouseRightButtonHold))
+                if ((m_mouseReverse && _input.IsMouseLeftButtonHold) || (!m_mouseReverse && _input.IsMouseRightButtonHold))
                 {
                     AdjustRotation(new Vector2(_input.CrtMouseMove.x, -_input.CrtMouseMove.y));
                 }

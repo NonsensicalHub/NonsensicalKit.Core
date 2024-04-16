@@ -8,7 +8,7 @@ namespace NonsensicalKit.Tools.GUITool
 {
     public class GUIEscapePanel : MonoBehaviour
     {
-        [SerializeField] private bool m_getInput;   
+        [SerializeField] private bool m_getInput;
 
         private bool _showEscapePanel;
         private GUIStyle _labelStyle;

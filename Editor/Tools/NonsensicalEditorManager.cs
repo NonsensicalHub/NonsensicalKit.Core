@@ -147,14 +147,14 @@ namespace NonsensicalKit.Core.Editor.Tools
         {
             Debug.Log("开始检测枚举值重复");
             int errorCount = 0;
-            Dictionary<int,string> keyValuePairs = new Dictionary<int,string>();
+            Dictionary<int, string> keyValuePairs = new Dictionary<int, string>();
             var v = ReflectionTool.GetEnumByAttribute<AggregatorEnumAttribute>();
             foreach (var item in v)
             {
                 Array values = Enum.GetValues(item);
                 foreach (var value in values)
                 {
-                    var intValue = (int)value ;
+                    var intValue = (int)value;
                     if (keyValuePairs.ContainsKey(intValue))
                     {
                         errorCount++;

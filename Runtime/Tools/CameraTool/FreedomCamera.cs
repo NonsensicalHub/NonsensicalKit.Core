@@ -30,7 +30,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 Mouse mouse = Mouse.current; if (mouse == null) { return; }
 
                 var move = new Vector2(keyboard.dKey.isPressed ? 1 : (keyboard.aKey.isPressed ? -1 : 0), keyboard.wKey.isPressed ? 1 : (keyboard.sKey.isPressed ? -1 : 0));
-                var shiftKey = keyboard.leftShiftKey.wasPressedThisFrame;
+                var shiftKey = keyboard.leftShiftKey.isPressed;
                 var altKey = keyboard.leftAltKey.isPressed;
                 var mouseMove = mouse.delta.ReadValue() * 0.1f;
                 var mousePos = mouse.position.ReadValue();
@@ -40,7 +40,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 var mouse2 = mouse.middleButton.isPressed;
 
 #else
-                var move =new Vector2( Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+                var move = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
                 var shiftKey = Input.GetKey(KeyCode.LeftShift);
                 var altKey = Input.GetKey(KeyCode.LeftAlt);
                 var mouseMove = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));

@@ -49,7 +49,7 @@ namespace NonsensicalKit.Tools
             byte[] buffer = Guid.NewGuid().ToByteArray();
             int iSeed = BitConverter.ToInt32(buffer, 0);
             System.Random random = new System.Random(iSeed);
-            float temp = (float) random.NextDouble()%_max;
+            float temp = (float)random.NextDouble() % _max;
             return temp;
         }
 

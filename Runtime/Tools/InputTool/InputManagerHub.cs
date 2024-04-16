@@ -67,11 +67,34 @@ namespace NonsensicalKit.Tools.InputTool
                 OnMoveChanged?.Invoke(CrtMove);
                 _lastMove = CrtMove;
             }
-            IsLeftShiftKeyHold = Input.GetKey(KeyCode.LeftShift);
-
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                IsLeftShiftKeyHold = true;
+                OnLeftShiftKeyChanged?.Invoke(true);
+            }
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                IsLeftShiftKeyHold = false;
+                OnLeftShiftKeyChanged?.Invoke(false);
+            }
+            if (Input.GetKeyDown(KeyCode.LeftAlt))
+            {
+                IsLeftAltKeyHold = true;
+                OnLeftAltKeyChanged?.Invoke(true);
+            }
+            if (Input.GetKeyUp(KeyCode.LeftAlt))
+            {
+                IsLeftAltKeyHold = false;
+                OnLeftAltKeyChanged?.Invoke(false);
+            }
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 OnSpaceKeyEnter?.Invoke();
+            }
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                OnFKeyEnter?.Invoke();
             }
 
         }

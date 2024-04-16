@@ -50,7 +50,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
         }
     }
-        
+
     public interface IPoolObject
     {
         /// <summary>
@@ -60,10 +60,10 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// <summary>
         /// 出池
         /// </summary>
-        public abstract void Out(); 
+        public abstract void Out();
         /// <summary>
         /// 入池
         /// </summary>
-        public abstract void In();  
+        public abstract void In();
     }
 }

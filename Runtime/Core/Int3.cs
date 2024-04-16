@@ -2,7 +2,7 @@ namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 限定值为Int的三位向量
-    /// 新版本可用Vector3Int
+    /// 新版本Unity可用Vector3Int
     /// </summary>
     public struct Int3
     {

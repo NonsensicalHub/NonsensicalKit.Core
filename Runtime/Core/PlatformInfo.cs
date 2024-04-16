@@ -13,7 +13,7 @@ namespace NonsensicalKit.Core
         public static bool IsWebGL { get; private set; }
         public static bool IsMobile { get; private set; }
 
-        [RuntimeInitializeOnLoadMethod( RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void Init()
         {
             Platform = Application.platform;

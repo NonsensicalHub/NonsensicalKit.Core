@@ -123,7 +123,7 @@ namespace NonsensicalKit.Tools.GUITool
             DrawToolbar();
 
             // Allow the window to be dragged by its title bar.
-          UnityEngine. GUI.DragWindow(_titleBarRect);
+            UnityEngine.GUI.DragWindow(_titleBarRect);
         }
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace NonsensicalKit.Tools.GUITool
     }
 
 
-     struct LogInfo
+    struct LogInfo
     {
         public string Message { get; private set; }
         public string StackTrace { get; private set; }
