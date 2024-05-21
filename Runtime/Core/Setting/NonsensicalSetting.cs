@@ -1,6 +1,8 @@
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service;
 using UnityEngine;
+using NonsensicalKit.Tools;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -53,7 +55,9 @@ namespace NonsensicalKit.Core.Setting
                 {
 #if UNITY_EDITOR
                     setting = CreateDefaultSettings();
+                    FileTool.EnsureDir(Application.dataPath + "/Resources");
                     AssetDatabase.CreateAsset(setting, $"Assets/Resources/{SETTING_NAME}.asset");
+                    Debug.Log($"自动创建NonsensicalSetting,路径为：Assets/Resources/{SETTING_NAME}.asset", setting);
 #endif
                 }
                 else

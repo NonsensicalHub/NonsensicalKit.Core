@@ -173,6 +173,7 @@ namespace NonsensicalKit.Tools.NetworkTool
                 byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
                 unityWebRequest.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
                 unityWebRequest.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                unityWebRequest.SetRequestHeader("Content-Type", "application/json");
                 IncreaseHeader(unityWebRequest, header);
                 yield return SendRequest(unityWebRequest, callback, iHandleWebError);
             }

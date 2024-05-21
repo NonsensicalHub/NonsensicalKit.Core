@@ -238,6 +238,18 @@ namespace NonsensicalKit.Core.Service.Config
             _count--;
         }
 
+
+        /// <summary>
+        /// 通过类型和id获取文件路径
+        /// </summary>
+        /// <param name="configData"></param>
+        /// <returns></returns>
+        private string GetFilePath(ConfigData configData)
+        {
+            string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs", configData.GetType().ToString() + "_" + configData.ConfigID + ".json");
+            return configFilePath;
+        }
+
         /// <summary>
         /// 赋值
         /// </summary>
@@ -263,16 +275,6 @@ namespace NonsensicalKit.Core.Service.Config
             configData.AfterSetData();
         }
 
-        /// <summary>
-        /// 通过类型和id获取文件路径
-        /// </summary>
-        /// <param name="configData"></param>
-        /// <returns></returns>
-        private string GetFilePath(ConfigData configData)
-        {
-            string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs", configData.GetType().ToString() + "_" + configData.ConfigID + ".json");
-            return configFilePath;
-        }
         #endregion
 
         #region Editor Method
@@ -287,6 +289,7 @@ namespace NonsensicalKit.Core.Service.Config
             m_configDatas = v;
             UnityEditor.EditorUtility.SetDirty(gameObject);
         }
+
         private T[] GetAllInstances<T>() where T : ScriptableObject
         {
             string[] guids = UnityEditor.AssetDatabase.FindAssets("t:" + typeof(T).Name);  //FindAssets uses tags check documentation for more info
@@ -312,11 +315,13 @@ namespace NonsensicalKit.Core.Service.Config
                 string path = GetFilePath(data);
                 string str = FileTool.ReadAllText(path);
                 SetData(str, data.GetType(), m_configDatas[i]);
+                UnityEditor.EditorUtility.SetDirty(m_configDatas[i]);
             }
-
-            UnityEditor.EditorUtility.SetDirty(gameObject);
         }
 
+        /// <summary>
+        /// 打包前调用
+        /// </summary>
         public void OnBeforeBuild()
         {
             if (m_autoMode)
@@ -326,6 +331,9 @@ namespace NonsensicalKit.Core.Service.Config
             WriteConfigs();
         }
 
+        /// <summary>
+        /// 编辑器内运行前调用
+        /// </summary>
         public void OnBeforePlay()
         {
             if (m_autoMode)
