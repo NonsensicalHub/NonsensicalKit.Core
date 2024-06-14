@@ -29,14 +29,14 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] protected float m_moveSpeedMaxZoom = 10;   //最大移动速度
         [SerializeField] protected float m_rotationSpeed = 1;      //旋转速率
         [SerializeField] protected float m_rollSpeed = 1;      //翻滚速率
-        [SerializeField] protected float m_zoomSpeed = 3;     //缩放速率
+        [SerializeField] protected float m_zoomSpeed = 1;     //缩放速率
 
         [SerializeField] protected bool m_checkUI = true;       //是否在鼠标悬浮在UI上时禁止控制相机
 
         [SerializeField] protected ControlMouseKey m_moveControl = ControlMouseKey.LeftKeyControl;
         [SerializeField] protected ControlMouseKey m_rotateControl = ControlMouseKey.RightKeyControl;
         [SerializeField] protected ControlMouseKey m_rollControl = ControlMouseKey.MiddleKeyControl;
-        [SerializeField] protected bool m_UseKeyBoardControlMove = true;
+        [SerializeField] protected bool m_UseKeyBoardControlMove = false;
 
         [SerializeField] protected bool m_autoInit = true;      //自动初始化
         [SerializeField] protected bool m_resetOnEnable = true; //重新激活时回到初始位置
@@ -114,6 +114,11 @@ namespace NonsensicalKit.Tools.CameraTool
         private Vector3 _startPos2;     //初始相机位置
         private Quaternion _startRot2;  //初始相机旋转
 
+        private bool _needMove = false;
+        private bool _needRotate = false;
+        private bool _needRoll = false;
+        private bool _mouseEventInitFlag = false;
+
         protected virtual void Awake()
         {
             if (m_camera != null && m_viewPoint != null)
@@ -136,6 +141,7 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             _crtEventSystem = EventSystem.current;
             _input = InputHub.Instance;
+            AddMouseEvent();
         }
 
         private void OnEnable()
@@ -163,85 +169,31 @@ namespace NonsensicalKit.Tools.CameraTool
                 if (_MouseNotInUI)
                 {
                     var v = -_input.CrtZoom;
-                    if (v > 0)
+                    if (v > 0)  //统一在不同平台中差异较大的滚动值
                     {
-                        v = 1.2f;
+                        v = 1f;
                     }
                     else if (v < 0)
                     {
-                        v = -1.2f;
+                        v = -1f;
                     }
                     if (v != 0)
                     {
                         AdjustZoom(v);
                     }
-
-                    bool needMove = false;
-                    switch (m_moveControl)
-                    {
-                        case ControlMouseKey.LeftKeyControl:
-                            needMove = _input.IsMouseLeftButtonHold;
-                            break;
-                        case ControlMouseKey.RightKeyControl:
-                            needMove = _input.IsMouseRightButtonHold;
-                            break;
-                        case ControlMouseKey.MiddleKeyControl:
-                            needMove = _input.IsMouseMiddleButtonHold;
-                            break;
-                        case ControlMouseKey.AlwaysControl:
-                            needMove = true;
-                            break;
-                        default:
-                            break;
-                    }
-                    if (needMove)
-                    {
-                        AdjustPosition(_input.CrtMouseMove);
-                    }
                 }
 
-                bool needRotate = false;
-                switch (m_rotateControl)
+                if (_needMove)
                 {
-                    case ControlMouseKey.LeftKeyControl:
-                        needRotate = _input.IsMouseLeftButtonHold;
-                        break;
-                    case ControlMouseKey.RightKeyControl:
-                        needRotate = _input.IsMouseRightButtonHold;
-                        break;
-                    case ControlMouseKey.MiddleKeyControl:
-                        needRotate = _input.IsMouseMiddleButtonHold;
-                        break;
-                    case ControlMouseKey.AlwaysControl:
-                        needRotate = true;
-                        break;
-                    default:
-                        break;
+                    AdjustPosition(_input.CrtMouseMove);
                 }
-                if (needRotate)
+
+                if (_needRotate)
                 {
                     AdjustRotation(new Vector2(_input.CrtMouseMove.x, -_input.CrtMouseMove.y));
                 }
 
-                bool needRoll = false;
-                switch (m_rollControl)
-                {
-                    case ControlMouseKey.LeftKeyControl:
-                        needRoll = _input.IsMouseLeftButtonHold;
-                        break;
-                    case ControlMouseKey.RightKeyControl:
-                        needRoll = _input.IsMouseRightButtonHold;
-                        break;
-                    case ControlMouseKey.MiddleKeyControl:
-                        needRoll = _input.IsMouseMiddleButtonHold;
-                        break;
-                    case ControlMouseKey.AlwaysControl:
-                        needRoll = true;
-                        break;
-                    default:
-                        break;
-                }
-                if (needRoll)
+                if (_needRoll)
                 {
                     AdjustRoll(_input.CrtMouseMove.x);
                 }
@@ -271,6 +223,15 @@ namespace NonsensicalKit.Tools.CameraTool
             CrtRotate = Quaternion.Euler(_crtPitch, _crtYaw, _crtRoll);
             m_camera.position = m_viewPoint.position + CrtRotate * Vector3.forward * -distance;
             m_camera.rotation = CrtRotate;
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            if (_mouseEventInitFlag)
+            {
+                RemoveMouseEvent();
+            }
         }
 
         public void Init()
@@ -399,7 +360,7 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="delta"></param>
         protected void AdjustRoll(float delta)
         {
-            _targetRoll += delta * m_rollSpeed * 0.3f;
+            _targetRoll += delta * m_rollSpeed;
         }
 
         /// <summary>
@@ -414,13 +375,190 @@ namespace NonsensicalKit.Tools.CameraTool
             _targetPos += direction * distance;
         }
 
-        [ContextMenu("LookAt")]
-        private void LookAt()
+        private void AddMouseEvent()
         {
-#if UNITY_EDITOR
-            UnityEditor.Undo.RecordObject(m_camera, m_camera.gameObject.name);
-#endif
-            m_camera.LookAt(m_viewPoint);
+            if (_mouseEventInitFlag)
+            {
+                return;
+            }
+            _mouseEventInitFlag = true;
+            switch (m_moveControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown += StartMove;
+                    _input.OnMouseLeftButtonUp += StopMove;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown += StartMove;
+                    _input.OnMouseRightButtonUp += StopMove;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown += StartMove;
+                    _input.OnMouseMiddleButtonUp += StopMove;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needMove = true;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_rotateControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown += StartRotate;
+                    _input.OnMouseLeftButtonUp += StopRotate;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown += StartRotate;
+                    _input.OnMouseRightButtonUp += StopRotate;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown += StartRotate;
+                    _input.OnMouseMiddleButtonUp += StopRotate;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needRotate = true;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_rollControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown += StartRoll;
+                    _input.OnMouseLeftButtonUp += StopRoll;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown += StartRoll;
+                    _input.OnMouseRightButtonUp += StopRoll;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown += StartRoll;
+                    _input.OnMouseMiddleButtonUp += StopRoll;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needRoll = true;
+                    break;
+                default:
+                    break;
+            }
         }
+
+        private void RemoveMouseEvent()
+        {
+            if (!_mouseEventInitFlag)
+            {
+                return;
+            }
+            _mouseEventInitFlag = false;
+            switch (m_moveControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown -= StartMove;
+                    _input.OnMouseLeftButtonUp -= StopMove;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown -= StartMove;
+                    _input.OnMouseRightButtonUp -= StopMove;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown -= StartMove;
+                    _input.OnMouseMiddleButtonUp -= StopMove;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needMove = false;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_rotateControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown -= StartRotate;
+                    _input.OnMouseLeftButtonUp -= StopRotate;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown -= StartRotate;
+                    _input.OnMouseRightButtonUp -= StopRotate;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown -= StartRotate;
+                    _input.OnMouseMiddleButtonUp -= StopRotate;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needRotate = false;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_rollControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown -= StartRoll;
+                    _input.OnMouseLeftButtonUp -= StopRoll;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown -= StartRoll;
+                    _input.OnMouseRightButtonUp -= StopRoll;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown -= StartRoll;
+                    _input.OnMouseMiddleButtonUp -= StopRoll;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needRoll = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void StartMove()
+        {
+            if (_MouseNotInUI)
+            {
+                _needMove = true;
+            }
+        }
+        private void StopMove()
+        {
+            _needMove = false;
+        }
+
+        private void StartRotate()
+        {
+            if (_MouseNotInUI)
+            {
+                _needRotate = true;
+            }
+        }
+        private void StopRotate()
+        {
+            _needRotate = false;
+        }
+
+        private void StartRoll()
+        {
+            if (_MouseNotInUI)
+            {
+                _needRoll = true;
+            }
+        }
+        private void StopRoll()
+        {
+            _needRoll = false;
+        }
+
+#if UNITY_EDITOR
+
+        private void OnDrawGizmosSelected()
+        {
+            if (m_camera != null && m_viewPoint != null)
+            {
+                m_camera.LookAt(m_viewPoint);
+            }
+        }
+#endif
+
     }
 }

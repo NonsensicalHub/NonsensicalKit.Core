@@ -14,7 +14,7 @@ namespace NonsensicalKit.Tools.NetworkTool
     /// </summary>
     public static class HttpUtility
     {
-        public static IEnumerator QuickGet(this UnityWebRequest unityWebRequest, string url)
+        public static IEnumerator Get(this UnityWebRequest unityWebRequest, string url)
         {
             unityWebRequest.method = "GET";
             unityWebRequest.url = url;
@@ -22,14 +22,23 @@ namespace NonsensicalKit.Tools.NetworkTool
             yield return unityWebRequest.SendWebRequest();
         }
 
-        public static IEnumerator QuickGetTexture(this UnityWebRequest unityWebRequest, string url)
+        public static IEnumerator GetWithArgs(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> fields)
+        {
+            unityWebRequest.method = "GET";
+            unityWebRequest.url = GetArgsStr(url, fields);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            yield return unityWebRequest.SendWebRequest();
+        }
+
+        public static IEnumerator GetTexture(this UnityWebRequest unityWebRequest, string url)
         {
             unityWebRequest.method = "GET";
             unityWebRequest.url = url;
             unityWebRequest.downloadHandler = new DownloadHandlerTexture(true);
             yield return unityWebRequest.SendWebRequest();
         }
-        public static IEnumerator QuickPost(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> formData, Dictionary<string, string> header)
+
+        public static IEnumerator Post(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> formData, Dictionary<string, string> header)
         {
             unityWebRequest.method = "Post";
             unityWebRequest.url = url;
@@ -49,7 +58,7 @@ namespace NonsensicalKit.Tools.NetworkTool
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
             yield return unityWebRequest.SendWebRequest();
         }
-        public static IEnumerator QuickPost(this UnityWebRequest unityWebRequest, string url, string json)
+        public static IEnumerator Post(this UnityWebRequest unityWebRequest, string url, string json)
         {
             unityWebRequest.method = "Post";
             unityWebRequest.url = url;
@@ -58,6 +67,7 @@ namespace NonsensicalKit.Tools.NetworkTool
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
             yield return unityWebRequest.SendWebRequest();
         }
+
         #region GET 
         public static IEnumerator Get(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {

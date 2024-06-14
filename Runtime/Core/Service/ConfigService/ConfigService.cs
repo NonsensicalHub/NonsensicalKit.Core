@@ -222,7 +222,7 @@ namespace NonsensicalKit.Core.Service.Config
             var data = obj.GetData();
             string path = GetFilePath(data);
             UnityWebRequest unityWebRequest = new UnityWebRequest();
-            yield return unityWebRequest.QuickGet(path);
+            yield return unityWebRequest.Get(path);
 
             if (unityWebRequest != null && unityWebRequest.result == UnityWebRequest.Result.Success)
             {
@@ -233,7 +233,7 @@ namespace NonsensicalKit.Core.Service.Config
             }
             else
             {
-                Debug.LogError("获取配置文件失败");
+                Debug.LogError("获取配置文件失败："+ path);
             }
             _count--;
         }
@@ -309,6 +309,11 @@ namespace NonsensicalKit.Core.Service.Config
         [ContextMenu("Load Json")]
         private void LoadJson()
         {
+            if (m_configDatas==null)
+            {
+                Debug.LogError("尚未进行配置");
+                return;
+            }
             for (int i = 0; i < m_configDatas.Length; i++)
             {
                 var data = m_configDatas[i].GetData();

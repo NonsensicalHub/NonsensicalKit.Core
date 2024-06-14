@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace NonsensicalKit.Core.Editor.Tools
 {
@@ -167,6 +168,50 @@ namespace NonsensicalKit.Core.Editor.Tools
                 }
             }
             Debug.Log($"枚举值重复检测完毕,共发现{errorCount}个重复");
+        }
+
+
+        [MenuItem("NonsensicalKit/Items/查找场景中的丢失脚本")]
+        static void SelectGameObjects()
+        {
+            //Get the current scene and all top-level GameObjects in the scene hierarchy
+            Scene currentScene = SceneManager.GetActiveScene();
+            GameObject[] rootObjects = currentScene.GetRootGameObjects();
+
+            List<UnityEngine.Object> objectsWithDeadLinks = new List<UnityEngine.Object>();
+            foreach (GameObject g in rootObjects)
+            {
+                var trans = g.GetComponentsInChildren<Transform>(true);
+                foreach (Transform tsf in trans)
+                {
+                    Component[] components = tsf.GetComponents<Component>();
+                    for (int i = 0; i < components.Length; i++)
+                    {
+                        Component currentComponent = components[i];
+
+                        //If the component is null, that means it's a missing script!
+                        if (currentComponent == null)
+                        {
+                            //Add the sinner to our naughty-list
+                            objectsWithDeadLinks.Add(tsf.gameObject);
+                            Selection.activeGameObject = tsf.gameObject;
+                            Debug.Log(tsf.gameObject + " has a missing script!",tsf.gameObject); 
+                            break;
+                        }
+                    }
+                }
+                //Get all components on the GameObject, then loop through them 
+            }
+
+            if (objectsWithDeadLinks.Count > 0)
+            {
+                //Set the selection in the editor
+                Selection.objects = objectsWithDeadLinks.ToArray();
+            }
+            else
+            {
+                Debug.Log("No GameObjects in '" + currentScene.name + "' have missing scripts! Yay!");
+            }
         }
     }
 }

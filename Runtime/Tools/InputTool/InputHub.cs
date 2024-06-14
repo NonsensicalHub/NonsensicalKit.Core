@@ -17,6 +17,8 @@ namespace NonsensicalKit.Tools.InputTool
         public Action OnMouseLeftButtonUp { get; set; }
         public Action OnMouseRightButtonDown { get; set; }
         public Action OnMouseRightButtonUp { get; set; }
+        public Action OnMouseMiddleButtonDown { get; set; }
+        public Action OnMouseMiddleButtonUp { get; set; }
 
         public Action<Vector2> OnMoveChanged { get; set; }
 

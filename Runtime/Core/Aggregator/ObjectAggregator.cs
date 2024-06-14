@@ -105,6 +105,7 @@ namespace NonsensicalKit.Core
         public void Register(Func<T> fallback)
         {
             _fallBack += fallback;
+            _listener?.Invoke(fallback());
         }
 
         public void Unregister(Func<T> fallback)
@@ -203,6 +204,10 @@ namespace NonsensicalKit.Core
             else
             {
                 _intFallBacks[name] += fallback;
+            }
+            if (_intFieldListeners.ContainsKey(name))
+            {
+                _intFieldListeners[name]?.Invoke(fallback());
             }
         }
 
@@ -324,6 +329,10 @@ namespace NonsensicalKit.Core
             else
             {
                 _strFallBacks[name] += fallback;
+            }
+            if (_strFieldListeners.ContainsKey(name))
+            {
+                _strFieldListeners[name]?.Invoke(fallback());
             }
         }
 

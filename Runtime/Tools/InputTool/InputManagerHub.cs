@@ -55,10 +55,12 @@ namespace NonsensicalKit.Tools.InputTool
             if (Input.GetMouseButtonDown(2))
             {
                 IsMouseMiddleButtonHold = true;
+                OnMouseMiddleButtonDown?.Invoke();
             }
             if (Input.GetMouseButtonUp(2))
             {
                 IsMouseMiddleButtonHold = false;
+                OnMouseMiddleButtonUp?.Invoke();
             }
 
             CrtMove = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
@@ -96,7 +98,6 @@ namespace NonsensicalKit.Tools.InputTool
             {
                 OnFKeyEnter?.Invoke();
             }
-
         }
     }
 }

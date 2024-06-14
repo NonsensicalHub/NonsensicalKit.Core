@@ -101,10 +101,12 @@ namespace NonsensicalKit.Tools.InputTool
         private void MouseMiddleButtonDown(InputAction.CallbackContext context)
         {
             IsMouseMiddleButtonHold = true;
+            OnMouseMiddleButtonDown?.Invoke();
         }
         private void MouseMiddleButtonUp(InputAction.CallbackContext context)
         {
             IsMouseMiddleButtonHold = false;
+            OnMouseMiddleButtonUp?.Invoke();
         }
         private void MoveChanged(InputAction.CallbackContext context)
         {
