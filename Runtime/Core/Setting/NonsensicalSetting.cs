@@ -1,7 +1,7 @@
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service;
-using UnityEngine;
 using NonsensicalKit.Tools;
+using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -16,6 +16,7 @@ namespace NonsensicalKit.Core.Setting
         [SerializeField, TypeQualifiedString(typeof(ILog))]
         private string _runningLogger;
         public string RunningLogger { get { return _runningLogger; } }
+
 
         [SerializeField, TypeQualifiedString(typeof(IService))]
         private string[] _runningServices;

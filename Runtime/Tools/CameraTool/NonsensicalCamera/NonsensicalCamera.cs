@@ -1,4 +1,5 @@
 using NonsensicalKit.Core;
+using NonsensicalKit.Tools.EazyTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -40,8 +41,8 @@ namespace NonsensicalKit.Tools.CameraTool
 
         [SerializeField] protected bool m_autoInit = true;      //自动初始化
         [SerializeField] protected bool m_resetOnEnable = true; //重新激活时回到初始位置
+        [SerializeField] protected RenderBox m_renderBox;
 
-        protected Bounds bounds;
         public bool IsOn { get; set; } = true;
         public Quaternion CrtRotate { get; set; }
 
@@ -369,10 +370,15 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="delta"></param>
         protected void AdjustPosition(Vector2 delta)
         {
+
             Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
             float damping = Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y));
             float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * damping * Time.deltaTime;
-            _targetPos += direction * distance;
+
+            if (m_renderBox == null || m_renderBox.Contains(_targetPos + direction * distance))
+            {
+                _targetPos += direction * distance;
+            }
         }
 
         private void AddMouseEvent()
