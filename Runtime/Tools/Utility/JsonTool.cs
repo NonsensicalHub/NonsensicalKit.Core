@@ -129,49 +129,15 @@ namespace NonsensicalKit.Tools
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), deserializeSettings);
         }
 
-        public static byte ConvertToByte(this object obj)
-        {
-            return (byte)(long)obj;
-        }
-
-        public static uint ConvertToUint(this object obj)
-        {
-            return (uint)(long)obj;
-        }
-
-        public static ulong ConvertToUlong(this object obj)
-        {
-            return (ulong)(long)obj;
-        }
-
-        public static int ConvertToInt(this object obj)
-        {
-            return (int)(long)obj;
-        }
-
-        public static long ConvertToLong(this object obj)
-        {
-            return (long)obj;
-        }
-
-        public static float ConvertToFloat(this object obj)
-        {
-            return (float)(double)obj;
-        }
-
-        public static double ConvertToDouble(this object obj)
-        {
-            return (double)obj;
-        }
-
-        public static string ConvertToString(this object obj)
-        {
-            return (string)obj;
-        }
-
         public static string SerializeObject(object obj)
         {
             return JsonConvert.SerializeObject(obj);
+        }
+
+        private static JsonSerializerSettings IgnoreLoop = new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+        public static string SerializeObjectIgnoreLoop(object obj)
+        {
+            return JsonConvert.SerializeObject(obj, IgnoreLoop);
         }
 
         public static T DeserializeObject<T>(string str)

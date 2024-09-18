@@ -15,6 +15,8 @@ namespace NonsensicalKit.Core.Service.Config
     {
         [Tooltip("每次运行或打包前，自动搜索所有Config并设置")]
         [SerializeField] private bool m_autoMode = true;
+        [Tooltip("生成和读取json文件")]
+        [SerializeField] private bool m_jsonMode = true;
         [Tooltip("所有管理的配置文件，可以通过右键-Set All Config来快速设置项目内所有配置文件")]
         [SerializeField] private ConfigObject[] m_configDatas;
 
@@ -35,7 +37,7 @@ namespace NonsensicalKit.Core.Service.Config
 
         protected IEnumerator OnInitStart()
         {
-            if (PlatformInfo.IsEditor)
+            if (PlatformInfo.IsEditor || (m_jsonMode))
             {
                 foreach (var item in m_configDatas)
                 {
@@ -233,11 +235,10 @@ namespace NonsensicalKit.Core.Service.Config
             }
             else
             {
-                Debug.LogError("获取配置文件失败："+ path);
+                Debug.LogError("获取配置文件失败：" + path);
             }
             _count--;
         }
-
 
         /// <summary>
         /// 通过类型和id获取文件路径
@@ -309,18 +310,21 @@ namespace NonsensicalKit.Core.Service.Config
         [ContextMenu("Load Json")]
         private void LoadJson()
         {
-            if (m_configDatas==null)
+            if (m_jsonMode)
             {
-                Debug.LogError("尚未进行配置");
-                return;
-            }
-            for (int i = 0; i < m_configDatas.Length; i++)
-            {
-                var data = m_configDatas[i].GetData();
-                string path = GetFilePath(data);
-                string str = FileTool.ReadAllText(path);
-                SetData(str, data.GetType(), m_configDatas[i]);
-                UnityEditor.EditorUtility.SetDirty(m_configDatas[i]);
+                if (m_configDatas == null)
+                {
+                    Debug.LogError("尚未进行配置");
+                    return;
+                }
+                for (int i = 0; i < m_configDatas.Length; i++)
+                {
+                    var data = m_configDatas[i].GetData();
+                    string path = GetFilePath(data);
+                    string str = FileTool.ReadAllText(path);
+                    SetData(str, data.GetType(), m_configDatas[i]);
+                    UnityEditor.EditorUtility.SetDirty(m_configDatas[i]);
+                }
             }
         }
 
@@ -333,7 +337,10 @@ namespace NonsensicalKit.Core.Service.Config
             {
                 FindAndSetAllConfig();
             }
-            WriteConfigs();
+            if (m_jsonMode)
+            {
+                WriteConfigs();
+            }
         }
 
         /// <summary>
@@ -364,15 +371,14 @@ namespace NonsensicalKit.Core.Service.Config
                         string json = Tools.JsonTool.SerializeObject(data);
                         FileTool.WriteTxt(GetFilePath(data), json);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        Debug.Log("配置json文件写入失败");
+                        throw new UnityEditor.Build.BuildFailedException($"配置{data.ConfigID}json文件写入{GetFilePath(data)}失败\r\n{e.Message}");
                     }
                 }
                 else
                 {
-                    Debug.LogError("相同类型配置的ID重复:" + crtID);
-                    break;
+                    throw new UnityEditor.Build.BuildFailedException($"相同类型配置的ID重复: {crtID}");
                 }
             }
         }

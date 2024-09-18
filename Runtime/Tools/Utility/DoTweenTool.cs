@@ -1,5 +1,6 @@
 using NonsensicalKit.Core;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace NonsensicalKit.Tools
 {
@@ -31,80 +32,89 @@ namespace NonsensicalKit.Tools
             return newTweener;
         }
 
-        public static Tweenner DoMove(this Transform _transform, Vector3 endValue, float value)
+        public static Tweenner DoMove(this Transform transform, Vector3 endValue, float value)
         {
-            TransformMoveTweener newTweener = new TransformMoveTweener(_transform, endValue, value);
+            TransformMoveTweener newTweener = new TransformMoveTweener(transform, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
             return newTweener;
         }
-        public static Tweenner DoMove(this RectTransform _transform, Vector2 endValue, float value)
+        public static Tweenner DoMove(this RectTransform transform, Vector2 endValue, float value)
         {
-            RectTransformMoveTweener newTweener = new RectTransformMoveTweener(_transform, endValue, value);
-
-            _hub.Tweenners.Add(newTweener);
-
-            return newTweener;
-        }
-
-        public static Tweenner DoRotate(this Transform _transform, Vector3 endValue, float value)
-        {
-            TransformRotateTweener newTweener = new TransformRotateTweener(_transform, endValue, value);
+            RectTransformMoveTweener newTweener = new RectTransformMoveTweener(transform, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
             return newTweener;
         }
 
-        public static Tweenner DoRotate(this Transform _transform, Quaternion endValue, float value)
+        public static Tweenner DoRotate(this Transform transform, Vector3 endValue, float value)
         {
-            TransformQuaternionRotateTweener newTweener = new TransformQuaternionRotateTweener(_transform, endValue, value);
+            TransformRotateTweener newTweener = new TransformRotateTweener(transform, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
             return newTweener;
         }
 
-        public static Tweenner DoLocalMove(this Transform _transform, Vector3 endValue, float value)
+        public static Tweenner DoRotate(this Transform transform, Quaternion endValue, float value)
         {
-            TransformLocalMoveTweener newTweener = new TransformLocalMoveTweener(_transform, endValue, value);
+            TransformQuaternionRotateTweener newTweener = new TransformQuaternionRotateTweener(transform, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
             return newTweener;
         }
 
-        public static Tweenner DoLocalMoveX(this Transform _transform, float endValue, float value)
+        public static Tweenner DoLocalMove(this Transform transform, Vector3 endValue, float value)
         {
-            TransformLocalMoveXTweener newTweener = new TransformLocalMoveXTweener(_transform, endValue, value);
+            TransformLocalMoveTweener newTweener = new TransformLocalMoveTweener(transform, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
             return newTweener;
         }
 
-        public static Tweenner DoLocalRotate(this Transform _transform, Vector3 endValue, float value)
+        public static Tweenner DoLocalMoveX(this Transform transform, float endValue, float value)
         {
-            TransformLocalRotateTweener newTweener = new TransformLocalRotateTweener(_transform, endValue, value);
+            TransformLocalMoveXTweener newTweener = new TransformLocalMoveXTweener(transform, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
             return newTweener;
         }
 
-        public static Tweenner DoLocalRotate(this Transform _transform, Quaternion endValue, float value)
+        public static Tweenner DoLocalRotate(this Transform transform, Vector3 endValue, float value)
         {
-            TransformQuaternionLocalRotateTweener newTweener = new TransformQuaternionLocalRotateTweener(_transform, endValue, value);
+            TransformLocalRotateTweener newTweener = new TransformLocalRotateTweener(transform, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
             return newTweener;
         }
 
-        public static Tweenner DoLocalScale(this Transform _transform, Vector3 endValue, float value)
+        public static Tweenner DoLocalRotate(this Transform transform, Quaternion endValue, float value)
         {
-            TransformLocalScaleTweener newTweener = new TransformLocalScaleTweener(_transform, endValue, value);
+            TransformQuaternionLocalRotateTweener newTweener = new TransformQuaternionLocalRotateTweener(transform, endValue, value);
+
+            _hub.Tweenners.Add(newTweener);
+
+            return newTweener;
+        }
+
+        public static Tweenner DoLocalScale(this Transform transform, Vector3 endValue, float value)
+        {
+            TransformLocalScaleTweener newTweener = new TransformLocalScaleTweener(transform, endValue, value);
+
+            _hub.Tweenners.Add(newTweener);
+
+            return newTweener;
+        }
+
+        public static Tweenner DoScrollTo(this ScrollRect scrollRect, Vector2  endValue, float value)
+        {
+            ScrollRectScrollToTweener newTweener = new ScrollRectScrollToTweener(scrollRect, endValue, value);
 
             _hub.Tweenners.Add(newTweener);
 
@@ -509,6 +519,31 @@ namespace NonsensicalKit.Tools
             Vector3 temp = _transform.localPosition;
             temp.x = _startValue + (_endValue - _startValue) * schedule;
             _transform.localPosition = temp;
+            return false;
+        }
+    }
+
+    public class ScrollRectScrollToTweener : Tweenner
+    {
+        private readonly ScrollRect _scrollRect;
+        private readonly Vector2 _startValue;
+        private readonly Vector2 _endValue;
+
+        public ScrollRectScrollToTweener(ScrollRect scrollRect, Vector2 endValue, float value) : base(value)
+        {
+            this._scrollRect = scrollRect;
+            _startValue = scrollRect.normalizedPosition;
+            this._endValue = endValue;
+            _totalValue = Vector2.Distance(_startValue, endValue);
+        }
+
+        public override bool DoSpecificBySchedule(float schedule)
+        {
+            if (_scrollRect == null)
+            {
+                return true;
+            }
+            _scrollRect.normalizedPosition = Vector2.Lerp(_startValue, _endValue, schedule);
             return false;
         }
     }

@@ -22,16 +22,16 @@ namespace NonsensicalKit.Core
         public float X => F1;
         public float Y => F2;
 
-        public Float2(float _f1, float _f2)
+        public Float2(float f1, float f2)
         {
-            m_f1 = _f1;
-            m_f2 = _f2;
+            m_f1 = f1;
+            m_f2 = f2;
         }
 
-        public Float2(Vector2 _vector2)
+        public Float2(Vector2 vector2)
         {
-            m_f1 = _vector2.x;
-            m_f2 = _vector2.y;
+            m_f1 = vector2.x;
+            m_f2 = vector2.y;
         }
 
         public Vector3 ToVector3()
@@ -109,6 +109,7 @@ namespace NonsensicalKit.Core
         {
             return Mathf.Sqrt(DistanceSquare(pos1, pos2));
         }
+
         /// <summary>
         /// 距离的平方，当只需要进行大小比较时，使用此方法能减少开方的性能消耗
         /// </summary>

@@ -3,6 +3,7 @@ using NonsensicalKit.Tools.EazyTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.CameraTool
 {
@@ -24,24 +25,27 @@ namespace NonsensicalKit.Tools.CameraTool
         [Range(-90, 90)][SerializeField] protected float m_maxPitch = 90;   //最大俯仰角
 
         [SerializeField] protected float m_minDistance = 1;        //最近距离
-        [SerializeField] protected float m_maxDistance = 10;       //最远距离
+        [SerializeField] protected float m_maxDistance = 100;       //最远距离
 
         [SerializeField] protected float m_moveSpeedMinZoom = 1;    //最小移动速度，速度和距离正相关
         [SerializeField] protected float m_moveSpeedMaxZoom = 10;   //最大移动速度
         [SerializeField] protected float m_rotationSpeed = 1;      //旋转速率
         [SerializeField] protected float m_rollSpeed = 1;      //翻滚速率
         [SerializeField] protected float m_zoomSpeed = 1;     //缩放速率
+        [SerializeField] protected float m_dragZoomSpeed = 1;     //拖缩缩放速率
 
         [SerializeField] protected bool m_checkUI = true;       //是否在鼠标悬浮在UI上时禁止控制相机
 
         [SerializeField] protected ControlMouseKey m_moveControl = ControlMouseKey.LeftKeyControl;
         [SerializeField] protected ControlMouseKey m_rotateControl = ControlMouseKey.RightKeyControl;
         [SerializeField] protected ControlMouseKey m_rollControl = ControlMouseKey.MiddleKeyControl;
+        [SerializeField] protected ControlMouseKey m_DragZoomControl = ControlMouseKey.Uncontrol;
         [SerializeField] protected bool m_UseKeyBoardControlMove = false;
 
+        [SerializeField] protected bool m_lerpMove = true;      //插值移动
         [SerializeField] protected bool m_autoInit = true;      //自动初始化
         [SerializeField] protected bool m_resetOnEnable = true; //重新激活时回到初始位置
-        [SerializeField] protected RenderBox m_renderBox;
+        [SerializeField][FormerlySerializedAs("m_renderBox")] protected RenderBox m_limitBox;
 
         public bool IsOn { get; set; } = true;
         public Quaternion CrtRotate { get; set; }
@@ -118,6 +122,7 @@ namespace NonsensicalKit.Tools.CameraTool
         private bool _needMove = false;
         private bool _needRotate = false;
         private bool _needRoll = false;
+        private bool _needDragZoom = false;
         private bool _mouseEventInitFlag = false;
 
         protected virtual void Awake()
@@ -198,6 +203,10 @@ namespace NonsensicalKit.Tools.CameraTool
                 {
                     AdjustRoll(_input.CrtMouseMove.x);
                 }
+                if (_needDragZoom)
+                {
+                    AdjustDragZoom(_input.CrtMouseMove);
+                }
 
                 if (m_UseKeyBoardControlMove)
                 {
@@ -213,17 +222,34 @@ namespace NonsensicalKit.Tools.CameraTool
                 return;
             }
 
-            m_viewPoint.position = Vector3.Lerp(m_viewPoint.position, _targetPos, 0.05f);
-            _crtZoom = _crtZoom * 0.95f + _TargetZoom * 0.05f;
-            float distance = Mathf.Lerp(m_minDistance, m_maxDistance, _crtZoom);
+            if (m_lerpMove)
+            {
+                m_viewPoint.position = Vector3.Lerp(m_viewPoint.position, _targetPos, 0.05f);
+                _crtZoom = _crtZoom * 0.95f + _TargetZoom * 0.05f;
+                float distance = Mathf.Lerp(m_minDistance, m_maxDistance, _crtZoom);
 
-            _crtPitch = _crtPitch * 0.95f + _targetPitch * 0.05f;
-            _crtYaw = _crtYaw * 0.95f + _targetYaw * 0.05f;
-            _crtRoll = _crtRoll * 0.95f + _targetRoll * 0.05f;
+                _crtPitch = _crtPitch * 0.95f + _targetPitch * 0.05f;
+                _crtYaw = _crtYaw * 0.95f + _targetYaw * 0.05f;
+                _crtRoll = _crtRoll * 0.95f + _targetRoll * 0.05f;
 
-            CrtRotate = Quaternion.Euler(_crtPitch, _crtYaw, _crtRoll);
-            m_camera.position = m_viewPoint.position + CrtRotate * Vector3.forward * -distance;
-            m_camera.rotation = CrtRotate;
+                CrtRotate = Quaternion.Euler(_crtPitch, _crtYaw, _crtRoll);
+                m_camera.position = m_viewPoint.position + CrtRotate * Vector3.forward * -distance;
+                m_camera.rotation = CrtRotate;
+            }
+            else
+            {
+                m_viewPoint.position = _targetPos;
+                _crtZoom = _TargetZoom;
+                float distance = Mathf.Lerp(m_minDistance, m_maxDistance, _crtZoom);
+
+                _crtPitch = _targetPitch;
+                _crtYaw = _targetYaw;
+                _crtRoll = _targetRoll;
+
+                CrtRotate = Quaternion.Euler(_crtPitch, _crtYaw, _crtRoll);
+                m_camera.position = m_viewPoint.position + CrtRotate * Vector3.forward * -distance;
+                m_camera.rotation = CrtRotate;
+            }
         }
 
         protected override void OnDestroy()
@@ -345,14 +371,7 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             _targetYaw += delta.x * m_rotationSpeed * 0.3f;
             _targetPitch += delta.y * m_rotationSpeed * 0.3f;
-            if (_targetPitch < m_minPitch)
-            {
-                _targetPitch = m_minPitch;
-            }
-            else if (_targetPitch >= m_maxPitch)
-            {
-                _targetPitch = m_maxPitch;
-            }
+            _targetPitch = Mathf.Clamp(_targetPitch, m_minPitch, m_maxPitch);
         }
 
         /// <summary>
@@ -364,18 +383,21 @@ namespace NonsensicalKit.Tools.CameraTool
             _targetRoll += delta * m_rollSpeed;
         }
 
+        protected void AdjustDragZoom(Vector2 delta)
+        {
+            _TargetZoom += (delta.x + delta.y) * m_dragZoomSpeed * 0.001f;
+        }
+
         /// <summary>
         /// 根据改变量进行位移
         /// </summary>
         /// <param name="delta"></param>
         protected void AdjustPosition(Vector2 delta)
         {
-
             Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
-            float damping = Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y));
-            float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * damping * Time.deltaTime;
+            float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * delta.magnitude * Time.deltaTime;
 
-            if (m_renderBox == null || m_renderBox.Contains(_targetPos + direction * distance))
+            if (m_limitBox == null || m_limitBox.Contains(_targetPos + direction * distance))
             {
                 _targetPos += direction * distance;
             }
@@ -444,6 +466,26 @@ namespace NonsensicalKit.Tools.CameraTool
                     break;
                 case ControlMouseKey.AlwaysControl:
                     _needRoll = true;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_DragZoomControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown += StartZoom;
+                    _input.OnMouseLeftButtonUp += StopZoom;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown += StartZoom;
+                    _input.OnMouseRightButtonUp += StopZoom;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown += StartZoom;
+                    _input.OnMouseMiddleButtonUp += StopZoom;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needDragZoom = true;
                     break;
                 default:
                     break;
@@ -517,6 +559,26 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+            switch (m_DragZoomControl)
+            {
+                case ControlMouseKey.LeftKeyControl:
+                    _input.OnMouseLeftButtonDown -= StartZoom;
+                    _input.OnMouseLeftButtonUp -= StopZoom;
+                    break;
+                case ControlMouseKey.RightKeyControl:
+                    _input.OnMouseRightButtonDown -= StartZoom;
+                    _input.OnMouseRightButtonUp -= StopZoom;
+                    break;
+                case ControlMouseKey.MiddleKeyControl:
+                    _input.OnMouseMiddleButtonDown -= StartZoom;
+                    _input.OnMouseMiddleButtonUp -= StopZoom;
+                    break;
+                case ControlMouseKey.AlwaysControl:
+                    _needDragZoom = false;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void StartMove()
@@ -553,6 +615,18 @@ namespace NonsensicalKit.Tools.CameraTool
         private void StopRoll()
         {
             _needRoll = false;
+        }
+
+        private void StartZoom()
+        {
+            if (_MouseNotInUI)
+            {
+                _needDragZoom = true;
+            }
+        }
+        private void StopZoom()
+        {
+            _needDragZoom = false;
         }
 
 #if UNITY_EDITOR

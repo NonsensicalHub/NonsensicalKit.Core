@@ -1,12 +1,16 @@
 {
   "name": "com.tony_bean_is_alive.nonsensicalkit.core",
   "displayName": "NonsensicalKit.Core",
+  "author": {
+    "name": "TonyBean"
+  },
   "version": "0.0.1",
   "unity": "2021.3",
   "license": "MIT",
   "description": "NonsensicalKit.Core\u4e3aNonsensicalKit\u7684\u6838\u5fc3\u5305\uff0c\u6b64\u5de5\u5177\u96c6\u7684\u4efb\u610f\u5176\u4ed6\u5305\u90fd\u4f9d\u8d56\u4e8e\u6b64\u5305\u3002\r\n\u6b64\u5305\u5305\u542b\u9879\u76ee\u7b80\u6613\u6846\u67b6\u3001\u5404\u79cd\u5de5\u5177\u7c7b",
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.unity.cinemachine": "2.8.9"
   },
   "samples": [
     {
@@ -16,17 +20,17 @@
     },
     {
       "displayName": "PlayerController",
-      "description": "角色控制器示例",
+      "description": "\u89d2\u8272\u63a7\u5236\u5668\u793a\u4f8b",
       "path": "Samples~/PlayerController"
     },
     {
       "displayName": "ShowIFSample",
-      "description": "控制显示编辑器扩展属性示例",
+      "description": "\u63a7\u5236\u663e\u793a\u7f16\u8f91\u5668\u6269\u5c55\u5c5e\u6027\u793a\u4f8b",
       "path": "Samples~/ShowIFSample"
     },
     {
       "displayName": "NonsensicalCameraTemplate",
-      "description": "Nonsensical摄像机示例",
+      "description": "Nonsensical\u6444\u50cf\u673a\u793a\u4f8b",
       "path": "Samples~/NonsensicalCameraTemplate"
     }
   ]

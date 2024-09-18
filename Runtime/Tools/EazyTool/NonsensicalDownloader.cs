@@ -150,8 +150,34 @@ namespace NonsensicalKit.Tools.EazyTool
             UnityWebRequest unityWebRequest = new UnityWebRequest();
             unityWebRequest.method = "GET";
             unityWebRequest.url = url;
-            var dh = new DownloadHandlerAudioClip(url, AudioType.MPEG);
-            dh.compressed = true;
+            DownloadHandler dh;
+            var extension = Path.GetExtension(url).ToLower();
+            switch (extension)
+            {
+                case ".ogg":
+                    {
+                        var dhau = new DownloadHandlerAudioClip(url, AudioType.OGGVORBIS);
+                        dhau.compressed = true;
+                        dh = dhau;
+                    }
+                    break;
+                case ".wav":
+                    {
+                        var dhau = new DownloadHandlerAudioClip(url, AudioType.WAV);
+                        dhau.compressed = true;
+                        dh = dhau;
+                    }
+                    break;
+                case ".mp2":
+                case ".mp3":
+                default:
+                    {
+                        var dhau = new DownloadHandlerAudioClip(url, AudioType.MPEG);
+                        dhau.compressed = true;
+                        dh = dhau;
+                    }
+                    break;
+            }
             unityWebRequest.downloadHandler = dh;
             return unityWebRequest;
         }
@@ -179,7 +205,6 @@ namespace NonsensicalKit.Tools.EazyTool
             }
             Resources.Clear();
         }
-
     }
 
     public abstract class DownloaderBase<Class, ResourceType> where Class : class, new()
@@ -238,7 +263,7 @@ namespace NonsensicalKit.Tools.EazyTool
 
         private IEnumerator Get(Context<ResourceType> context)
         {
-            string path = Path.Combine(_basePath, MD5Tool.GetMd5Str(context.Url, false));
+            string path = Path.Combine(_basePath, MD5Tool.GetMd5Str(context.Url, false)+Path.GetExtension(context.Url));
 
             //WebGL构建中应勾选Data Catching,则unity会自行缓存数据
             if (!PlatformInfo.IsWebGL)

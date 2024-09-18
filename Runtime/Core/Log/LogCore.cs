@@ -27,7 +27,6 @@ namespace NonsensicalKit.Core.Log
                 if (runningLog.Equals(type.Name))
                 {
                     Logger = Activator.CreateInstance(type) as ILog;
-
                     break;
                 }
             }

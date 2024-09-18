@@ -43,5 +43,17 @@ namespace NonsensicalKit.Tools
                 dictionary.Add(key, value);
             }
         }
+
+        public static void ActionAdd<Key, Value1,Value2>(this Dictionary<Key, Action<Value1,Value2>> dictionary, Key key, Action<Value1, Value2> value)
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                dictionary[key] += value;
+            }
+            else
+            {
+                dictionary.Add(key, value);
+            }
+        }
     }
 }

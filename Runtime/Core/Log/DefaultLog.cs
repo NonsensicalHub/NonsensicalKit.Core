@@ -77,7 +77,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        private void BuildString(object obj, string[] tags, string callerMemberName = "", string callerFilePath = "", int callerLineNumber = 0)
+        private void BuildString(object obj, string[] tags, string callerMemberName, string callerFilePath , int callerLineNumber)
         {
             if (obj != null)
             {

@@ -8,12 +8,12 @@ namespace NonsensicalKit.Core
     /// <typeparam name="T"></typeparam>
     public struct Array4<T>
     {
-        private readonly T[] _array4;
-
         public readonly int Length0;
         public readonly int Length1;
         public readonly int Length2;
         public readonly int Length3;
+
+        private readonly T[] _array4;
 
         private readonly int _step0;
         private readonly int _step1;
@@ -68,7 +68,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public Tuple<int, int, int, int> GetValue(int index)
+        public Tuple<int, int, int, int> GetIndexTuple(int index)
         {
             var x = index / _step0;
             var y = (index - x * _step0) / _step1;

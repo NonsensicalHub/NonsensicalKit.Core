@@ -24,18 +24,18 @@ namespace NonsensicalKit.Core
         public float Y => F2;
         public float Z => F3;
 
-        public Float3(float _f1, float _f2, float _f3)
+        public Float3(float f1, float f2, float f3)
         {
-            m_f1 = _f1;
-            m_f2 = _f2;
-            m_f3 = _f3;
+            m_f1 = f1;
+            m_f2 = f2;
+            m_f3 = f3;
         }
 
-        public Float3(Vector3 _vector3)
+        public Float3(Vector3 vector3)
         {
-            m_f1 = _vector3.x;
-            m_f2 = _vector3.y;
-            m_f3 = _vector3.z;
+            m_f1 = vector3.x;
+            m_f2 = vector3.y;
+            m_f3 = vector3.z;
         }
 
         public Vector3 ToVector3()

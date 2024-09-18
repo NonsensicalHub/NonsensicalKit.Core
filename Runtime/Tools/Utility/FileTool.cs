@@ -13,6 +13,7 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class FileTool
     {
+
         public static void WriteVector2(this BinaryWriter writer, Vector2 v2)
         {
             writer.Write(v2.x);
@@ -181,7 +182,7 @@ namespace NonsensicalKit.Tools
             }
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.streamingAssetsPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
             openFileName.title = "选择文件";
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008;
 
@@ -228,7 +229,7 @@ namespace NonsensicalKit.Tools
             }
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.streamingAssetsPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
             openFileName.title = "选择文件";
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008;
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
@@ -277,7 +278,7 @@ namespace NonsensicalKit.Tools
             }
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.streamingAssetsPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
             openFileName.title = "选择文件";
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008 | 0x00000200;
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
@@ -331,7 +332,6 @@ namespace NonsensicalKit.Tools
 
         public static string FileSaveSelector(string typeName, params string[] filter)
         {
-
             var openFileName = new Win32API.OpenFileName();
             openFileName.structSize = Marshal.SizeOf(openFileName);
             if (filter == null || filter.Length == 0)
@@ -356,7 +356,7 @@ namespace NonsensicalKit.Tools
             }
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.streamingAssetsPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
             openFileName.title = "保存项目";
             openFileName.defExt = "dat";
             openFileName.flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000200 | 0x00000008;
@@ -389,28 +389,8 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        /// <summary>
-        /// 转移数据，将源文件的内容作为文本覆盖到目标文件（默认使用UTF-8编码）
-        /// </summary>
-        /// <param name="_filepath1">源文件</param>
-        /// <param name="_filepath2">目标文件</param>
-        /// <param name="_origin">源文件编码格式</param>
-        /// <param name="_target">目标文件编码格式</param>
-        /// <returns>当转移成功时时，返回真，否则返回假</returns>
-        public static bool TransferData(string _filepath1, string _filepath2, Encoding _origin = null, Encoding _target = null)
+        public static bool TransferData(string _filepath1, string _filepath2)
         {
-            if (_origin == null)
-            {
-                _origin = Encoding.UTF8;
-            }
-            if (_target == null)
-            {
-                _target = Encoding.UTF8;
-            }
-
-            StreamReader sr = null;
-            FileStream fs = null;
-
             if (!System.IO.File.Exists(_filepath1) || !System.IO.File.Exists(_filepath1))
             {
                 return false;
@@ -418,28 +398,21 @@ namespace NonsensicalKit.Tools
 
             try
             {
-                sr = new StreamReader(_filepath1, _origin);
-                string content = sr.ReadToEnd();
-
-                fs = new FileStream(_filepath2, FileMode.Create);
-                byte[] data = _target.GetBytes(content);
-                fs.Write(data, 0, data.Length);
+                using (var f1 = new FileStream(_filepath1,FileMode.Open))
+                using (var f2 = new FileStream(_filepath2,FileMode.OpenOrCreate))
+                {
+                    byte[] buffer=new byte[1024];
+                    int realRead;
+                    while ((realRead= f1.Read(buffer,0,1024))>0)
+                    {
+                        f2.Write(buffer,0,realRead);
+                    }
+                }
                 return true;
             }
             catch (Exception)
             {
                 return false;
-            }
-            finally
-            {
-                if (sr != null)
-                {
-                    sr.Close();
-                }
-                if (fs != null)
-                {
-                    fs.Close();
-                }
             }
         }
 
@@ -493,21 +466,6 @@ namespace NonsensicalKit.Tools
                 LogCore.Warning("文件写入错误");
                 return false;
             }
-        }
-
-        /// <summary>
-        /// 读取文档，逐行输出：
-        /// </summary>
-        public static List<string> ReadByLine()
-        {
-            StreamReader sr = new StreamReader(@"Debug.txt", Encoding.UTF8);
-            string line;
-            List<string> lines = new List<string>();
-            while ((line = sr.ReadLine()) != null)
-            {
-                lines.Add(line.ToString());
-            }
-            return lines;
         }
 
         /// <summary>
@@ -569,12 +527,24 @@ namespace NonsensicalKit.Tools
         /// 确保文件夹路径存在
         /// </summary>
         /// <param name="dirPath"></param>
+        public static void EnsureFileDir(string filePath)
+        {
+            var dirPath=Path.GetDirectoryName(filePath);
+            if (Directory.Exists(dirPath) == false)
+            {
+                Directory.CreateDirectory(dirPath);
+            }
+        }
+
+        /// <summary>
+        /// 确保文件夹路径存在
+        /// </summary>
+        /// <param name="dirPath"></param>
         public static void EnsureDir(string dirPath)
         {
             if (Directory.Exists(dirPath) == false)
             {
                 Directory.CreateDirectory(dirPath);
-
             }
         }
 

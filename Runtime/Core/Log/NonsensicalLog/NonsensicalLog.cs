@@ -16,21 +16,11 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
     /// </summary>
     public class NonsensicalLog : ILog
     {
+        private List<LogStrategyContext> _strategys;
         private StringBuilder _sb;
         private Queue<LogContext> _buffer;
 
         private bool _isReady;
-
-        private LogLevel _logLevel;
-        private LogStrategy[] _logStrategy;
-        private bool _logDateTime;
-        private bool _logClassInfo;
-
-        private bool _logConsole;
-        private bool _logPersistentFile;
-
-        private FileStream _fs;
-        private StreamWriter _sw;
 
         public NonsensicalLog()
         {
@@ -48,10 +38,14 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
         ~NonsensicalLog()
         {
             _sb.Clear();
-            _sw?.Flush();
-            _fs?.Flush();
-            _sw?.Close();
-            _fs?.Close();
+
+            foreach (var item in _strategys)
+            {
+                item._sw?.Flush();
+                item.FileStream?.Flush();
+                item._sw?.Close();
+                item.FileStream?.Close();
+            }
         }
 
         public void Debug(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
@@ -93,76 +87,101 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
 
         private void Log(LogContext info)
         {
-            if (info.LogLevel < _logLevel)
+            foreach (var strategy in _strategys)
             {
-                return;
-            }
-            _sb.Clear();
-            _sb.Append(info.LogLevel);
-            _sb.Append(": ");
-            if (info.Obj != null)
-            {
-                _sb.AppendLine(info.Obj.ToString());
-            }
-            else
-            {
-                _sb.AppendLine("null");
-            }
-            if (info.Tags != null && info.Tags.Length > 0)
-            {
-                _sb.Append("Tags:[");
-                foreach (var tag in info.Tags)
+                if (info.LogLevel < strategy.LogLevel)
                 {
-                    _sb.Append($"{tag},");
+                    continue;
                 }
-                _sb.Remove(_sb.Length - 1, 1);  //去掉最后一个逗号
-                _sb.AppendLine("]");
-            }
-            if (_logDateTime)
-            {
-                _sb.AppendLine($"DateTime:{info.Time.ToString("yyyy-MM-dd HH:mm:ss")}");
-            }
-            if (_logClassInfo)
-            {
-                _sb.AppendLine($"{info.MemberName}(at {info.FilePath} :{info.LineNumber})");
-            }
-
-            if (_logConsole)
-            {
-                switch (info.LogLevel)
+                if(strategy.TagCheck)
                 {
-                    case LogLevel.DEBUG:
-                    case LogLevel.INFO:
-                        UnityEngine.Debug.Log(_sb.ToString(), info.Context);
+                    bool flag=false;
+                    foreach (var item in info.Tags)
+                    {
+                        if (strategy.ExcludeTags.Contains(item))
+                        {
+                            flag = true;
+                            break;
+                        }
+                        if (strategy.LimitedTags.Length>0&&(strategy.LimitedTags.Contains(item)==false))
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag)
+                    {
+                        continue;
+                    }
+                }
+                _sb.Clear();
+                _sb.Append(info.LogLevel);
+                _sb.Append(": ");
+                if (info.Obj != null)
+                {
+                    _sb.AppendLine(info.Obj.ToString());
+                }
+                else
+                {
+                    _sb.AppendLine("null");
+                }
+                if (info.Tags != null && info.Tags.Length > 0)
+                {
+                    _sb.Append("Tags:[");
+                    foreach (var tag in info.Tags)
+                    {
+                        _sb.Append($"{tag},");
+                    }
+                    _sb.Remove(_sb.Length - 1, 1);  //去掉最后一个逗号
+                    _sb.AppendLine("]");
+                }
+                if (strategy.LogDateTime)
+                {
+                    _sb.AppendLine($"DateTime:{info.Time.ToString("yyyy-MM-dd HH:mm:ss")}");
+                }
+                if (strategy.LogClassInfo)
+                {
+                    _sb.AppendLine($"{info.MemberName}(at {info.FilePath} :{info.LineNumber})");
+                }
+                switch (strategy.LogStrategy)
+                {
+                    case LogPathway.Console:
+                        switch (info.LogLevel)
+                        {
+                            case LogLevel.DEBUG:
+                            case LogLevel.INFO:
+                                UnityEngine.Debug.Log(_sb.ToString(), info.Context);
+                                break;
+                            case LogLevel.WARNING:
+                                UnityEngine.Debug.LogWarning(_sb.ToString(), info.Context);
+                                break;
+                            case LogLevel.ERROR:
+                            case LogLevel.FATAL:
+                                UnityEngine.Debug.LogError(_sb.ToString(), info.Context);
+                                break;
+                            case LogLevel.OFF:
+                                break;
+                        }
                         break;
-                    case LogLevel.WARNING:
-                        UnityEngine.Debug.LogWarning(_sb.ToString(), info.Context);
+                    case LogPathway.PersistentFile:
+                    case LogPathway.CustomPathFile:
+                        try
+                        {
+                            strategy._sw.Write(_sb.ToString());
+                            strategy._sw.Write("\r\n");
+                            strategy._sw.Flush();
+                            strategy.FileStream.Flush();
+                        }
+                        catch (Exception)
+                        {
+                            UnityEngine.Debug.LogError("日志文件无法写入");
+                            continue;
+                        }
                         break;
-                    case LogLevel.ERROR:
-                    case LogLevel.FATAL:
-                        UnityEngine.Debug.LogError(_sb.ToString(), info.Context);
-                        break;
-                    case LogLevel.OFF:
+                    default:
                         break;
                 }
             }
-
-            if (_logPersistentFile)
-            {
-                try
-                {
-                    _sw.Write(_sb.ToString());
-                    _sw.Write("\r\n");
-                    _sw.Flush();
-                    _fs.Flush();
-                }
-                catch (Exception)
-                {
-                    _logPersistentFile = false;
-                    UnityEngine.Debug.LogError("日志文件无法写入");
-                }
-            }
-
         }
 
         private void Flush()
@@ -182,58 +201,68 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
         {
             if (configService.TryGetConfig<NonsensicalLogConfigData>(out var data))
             {
-                if (PlatformInfo.IsEditor)
+                _strategys = new List<LogStrategyContext>();
+                foreach (var strategyConfig in data.Strategys)
                 {
-                    _logLevel = data.EditorLogLevel;
-                    _logStrategy = data.EditorLogStrategy;
-                    _logDateTime = data.EditorLogDateTime;
-                    _logClassInfo = data.EditorLogCallerInfo;
-                }
-                else
-                {
-                    _logLevel = data.RuntimeLogLevel;
-                    _logStrategy = data.RuntimeLogStrategy;
-                    _logDateTime = data.RuntimeLogDateTime;
-                    _logClassInfo = data.RuntimeLogCallerInfo;
-                }
-                if (_logStrategy.Length == 0)
-                {
-                    _logLevel = LogLevel.OFF;
-                }
-
-                foreach (var item in _logStrategy)
-                {
-                    switch (item)
+                    if ((PlatformInfo.IsEditor && !strategyConfig.WorkInEditor)
+                        || (!PlatformInfo.IsEditor && !strategyConfig.WorkInRuntime))
                     {
-                        case LogStrategy.Console:
-                            _logConsole = true;
+                        continue;
+                    }
+
+                    LogStrategyContext strategy=new LogStrategyContext();
+                    strategy.LogLevel = strategyConfig.LogLevel;
+                    strategy.LogStrategy = strategyConfig.LogStrategy;
+                    strategy.LogArgument = strategyConfig.LogArgument;
+                    strategy.LogDateTime = strategyConfig.LogDateTime;
+                    strategy.LogClassInfo = strategyConfig.LogCallerInfo;
+                    strategy.TagCheck = (strategyConfig.ExcludeTags.Length>0)|| (strategyConfig.LimitedTags.Length>0);
+                    strategy.ExcludeTags = strategyConfig.ExcludeTags;
+                    strategy.LimitedTags = strategyConfig.LimitedTags;
+
+                    switch (strategy.LogStrategy)
+                    {
+                        case LogPathway.Console:
                             break;
-                        case LogStrategy.PersistentFile:
-                            _logPersistentFile = true;
+                        case LogPathway.PersistentFile:
+                            try
+                            {
+                                var logFilePath = Path.Combine(Application.persistentDataPath, "NonsensicalLog", $"Log{DateTime.UtcNow.ToString("yyyy_MM_dd_HH")}.txt");
+                                FileTool.EnsureFileDir(logFilePath);
+                                strategy. FileStream = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Write);
+                                strategy._sw = new StreamWriter(strategy.FileStream, Encoding.UTF8);
+                            }
+                            catch (Exception)
+                            {
+                                UnityEngine.Debug.LogError("无法创建日志文件");
+                                continue;
+                            }
+                            break;
+                        case LogPathway.CustomPathFile:
+                            try
+                            {
+                                var logFilePath = Path.Combine(strategy.LogArgument);
+                                FileTool.EnsureFileDir(logFilePath);
+                                strategy.FileStream = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Write);
+                                strategy._sw = new StreamWriter(strategy.FileStream, Encoding.UTF8);
+                            }
+                            catch (Exception)
+                            {
+                                UnityEngine.Debug.LogError("无法创建日志文件");
+                                continue;
+                            }
                             break;
                         default:
                             break;
                     }
+
+                    _strategys.Add(strategy);
                 }
 
-                if (_logPersistentFile)
-                {
-                    try
-                    {
-                        var logFilePath = Path.Combine(Application.persistentDataPath, "NonsensicalLog", $"Log{DateTime.UtcNow.ToString("yyyy_MM_dd_HH")}.txt");
-                        FileTool.EnsureDir(logFilePath);
-                        _fs = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Write);
-                        _sw = new StreamWriter(_fs, Encoding.UTF8);
-                    }
-                    catch (Exception)
-                    {
-                        _logPersistentFile = false;
-                        UnityEngine.Debug.LogError("无法创建日志文件");
-                    }
-                }
+                UnityEngine.Debug.Log($"NonsensicalLog Ready");
 
                 Flush();
-                UnityEngine.Debug.Log($"NonsensicalLog Ready");
+
                 _isReady = true;
             }
             else

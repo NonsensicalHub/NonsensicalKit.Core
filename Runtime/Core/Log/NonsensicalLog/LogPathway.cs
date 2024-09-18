@@ -1,8 +1,9 @@
 namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
-    public enum LogStrategy
+    public enum LogPathway
     {
         Console,
         PersistentFile,
+        CustomPathFile
     }
 }

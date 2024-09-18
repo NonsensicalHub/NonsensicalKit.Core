@@ -22,13 +22,21 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
     [System.Serializable]
     public class NonsensicalLogConfigData : ConfigData
     {
-        public LogLevel EditorLogLevel = LogLevel.DEBUG;
-        public LogLevel RuntimeLogLevel = LogLevel.OFF;
-        public LogStrategy[] EditorLogStrategy = new LogStrategy[] { LogStrategy.Console };
-        public LogStrategy[] RuntimeLogStrategy = new LogStrategy[] { };
-        public bool EditorLogDateTime = false;
-        public bool RuntimeLogDateTime = false;
-        public bool EditorLogCallerInfo = false;
-        public bool RuntimeLogCallerInfo = false;
+        public NonsensicalLogStrategyConfig[] Strategys;
+    }
+
+    [System.Serializable]
+    public class NonsensicalLogStrategyConfig
+    {
+        public bool WorkInEditor;
+        public bool WorkInRuntime;
+
+        public LogLevel LogLevel = LogLevel.DEBUG;
+        public string[] ExcludeTags;
+        public string[] LimitedTags;
+        public LogPathway LogStrategy = LogPathway.Console;
+        public string LogArgument;
+        public bool LogDateTime = false;
+        public bool LogCallerInfo = false;
     }
 }
