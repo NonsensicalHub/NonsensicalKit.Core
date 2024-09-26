@@ -635,21 +635,21 @@ namespace NonsensicalKit.Tools
                 public int reservedInt = 0;
                 public int flagsEx = 0;
             }
-            [DllImport("user32.dll")]
+            [DllImport("user32.dll,CharSet = CharSet.Auto")]
             public static extern IntPtr GetForegroundWindow();
 
             public class Shell32
             {
                 public delegate int BFFCALLBACK(IntPtr hwnd, uint uMsg, IntPtr lParam, IntPtr lpData);
 
-                [DllImport("Shell32.DLL")]
+                [DllImport("Shell32.DLL", CharSet = CharSet.Auto)]
                 public static extern int SHGetMalloc(out IMalloc ppMalloc);
 
-                [DllImport("Shell32.DLL")]
+                [DllImport("Shell32.DLL", CharSet = CharSet.Auto)]
                 public static extern int SHGetSpecialFolderLocation(
                             IntPtr hwndOwner, int nFolder, out IntPtr ppidl);
 
-                [DllImport("Shell32.DLL")]
+                [DllImport("Shell32.DLL", CharSet = CharSet.Auto)]
                 public static extern int SHGetPathFromIDList(
                             IntPtr pidl, byte[] pszPath);
 
