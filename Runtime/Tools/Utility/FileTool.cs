@@ -389,17 +389,17 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        public static bool TransferData(string _filepath1, string _filepath2)
+        public static bool TransferData(string filepath1, string filepath2)
         {
-            if (!System.IO.File.Exists(_filepath1) || !System.IO.File.Exists(_filepath1))
+            if (!System.IO.File.Exists(filepath1) || !System.IO.File.Exists(filepath1))
             {
                 return false;
             }
 
             try
             {
-                using (var f1 = new FileStream(_filepath1,FileMode.Open))
-                using (var f2 = new FileStream(_filepath2,FileMode.OpenOrCreate))
+                using (var f1 = new FileStream(filepath1,FileMode.Open))
+                using (var f2 = new FileStream(filepath2,FileMode.OpenOrCreate))
                 {
                     byte[] buffer=new byte[1024];
                     int realRead;
@@ -419,42 +419,42 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 创建或读取一个txt文件并往其中写入文本(覆盖)
         /// </summary>
-        /// <param name="_path">文件路径</param>
-        /// <param name="_text">写入的文本</param>
-        public static void WriteTxt(string _path, string _text)
+        /// <param name="path">文件路径</param>
+        /// <param name="text">写入的文本</param>
+        public static void WriteTxt(string path, string text)
         {
-            string dirpath = StringTool.GetDirpathByPath(_path);
+            string dirpath = StringTool.GetDirpathByPath(path);
             EnsureDir(dirpath);
-            File.WriteAllText(_path, _text);
+            File.WriteAllText(path, text);
         }
 
-        public static void AutoWriteTxt(string _text)
+        public static void AutoWriteTxt(string text)
         {
             EnsureDir(Application.streamingAssetsPath);
             string path = Path.Combine(Application.streamingAssetsPath, StringTool.GetDateTimeString() + ".txt");
-            File.WriteAllText(path, _text);
+            File.WriteAllText(path, text);
             Debug.Log("文件已写入：" + path);
         }
 
-        public static bool FileAppendWrite(string _fullpath, string _text)
+        public static bool FileAppendWrite(string fullpath, string text)
         {
-            return FileAppendWrite(Path.GetDirectoryName(_fullpath), Path.GetFileName(_fullpath), _text);
+            return FileAppendWrite(Path.GetDirectoryName(fullpath), Path.GetFileName(fullpath), text);
         }
 
-        public static bool FileAppendWrite(string _path, string _name, string _text)
+        public static bool FileAppendWrite(string path, string name, string text)
         {
-            if (!Directory.Exists(_path))
+            if (!Directory.Exists(path))
             {
-                Directory.CreateDirectory(_path);
+                Directory.CreateDirectory(path);
             }
-            string pathStr = Path.Combine(_path, _name);
+            string pathStr = Path.Combine(path, name);
             try
             {
                 using (FileStream fs = new FileStream(pathStr, FileMode.Append, FileAccess.Write, FileShare.Write))
                 {
                     using (StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8))
                     {
-                        sw.Write(_text);
+                        sw.Write(text);
                         sw.Flush();
                         sw.Close();
                     }
@@ -489,16 +489,16 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 获取文件内容字符串
         /// </summary>
-        /// <param name="_path"></param>
+        /// <param name="path"></param>
         /// <returns></returns>
-        public static string GetFileString(string _path)
+        public static string GetFileString(string path)
         {
-            if (!System.IO.File.Exists(_path))
+            if (!System.IO.File.Exists(path))
             {
                 return null;
             }
 
-            using (StreamReader file = File.OpenText(_path))
+            using (StreamReader file = File.OpenText(path))
             {
                 string fileContent = file.ReadToEnd();
                 return fileContent;
@@ -508,13 +508,13 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 删除文件
         /// </summary>
-        /// <param name="_path"></param>
+        /// <param name="path"></param>
         /// <returns></returns>
-        public static bool DeleteFile(string _path)
+        public static bool DeleteFile(string path)
         {
             try
             {
-                File.Delete(_path);
+                File.Delete(path);
                 return true;
             }
             catch (Exception)

@@ -8,31 +8,32 @@ namespace NonsensicalKit.Core
     /// <typeparam name="T"></typeparam>
     public struct Array3<T>
     {
+        public readonly T[] Array;
+
         public readonly int Length0;
         public readonly int Length1;
         public readonly int Length2;
 
-        private readonly T[] _array3;
+        public readonly int Step0;
+        public readonly int Step1;
 
-        private readonly int _step0;
-        private readonly int _step1;
-
-        public Array3(int _length0, int _length1, int _length2)
+        public Array3(int length0, int length1, int length2)
         {
-            _array3 = new T[_length0 * _length1 * _length2];
-            this.Length0 = _length0;
-            Length1 = _length1;
-            Length2 = _length2;
+            Array = new T[length0 * length1 * length2];
 
-            _step0 = _length1 * _length2;
-            _step1 = _length2;
+            Length0 = length0;
+            Length1 = length1;
+            Length2 = length2;
+
+            Step0 = length1 * length2;
+            Step1 = length2;
         }
 
         public void Reset(T state)
         {
-            for (int i = 0; i < _array3.Length; i++)
+            for (int i = 0; i < Array.Length; i++)
             {
-                _array3[i] = state;
+                Array[i] = state;
             }
         }
 
@@ -40,11 +41,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return _array3[index0 * _step0 + index1 * _step1 + index2];
+                return Array[index0 * Step0 + index1 * Step1 + index2];
             }
             set
             {
-                _array3[index0 * _step0 + index1 * _step1 + index2] = value;
+                Array[index0 * Step0 + index1 * Step1 + index2] = value;
 
             }
         }
@@ -53,11 +54,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return _array3[int3.I1 * _step0 + int3.I2 * _step1 + int3.I3];
+                return Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3];
             }
             set
             {
-                _array3[int3.I1 * _step0 + int3.I2 * _step1 + int3.I3] = value;
+                Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3] = value;
 
             }
         }
@@ -66,25 +67,25 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return _array3[index];
+                return Array[index];
             }
             set
             {
-                _array3[index] = value;
+                Array[index] = value;
             }
         }
 
         public Tuple<int, int, int> GetIndexTuple(int index)
         {
-            var x = index / _step0;
-            var y = (index - x * _step0) / _step1;
-            var z = index - x * _step0 - y * _step1;
+            var x = index / Step0;
+            var y = (index - x * Step0) / Step1;
+            var z = index - x * Step0 - y * Step1;
             return Tuple.Create(x, y, z);
         }
 
         public int GetIndex(int index0, int index1, int index2)
         {
-            return index0 * _step0 + index1 * _step1 + index2;
+            return index0 * Step0 + index1 * Step1 + index2;
         }
     }
 }

@@ -94,9 +94,9 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void DelayDoIt(float _delayTime, Action _action)
+        public void DelayDoIt(float delayTime, Action action)
         {
-            StartCoroutine(DelayDoItCoroutine(_delayTime, _action));
+            StartCoroutine(DelayDoItCoroutine(delayTime, action));
         }
 
         public void AddComponent<T>() where T : MonoBehaviour
@@ -104,11 +104,11 @@ namespace NonsensicalKit.Core
             gameObject.AddComponent<T>();
         }
 
-        private IEnumerator DelayDoItCoroutine(float _delayTime, Action _action)
+        private IEnumerator DelayDoItCoroutine(float delayTime, Action action)
         {
-            yield return new WaitForSeconds(_delayTime);
+            yield return new WaitForSeconds(delayTime);
 
-            _action?.Invoke();
+            action?.Invoke();
         }
     }
 }

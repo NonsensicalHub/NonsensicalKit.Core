@@ -11,6 +11,25 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class GameObjectTool
     {
+        public static T GetOrAddComponent<T>(this GameObject go) where T : Component
+        {
+            T o;
+            if (go.TryGetComponent<T>(out o))
+            {
+                return o;
+            }
+            else
+            {
+                o = go.AddComponent<T>();
+                return o;
+            }
+        }
+
+        public static T GetOrAddComponent<T>(this Transform t) where T : Component
+        {
+            return GetOrAddComponent<T>(t.gameObject);
+        }
+
         /// <summary>
         /// 获取对象上的所有组件名称
         /// </summary>

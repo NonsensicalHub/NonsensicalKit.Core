@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using UnityEngine;
 
@@ -16,11 +17,10 @@ namespace NonsensicalKit.Core
         [SerializeField] private float m_f2;
 
         public float F1 { get { return m_f1; } set { m_f1 = value; } }
-
         public float F2 { get { return m_f2; } set { m_f2 = value; } }
 
-        public float X => F1;
-        public float Y => F2;
+        [JsonIgnore] public float X => F1;
+        [JsonIgnore] public float Y => F2;
 
         public Float2(float f1, float f2)
         {

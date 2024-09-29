@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using UnityEngine;
 
@@ -22,15 +23,15 @@ namespace NonsensicalKit.Core
         public float F3 { get { return m_f3; } set { m_f3 = value; } }
         public float F4 { get { return m_f4; } set { m_f4 = value; } }
 
-        public float X => F1;
-        public float Y => F2;
-        public float Z => F3;
-        public float W => F4;
+        [JsonIgnore] public float X => F1;
+        [JsonIgnore] public float Y => F2;
+        [JsonIgnore] public float Z => F3;
+        [JsonIgnore] public float W => F4;
 
-        public float R => F1;
-        public float G => F2;
-        public float B => F3;
-        public float A => F4;
+        [JsonIgnore] public float R => F1;
+        [JsonIgnore] public float G => F2;
+        [JsonIgnore] public float B => F3;
+        [JsonIgnore] public float A => F4;
 
         public Float4(float f1, float f2, float f3, float f4)
         {

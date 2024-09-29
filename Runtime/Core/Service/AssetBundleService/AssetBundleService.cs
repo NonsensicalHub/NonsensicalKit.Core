@@ -136,6 +136,7 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <returns></returns>
         public bool CheckAssetBundle(string bundlePath)
         {
+            bundlePath = bundlePath.ToLower();
             if (_assstBundleDic.ContainsKey(bundlePath) == false)
             {
                 LogCore.Warning($"错误的包名：{bundlePath}");
@@ -153,6 +154,7 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="onLoading"></param>
         public void LoadAssetBundle(string bundlePath, Action<string> onComplete = null, Action<string, float> onLoading = null, Action<string> onLoaded = null)
         {
+            bundlePath=bundlePath.ToLower();
             LogCore.Info("加载ab包：" + bundlePath);
             if (_assstBundleDic.ContainsKey(bundlePath) == false)
             {
@@ -278,6 +280,8 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="onCompleted">完成回调</param>
         public void LoadResource<T>(string resourceName, string bundlePath, Action<string, string, T> onCompleted, Action<string, string, float> onLoading = null) where T : UnityEngine.Object
         {
+            resourceName = resourceName.ToLower();
+            bundlePath = bundlePath.ToLower();
             if (_assstBundleDic.ContainsKey(bundlePath) == false)
             {
                 LogCore.Warning($"错误的包名{bundlePath}");
@@ -363,6 +367,7 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="bundleName"></param>
         public void ReleaseAsset(string bundleName)
         {
+            bundleName = bundleName.ToLower();
             _assstBundleDic[bundleName].LoadCount--;
         }
 
@@ -373,6 +378,7 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="unloadAllObjects"></param>
         public void UnloadUnusedBundle(string bundleName)
         {
+            bundleName = bundleName.ToLower();
             if (_assstBundleDic[bundleName].LoadCount == 0 && _assstBundleDic[bundleName].DependencieCount == 0)
             {
                 UnloadBundle(bundleName);
@@ -386,6 +392,7 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="unloadAllObjects"></param>
         public void UnloadBundle(string bundleName, bool checkDependencie = true)
         {
+            bundleName = bundleName.ToLower();
             if (_assstBundleDic.ContainsKey(bundleName))
             {
                 var bundle = _assstBundleDic[bundleName];
@@ -459,10 +466,10 @@ namespace NonsensicalKit.Core.Service.Asset
             public Action<string> OnLoaded;             //加载完成事件，此时依赖包可能尚未加载
             public Action<string, float> OnLoading;     //加载中进度事件，会使用一个0到1的进度调用此事件代表下载进度
 
-            public AssetBundleContext(string _bundleName, string[] _dependencies)
+            public AssetBundleContext(string bundleName, string[] dependencies)
             {
-                this.BundlePath = _bundleName;
-                this.Dependencies = _dependencies;
+                this.BundlePath = bundleName;
+                this.Dependencies = dependencies;
             }
         }
     }

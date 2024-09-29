@@ -1,3 +1,6 @@
+using Newtonsoft.Json;
+using UnityEngine;
+
 namespace NonsensicalKit.Core
 {
     /// <summary>
@@ -6,42 +9,43 @@ namespace NonsensicalKit.Core
     /// </summary>
     public struct Int3
     {
-        public int I1 { get; set; }
-        public int I2 { get; set; }
-        public int I3 { get; set; }
+        [SerializeField] private int m_i1;
+        [SerializeField] private int m_i2;
+        [SerializeField] private int m_i3;
 
-        public int X => I1;
-        public int Y => I2;
-        public int Z => I3;
+        public int I1 { get { return m_i1; } set { m_i1 = value; } }
+        public int I2 { get { return m_i2; } set { m_i2 = value; } }
+        public int I3 { get { return m_i3; } set { m_i3 = value; } }
+
+        [JsonIgnore] public int X => I1;
+        [JsonIgnore] public int Y => I2;
+        [JsonIgnore] public int Z => I3;
 
         public Int3(int i1, int i2, int i3)
         {
-            I1 = i1;
-            I2 = i2;
-            I3 = i3;
+            m_i1 = i1;
+            m_i2 = i2;
+            m_i3 = i3;
         }
-
 
         public Int3(Float3 _float3)
         {
-            I1 = (int)_float3.F1;
-            if (_float3.F1 - I1 > 0.5f)
+            m_i1 = (int)_float3.F1;
+            if (_float3.F1 - m_i1 >= 0.5f)
             {
-                I1++;
+                m_i1++;
             }
 
-
-            I2 = (int)_float3.F2;
-            if (_float3.F2 - I2 > 0.5f)
+            m_i2 = (int)_float3.F2;
+            if (_float3.F2 - m_i2 >= 0.5f)
             {
-                I2++;
+                m_i2++;
             }
 
-
-            I3 = (int)_float3.F3;
-            if (_float3.F3 - I3 > 0.5f)
+            m_i3 = (int)_float3.F3;
+            if (_float3.F3 - m_i3 >= 0.5f)
             {
-                I3++;
+                m_i3++;
             }
         }
 

@@ -105,11 +105,11 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 算式运算(仅支持加减乘除)
         /// </summary>
-        /// <param name="_s"></param>
+        /// <param name="s"></param>
         /// <returns></returns>
-        public static double? Calculation(string _s)
+        public static double? Calculation(string s)
         {
-            List<string> ls = Incision(_s);
+            List<string> ls = Incision(s);
 
             if (ls == null || ls.Count == 0)
             {
@@ -316,22 +316,22 @@ namespace NonsensicalKit.Tools
         /// <summary>
         ///  将传入的字符串以算数符号为界切开，并放入链表中
         /// </summary>
-        /// <param name="_s">要切分的字符串</param>
+        /// <param name="s">要切分的字符串</param>
         /// <returns></returns>
-        private static List<string> Incision(string _s)
+        private static List<string> Incision(string s)
         {
             List<string> ls = new List<string>();
             bool flag = false;
 
             while (true)
             {
-                for (int i = 0; i < _s.Length; i++)
+                for (int i = 0; i < s.Length; i++)
                 {
-                    if (_s[i] == '+' || _s[i] == '-' || _s[i] == '*' || _s[i] == '/')
+                    if (s[i] == '+' || s[i] == '-' || s[i] == '*' || s[i] == '/')
                     {
-                        string temp1 = _s[i].ToString();
-                        char[] temp2 = { _s[i] };
-                        string[] ss = _s.Split(temp2, 2);
+                        string temp1 = s[i].ToString();
+                        char[] temp2 = { s[i] };
+                        string[] ss = s.Split(temp2, 2);
                         if (ss[0] != null && ss[0] != "")
                         {
                             ls.Add(ss[0]);
@@ -341,55 +341,55 @@ namespace NonsensicalKit.Tools
                         {
                             return null;
                         }
-                        _s = ss[1];
+                        s = ss[1];
                         flag = true;
                         break;
                     }
-                    else if (_s[i] == '(' || _s[i] == '（')
+                    else if (s[i] == '(' || s[i] == '（')
                     {
                         if (i == 0)
                         {
-                            if (!char.IsNumber(_s[i + 1]))
+                            if (!char.IsNumber(s[i + 1]))
                             {
                                 return null;
                             }
                         }
                         else
                         {
-                            if ((_s[i - 1] != '+' && _s[i - 1] != '-' && _s[i - 1] != '*' && _s[i - 1] != '/') || !char.IsNumber(_s[i + 1]))
+                            if ((s[i - 1] != '+' && s[i - 1] != '-' && s[i - 1] != '*' && s[i - 1] != '/') || !char.IsNumber(s[i + 1]))
                             {
                                 return null;
                             }
                         }
 
-                        ls.Add(_s[i].ToString());
-                        _s = _s.Substring(1);
+                        ls.Add(s[i].ToString());
+                        s = s.Substring(1);
                         flag = true;
                         break;
                     }
-                    else if (_s[i] == ')' || _s[i] == '）')
+                    else if (s[i] == ')' || s[i] == '）')
                     {
-                        if (i == _s.Length - 1)
+                        if (i == s.Length - 1)
                         {
-                            if (!char.IsNumber(_s[i - 1]))
+                            if (!char.IsNumber(s[i - 1]))
                             {
                                 return null;
                             }
                         }
                         else
                         {
-                            if (!char.IsNumber(_s[i - 1]) || (_s[i + 1] != '+' && _s[i + 1] != '-' && _s[i + 1] != '*' && _s[i + 1] != '/'))
+                            if (!char.IsNumber(s[i - 1]) || (s[i + 1] != '+' && s[i + 1] != '-' && s[i + 1] != '*' && s[i + 1] != '/'))
                             {
                                 return null;
                             }
                         }
 
-                        string temp1 = _s[i].ToString();
-                        char[] temp2 = { _s[i] };
-                        string[] ss = _s.Split(temp2, 2);
+                        string temp1 = s[i].ToString();
+                        char[] temp2 = { s[i] };
+                        string[] ss = s.Split(temp2, 2);
                         ls.Add(ss[0]);
                         ls.Add(temp1);
-                        _s = ss[1];
+                        s = ss[1];
                         flag = true;
                         break;
                     }
@@ -399,9 +399,9 @@ namespace NonsensicalKit.Tools
                     flag = false;
                     continue;
                 }
-                if (_s != null && _s != "")
+                if (s != null && s != "")
                 {
-                    ls.Add(_s);
+                    ls.Add(s);
                 }
                 break;
             }

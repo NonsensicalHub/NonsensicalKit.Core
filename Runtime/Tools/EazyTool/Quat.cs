@@ -21,12 +21,12 @@ namespace NonsensicalKit.Tools.EazyTool
             _w = q.w;
         }
 
-        public Quat(float _x, float _y, float _z, float _w)
+        public Quat(float x, float y, float z, float w)
         {
-            this._x = _x;
-            this._y = _y;
-            this._z = _z;
-            this._w = _w;
+            this._x = x;
+            this._y = y;
+            this._z = z;
+            this._w = w;
         }
 
         public Quaternion ToQuaternion()

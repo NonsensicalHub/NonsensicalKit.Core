@@ -564,11 +564,12 @@ namespace NonsensicalKit.Tools
         }
 
         /// <summary>
-        /// 根据面的法向量求出向量在面上的投影
+        /// 根据面的法向量求出向量在面上的投影向量
         /// https://blog.csdn.net/weixin_41485242/article/details/95066693
+        /// 点的投影使用Plane.ClosestPointOnPlane(Vector3 point)
         /// </summary>
         /// <returns></returns>
-        public static Vector3 PointProjection(Vector3 a, Vector3 normal)
+        public static Vector3 VectorProjection(Vector3 a, Vector3 normal)
         {
             return a - (Vector3.Dot(a, normal) / normal.magnitude) * normal;
         }
@@ -584,8 +585,8 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static float GetProjectionAngle(Vector3 a, Vector3 b, Vector3 normal, Vector3 centerPoint)
         {
-            Vector3 vector1 = PointProjection(a, normal) - centerPoint;
-            Vector3 vector2 = PointProjection(b, normal) - centerPoint;
+            Vector3 vector1 = VectorProjection(a, normal) - centerPoint;
+            Vector3 vector2 = VectorProjection(b, normal) - centerPoint;
 
             return GetSignedangle(vector1, vector2, normal);
         }

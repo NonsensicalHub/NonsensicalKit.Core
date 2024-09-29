@@ -31,25 +31,25 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 获取使用Guid作为种子返回的随机数
         /// </summary>
-        /// <param name="_max">返回值的绝对值小于max</param>
+        /// <param name="max">返回值的绝对值小于max</param>
         /// <returns></returns>
-        public static int GetRandomInt(int _max)
+        public static int GetRandomInt(int max)
         {
             byte[] buffer = Guid.NewGuid().ToByteArray();
             int iSeed = BitConverter.ToInt32(buffer, 0);
             System.Random random = new System.Random(iSeed);
-            int temp = random.Next(_max * 2 - 1);
-            temp = temp - _max + 1;
+            int temp = random.Next(max * 2 - 1);
+            temp = temp - max + 1;
 
             return temp;
         }
 
-        public static float GetRandomFloat(float _max)
+        public static float GetRandomFloat(float max)
         {
             byte[] buffer = Guid.NewGuid().ToByteArray();
             int iSeed = BitConverter.ToInt32(buffer, 0);
             System.Random random = new System.Random(iSeed);
-            float temp = (float)random.NextDouble() % _max;
+            float temp = (float)random.NextDouble() % max;
             return temp;
         }
 

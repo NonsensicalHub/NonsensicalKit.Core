@@ -226,17 +226,17 @@ namespace NonsensicalKit.Tools.GUITool
         public LogType LogType { get; private set; }
         public DateTime DateTime { get; private set; }
 
-        public LogInfo(string _message, string _staclTrace, LogType _logType, DateTime _dateTime)
+        public LogInfo(string message, string staclTrace, LogType logType, DateTime dateTime)
         {
-            Message = _message;
-            StackTrace = _staclTrace;
-            LogType = _logType;
-            DateTime = _dateTime;
+            Message = message;
+            StackTrace = staclTrace;
+            LogType = logType;
+            DateTime = dateTime;
         }
 
-        public bool CheckType(LogType _logType)
+        public bool CheckType(LogType logType)
         {
-            return LogType == _logType;
+            return LogType == logType;
         }
 
         public override string ToString()
