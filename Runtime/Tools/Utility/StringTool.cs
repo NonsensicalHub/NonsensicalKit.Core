@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -37,6 +38,51 @@ namespace NonsensicalKit.Tools
         {
             string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2") + color.a.ToString("X2");
             return hex;
+        }
+
+        /// <summary>
+        /// 匿名函数的正则匹配
+        /// </summary>
+        /// <returns></returns>
+        public static string AnonymousFunctionMatch()
+        {
+            return "[(].*[)] *= *>";
+        }
+
+        /// <summary>
+        /// 将单行字符串分割成多行，同时保证单词不会跨行
+        /// </summary>
+        /// <param name="stringToSplit"></param>
+        /// <param name="maximumLineLength"></param>
+        /// <returns></returns>
+        public static IEnumerable<string> SplitToLines(string stringToSplit, int maximumLineLength)
+        {
+            var words = stringToSplit.Split(' ').Concat(new[] { "" });
+            return
+                words
+                    .Skip(1)
+                    .Aggregate(
+                        words.Take(1).ToList(),
+                        (a, w) =>
+                        {
+                            var last = a.Last();
+                            while (last.Length > maximumLineLength)
+                            {
+                                a[a.Count() - 1] = last.Substring(0, maximumLineLength);
+                                last = last.Substring(maximumLineLength);
+                                a.Add(last);
+                            }
+                            var test = last + " " + w;
+                            if (test.Length > maximumLineLength)
+                            {
+                                a.Add(w);
+                            }
+                            else
+                            {
+                                a[a.Count() - 1] = test;
+                            }
+                            return a;
+                        });
         }
 
         public static Color HexToColor(string hex)

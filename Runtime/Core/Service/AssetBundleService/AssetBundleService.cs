@@ -280,8 +280,8 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="onCompleted">完成回调</param>
         public void LoadResource<T>(string resourceName, string bundlePath, Action<string, string, T> onCompleted, Action<string, string, float> onLoading = null) where T : UnityEngine.Object
         {
-            resourceName = resourceName.ToLower();
             bundlePath = bundlePath.ToLower();
+
             if (_assstBundleDic.ContainsKey(bundlePath) == false)
             {
                 LogCore.Warning($"错误的包名{bundlePath}");
