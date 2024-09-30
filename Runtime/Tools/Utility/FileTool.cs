@@ -635,7 +635,7 @@ namespace NonsensicalKit.Tools
                 public int reservedInt = 0;
                 public int flagsEx = 0;
             }
-            [DllImport("user32.dll,CharSet = CharSet.Auto")]
+            [DllImport("user32.dll", CharSet = CharSet.Auto)]
             public static extern IntPtr GetForegroundWindow();
 
             public class Shell32

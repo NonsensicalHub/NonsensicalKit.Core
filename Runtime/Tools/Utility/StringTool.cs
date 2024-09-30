@@ -16,6 +16,7 @@ namespace NonsensicalKit.Tools
         private static readonly string no_breaking_space = "\u00A0";
 
         #region PublicMethod
+
         ///<summary>
         /// 判断输入的字符串是否只包含数字和英文字母  
         /// </summary>
@@ -28,16 +29,14 @@ namespace NonsensicalKit.Tools
             return regex.IsMatch(input);
         }
 
+        /// <summary>
+        /// 将普通空格替换成utf8中的空格，避免unity文本组件因空格换行
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static string ReplaceNoBreakingSpace(string str)
         {
             return str.Replace(" ", no_breaking_space);
-        }
-
-        // Note that Color32 and Color implictly convert to each other. You may pass a Color object to this method without first casting it.
-        public static string ColorToHex(Color32 color)
-        {
-            string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2") + color.a.ToString("X2");
-            return hex;
         }
 
         /// <summary>
@@ -50,8 +49,58 @@ namespace NonsensicalKit.Tools
         }
 
         /// <summary>
-        /// 将单行字符串分割成多行，同时保证单词不会跨行
+        /// 获取新副本名称
         /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string GetDuplicateName(string name)
+        {
+            int oldIndex = GetDuplicateIndex(name);
+            if (oldIndex>0)
+            {
+                name = name.RemoveEnd(oldIndex.ToString().Length + 2);
+            }
+            name+=$"({oldIndex+1})";
+            return name;
+        }
+
+        /// <summary>
+        /// 获取副本索引
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>返回0代表无有效索引</returns>
+        public static int GetDuplicateIndex(string name)
+        {
+            int leftIndex = name.LastIndexOf('(');
+            if (leftIndex == -1) return 0;
+
+            int rightIndex = name.LastIndexOf(')');
+            int length = rightIndex - leftIndex;
+            if (length<=0) return 0;
+
+            string indexStr=name.Substring(leftIndex+1, length-1);
+            int index;
+            if (int.TryParse(indexStr, out index) == false) return 0;
+            if (index < 0) return 0;
+            return index;
+        }
+
+        /// <summary>
+        /// 去除字符串尾部字符
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="removeLength"></param>
+        /// <returns></returns>
+        public static string RemoveEnd(this string str,int removeLength)
+        {
+            int length = str.Length;
+            if (str.Length< removeLength) return str;
+            return str.Substring(0, length-removeLength);
+        }
+
+        /// <summary>
+        /// 将单行字符串分割成多行，同时保证单词不会跨行
+        /// </summary> 
         /// <param name="stringToSplit"></param>
         /// <param name="maximumLineLength"></param>
         /// <returns></returns>
@@ -85,6 +134,13 @@ namespace NonsensicalKit.Tools
                         });
         }
 
+        // Note that Color32 and Color implictly convert to each other. You may pass a Color object to this method without first casting it.
+        public static string ColorToHex(Color32 color)
+        {
+            string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2") + color.a.ToString("X2");
+            return hex;
+        }
+
         public static Color HexToColor(string hex)
         {
             hex = hex.Replace("0x", "");//in case the string is formatted 0xFFFFFF
@@ -100,14 +156,15 @@ namespace NonsensicalKit.Tools
             }
             return new Color32(r, g, b, a);
         }
+
         public static string ToRealString(this Vector2 v2)
         {
-            return $"Vector2({v2.x},{v2.y})";
+            return $"({v2.x},{v2.y})";
         }
 
         public static string ToRealString(this Vector3 v3)
         {
-            return $"Vector3({v3.x},{v3.y},{v3.z})";
+            return $"({v3.x},{v3.y},{v3.z})";
         }
 
         public static bool CheckBom(byte[] data)
@@ -140,12 +197,16 @@ namespace NonsensicalKit.Tools
 
         public static string TrimClone(string str)
         {
-            int le = str.Length;
-            if (le < 7)
+            int length = str.Length;
+            if (length < 7)
             {
                 return str;
             }
-            return str.Substring(0, le - 7);
+            if (str.Substring(length-7)!="(Clone)")
+            {
+                return str;
+            }
+            return str.Substring(0, length - 7);
         }
 
         /// <summary>
@@ -171,27 +232,6 @@ namespace NonsensicalKit.Tools
             return AdditionAndSubtraction(ls);
         }
 
-        public static string GetIntMapString(int[,] ienumerable)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            int rowLine = ienumerable.GetLength(0);
-
-            int count = 0;
-            foreach (var item in ienumerable)
-            {
-                sb.Append(item.ToString());
-                sb.Append(","); count++;
-                if (count == rowLine)
-                {
-                    count = 0;
-                    sb.AppendLine();
-                }
-            }
-
-            return sb.ToString();
-        }
-
         /// <summary>
         /// 获取集合的可读字符串
         /// </summary>
@@ -208,7 +248,12 @@ namespace NonsensicalKit.Tools
             sb.Append("[");
             foreach (var item in ienumerable)
             {
-                if (item.GetType() == typeof(Vector3))
+                if (item.GetType() == typeof(Vector2))
+                {
+                    Vector2 temp = (Vector2)item;
+                    sb.Append($"({temp.x},{temp.y})");
+                }
+                else if (item.GetType() == typeof(Vector3))
                 {
                     Vector3 temp = (Vector3)item;
                     sb.Append($"({temp.x},{temp.y},{temp.z})");
@@ -342,6 +387,11 @@ namespace NonsensicalKit.Tools
             return DateTime.Now.ToString($"yyyy{divider}MM{divider}dd {dt.Hour}{divider}mm{divider}ss");
         }
 
+        /// <summary>
+        /// 将秒数转换成 小时:分钟:秒数
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
         public static string ToHMS(int time)
         {
             int hour = time / 3600;
@@ -350,6 +400,11 @@ namespace NonsensicalKit.Tools
             return string.Format("{0:D2}:{1:D2}:{2:D2}", hour, minute, second);
         }
 
+        /// <summary>
+        /// 将秒数转换成 分钟:秒数
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
         public static string ToMS(int time)
         {
             int minute = time / 60;
