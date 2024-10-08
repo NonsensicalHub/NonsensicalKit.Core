@@ -329,9 +329,15 @@ namespace NonsensicalKit.Tools
                 return null;
             }
         }
-
         public static string FileSaveSelector(string typeName, params string[] filter)
         {
+          return   FileSaveSelector(typeName, Application.dataPath.Replace('/', '\\'), filter);
+        }
+
+        public static string FileSaveSelector(string typeName, string initialDir, params string[] filter)
+        {
+            initialDir = initialDir.Replace('/', '\\');
+
             var openFileName = new Win32API.OpenFileName();
             openFileName.structSize = Marshal.SizeOf(openFileName);
             if (filter == null || filter.Length == 0)
@@ -356,7 +362,7 @@ namespace NonsensicalKit.Tools
             }
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = initialDir;//默认路径
             openFileName.title = "保存项目";
             openFileName.defExt = "dat";
             openFileName.flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000200 | 0x00000008;
