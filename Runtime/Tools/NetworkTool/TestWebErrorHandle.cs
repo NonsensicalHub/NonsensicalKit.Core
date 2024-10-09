@@ -1,5 +1,5 @@
+using NonsensicalKit.Core.Log;
 using System;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace NonsensicalKit.Tools.NetworkTool
@@ -11,29 +11,29 @@ namespace NonsensicalKit.Tools.NetworkTool
     {
         public void OnProtocolError(UnityWebRequest unityWebRequest)
         {
-            Debug.Log("ProtocolError:" + unityWebRequest.downloadHandler.error + "\r\n" + unityWebRequest.downloadHandler.text);
+            LogCore.Error("ProtocolError:" + unityWebRequest.downloadHandler.error + "\r\n" + unityWebRequest.downloadHandler.text);
         }
 
         public void OnConnectionError(UnityWebRequest unityWebRequest)
         {
             if (Uri.IsWellFormedUriString(unityWebRequest.url, UriKind.Absolute) == false)
             {
-                Debug.Log($"url:\"{unityWebRequest.url}\"格式不正确");
+                LogCore.Error($"url:\"{unityWebRequest.url}\"格式不正确");
             }
             else
             {
-                Debug.Log("ConnectionError:" + unityWebRequest.downloadHandler.error + "\r\n" + unityWebRequest.downloadHandler.text);
+                LogCore.Error("ConnectionError:" + unityWebRequest.downloadHandler.error + "\r\n" + unityWebRequest.downloadHandler.text);
             }
         }
 
         public void OnDataProcessingError(UnityWebRequest unityWebRequest)
         {
-            Debug.Log("DataProcessingError:" + unityWebRequest.downloadHandler.error + "\r\n" + unityWebRequest.downloadHandler.text);
+            LogCore.Error("DataProcessingError:" + unityWebRequest.downloadHandler.error + "\r\n" + unityWebRequest.downloadHandler.text);
         }
 
         public void OnUnknowError(UnityWebRequest unityWebRequest)
         {
-            Debug.Log("连接出现未知错误");
+            LogCore.Error("连接出现未知错误");
         }
     }
 }

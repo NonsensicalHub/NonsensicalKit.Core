@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -14,6 +15,7 @@ namespace NonsensicalKit.Tools.NetworkTool
     /// </summary>
     public static class HttpUtility
     {
+        #region Extensions
         public static IEnumerator Get(this UnityWebRequest unityWebRequest, string url)
         {
             unityWebRequest.method = "GET";
@@ -67,6 +69,7 @@ namespace NonsensicalKit.Tools.NetworkTool
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
             yield return unityWebRequest.SendWebRequest();
         }
+        #endregion
 
         #region GET 
         public static IEnumerator Get(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
@@ -136,6 +139,37 @@ namespace NonsensicalKit.Tools.NetworkTool
                 yield return SendRequest(unityWebRequest, callback, iHandleWebError);
             }
         }
+
+        public static IEnumerator GetAudio(string url, AudioType audioType, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        {
+            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
+            {
+                unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, audioType);
+                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+            }
+        }
+
+        public static IEnumerator GetAudio(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        {
+            AudioType audioType;
+            switch (StringTool.GetFileExtensionFromUrl(url))
+            {
+                case ".ogg":
+                    audioType = AudioType.OGGVORBIS;
+                    break;
+                case ".wav":
+                    audioType = AudioType.WAV;
+                    break;
+                default:
+                    audioType = AudioType.MPEG;
+                    break;
+            }
+            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
+            {
+                unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, audioType);
+                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+            }
+        }
         #endregion
 
         #region Post
@@ -147,6 +181,7 @@ namespace NonsensicalKit.Tools.NetworkTool
                 yield return SendRequest(unityWebRequest, callback, iHandleWebError);
             }
         }
+
         public static IEnumerator Post(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback, Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
         {
             using (UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST"))
@@ -169,7 +204,6 @@ namespace NonsensicalKit.Tools.NetworkTool
                 }
             }
         }
-
 
         public static IEnumerator Post(string url, Dictionary<string, string> formData, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
@@ -286,7 +320,6 @@ namespace NonsensicalKit.Tools.NetworkTool
                 }
             }
         }
-
 
         public static IEnumerator PostTexture(string url, Dictionary<string, string> formData, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {

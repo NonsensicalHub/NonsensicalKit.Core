@@ -22,11 +22,26 @@ namespace NonsensicalKit.Tools
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static bool IsNumAndEnCh(string input)
+        public static bool JustNumAndEng(this string str)
         {
-            string pattern = @"^[A-Za-z0-9]+$";
-            Regex regex = new Regex(pattern);
-            return regex.IsMatch(input);
+            foreach (var c in str)
+            {
+                if (c<48
+                    ||(57<c&&c<65)
+                    ||(90<c&&c<97)
+                    ||122<c)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static string GetFileExtensionFromUrl(string url)
+        {
+            url = url.Split('?')[0];
+            url = url.Split('/').Last();
+            return url.Contains('.') ? url.Substring(url.LastIndexOf('.')) : "";
         }
 
         /// <summary>
