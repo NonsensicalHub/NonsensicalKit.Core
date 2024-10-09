@@ -1,9 +1,7 @@
 {
-  "name": "com.tony_bean_is_alive.nonsensicalkit.core",
+  "name": "com.nonsensicallab.nonsensicalkit.core",
   "displayName": "NonsensicalKit.Core",
-  "author": {
-    "name": "TonyBean"
-  },
+  "author": { "name": "NonsensicalLab" },
   "version": "0.0.1",
   "unity": "2021.3",
   "license": "MIT",
