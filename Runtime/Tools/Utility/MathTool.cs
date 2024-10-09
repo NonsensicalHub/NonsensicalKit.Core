@@ -6,6 +6,26 @@ namespace NonsensicalKit.Tools
     public static class MathTool
     {
         /// <summary>
+        /// 计算枚举改变
+        /// </summary>
+        /// <param name="oldEnum">原始枚举</param>
+        /// <param name="changeEnum">需要改变的枚举量</param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int CalculateEnum(Enum oldEnum, Enum changeEnum, bool value)
+        {
+            int raw = Convert.ToInt32(oldEnum);
+            int change = Convert.ToInt32(changeEnum);
+
+            var b = (raw & change) != 0;
+            if (b ^ value)
+            {
+                raw ^= change;
+            }
+            return raw;
+        }
+
+        /// <summary>
         /// 判断是否为质数
         /// </summary>
         /// <param name="num"></param>
