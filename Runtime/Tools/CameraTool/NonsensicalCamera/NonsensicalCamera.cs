@@ -21,6 +21,7 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] private Transform m_viewPoint;     //视点
         [SerializeField] private Transform m_camera;        //相机
 
+        [SerializeField] private bool m_isLimitPith = true;
         [Range(-90, 90)][SerializeField] protected float m_minPitch = -90;  //最小俯仰角
         [Range(-90, 90)][SerializeField] protected float m_maxPitch = 90;   //最大俯仰角
 
@@ -281,13 +282,16 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 _targetPitch -= 180;
             }
-            if (_targetPitch < m_minPitch)
+            if (m_isLimitPith == true)
             {
-                _targetPitch = m_minPitch;
-            }
-            else if (_targetPitch >= m_maxPitch)
-            {
-                _targetPitch = m_maxPitch;
+                if (_targetPitch < m_minPitch)
+                {
+                    _targetPitch = m_minPitch;
+                }
+                else if (_targetPitch >= m_maxPitch)
+                {
+                    _targetPitch = m_maxPitch;
+                }
             }
         }
 
@@ -371,7 +375,10 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             _targetYaw += delta.x * m_rotationSpeed * 0.3f;
             _targetPitch += delta.y * m_rotationSpeed * 0.3f;
-            _targetPitch = Mathf.Clamp(_targetPitch, m_minPitch, m_maxPitch);
+            if (m_isLimitPith == true)
+            {
+                _targetPitch = Mathf.Clamp(_targetPitch, m_minPitch, m_maxPitch);
+            }
         }
 
         /// <summary>
