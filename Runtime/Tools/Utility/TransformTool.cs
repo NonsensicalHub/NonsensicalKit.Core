@@ -43,7 +43,7 @@ namespace NonsensicalKit.Tools
             return crt;
         }
 
-        public static Bounds CalculateBox(this Transform root, IEnumerable<Renderer> renderers)
+        public static Bounds BoundingBox(this Transform root, IEnumerable<Renderer> renderers)
         {
             Quaternion qn = root.rotation;
             root.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
@@ -51,7 +51,6 @@ namespace NonsensicalKit.Tools
             bool hasBounds = false;
 
             Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
-
 
             foreach (var item in renderers)
             {
@@ -64,6 +63,36 @@ namespace NonsensicalKit.Tools
                     bounds = item.bounds;
                     hasBounds = true;
                 }
+            }
+
+            root.rotation = qn;
+            bounds.center -= root.position;
+            return bounds;
+        }
+
+        public static Bounds BoundingBox(this Transform root)
+        {
+            Quaternion qn = root.rotation;
+            root.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+
+            bool hasBounds = false;
+
+            Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+
+            Renderer[] childRenderers = root.GetComponentsInChildren<Renderer>();
+
+            foreach (var item in childRenderers)
+            {
+                if (hasBounds)
+                {
+                    bounds.Encapsulate(item.bounds);
+                }
+                else
+                {
+                    bounds = item.bounds;
+                    hasBounds = true;
+                }
+
             }
 
             root.rotation = qn;

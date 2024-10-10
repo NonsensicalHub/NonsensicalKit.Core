@@ -57,7 +57,6 @@ namespace NonsensicalKit.Core.Editor.Service.Config
 
 
             string resourceFileText =
-
 @"using NonsensicalKit.Core.Service.Config;
 using System.Collections.Generic;
 using UnityEngine;

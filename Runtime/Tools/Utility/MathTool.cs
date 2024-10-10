@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools
@@ -60,27 +61,33 @@ namespace NonsensicalKit.Tools
         /// <param name="values"></param>
         /// <param name="i1"></param>
         /// <param name="i2"></param>
-        public static void Swap<T>(T[] values, int i1, int i2)
+        public static void Swap<T>(IList<T> values, int i1, int i2)
         {
             T tmp = values[i1];
             values[i1] = values[i2];
             values[i2] = tmp;
         }
 
-        public static int IndexOfMin<T>(this T[] array) where T : struct, IComparable<T>
+        /// <summary>
+        /// 链表中最小值的索引
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static int IndexOfMinValue<T>(this IList<T> list) where T : struct, IComparable<T>
         {
-            if (array.Length == 0)
+            if (list.Count == 0)
             {
                 return -1;
             }
             int minIndex = 0;
-            T min = array[0];
-            for (int i = 1; i < array.Length; i++)
+            T min = list[0];
+            for (int i = 1; i < list.Count; i++)
             {
-                if (min.CompareTo(array[i]) > 0)
+                if (min.CompareTo(list[i]) > 0)
                 {
                     minIndex = i;
-                    min = array[i];
+                    min = list[i];
                 }
             }
             return minIndex;
@@ -92,9 +99,9 @@ namespace NonsensicalKit.Tools
         /// <typeparam name="T"></typeparam>
         /// <param name="values"></param>
         /// <returns></returns>
-        public static T[] SortMaxHeap<T>(T[] values) where T : struct, IComparable<T>
+        public static IList<T> SortMaxHeap<T>(IList<T> values) where T : struct, IComparable<T>
         {
-            for (int i = values.Length - 1; i > 0; i--)
+            for (int i = values.Count - 1; i > 0; i--)
             {
                 Swap(values, 0, i);
 
@@ -129,9 +136,9 @@ namespace NonsensicalKit.Tools
         /// <typeparam name="T"></typeparam>
         /// <param name="values"></param>
         /// <returns></returns>
-        public static T[] SortHeap<T>(T[] values) where T : struct, IComparable<T>
+        public static IList<T> SortHeap<T>(IList<T> values) where T : struct, IComparable<T>
         {
-            for (int i = values.Length - 1; i > 0; i--)
+            for (int i = values.Count - 1; i > 0; i--)
             {
                 Swap(values, 0, i);
 
