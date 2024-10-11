@@ -277,13 +277,13 @@ namespace NonsensicalKit.Tools.CameraTool
 
             _targetPitch = 90 - Vector3.Angle(Vector3.up, dir);
             _crtPitch = _targetPitch;
-
-            while (_targetPitch > 90)
-            {
-                _targetPitch -= 180;
-            }
             if (m_isLimitPith == true)
             {
+                while (_targetPitch > 90)
+                {
+                    _targetPitch -= 180;
+                }
+
                 if (_targetPitch < m_minPitch)
                 {
                     _targetPitch = m_minPitch;
@@ -293,6 +293,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     _targetPitch = m_maxPitch;
                 }
             }
+
         }
 
         /// <summary>
@@ -322,6 +323,8 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="yaw"></param>
         public void SetPitchAndYaw(float pitch, float yaw)
         {
+            Debug.Log(pitch + " " + yaw);
+
             if (_targetPitch.NatureAngle() == pitch.NatureAngle() && _targetYaw.NatureAngle() == yaw.NatureAngle())
             {
                 _targetRoll = 0;
