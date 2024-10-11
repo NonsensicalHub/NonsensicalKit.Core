@@ -35,6 +35,10 @@ public class CameraRayInteraction : MonoBehaviour
                     IOCC.Publish("onVirtualMouseEnter", string.Empty);
                 }
             }
+            else
+            {
+                IOCC.Publish("onVirtualMouseEnter", string.Empty);
+            }
         }
     }
 }
