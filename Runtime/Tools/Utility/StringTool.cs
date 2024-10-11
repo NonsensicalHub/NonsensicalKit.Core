@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools
@@ -26,10 +25,10 @@ namespace NonsensicalKit.Tools
         {
             foreach (var c in str)
             {
-                if (c<48
-                    ||(57<c&&c<65)
-                    ||(90<c&&c<97)
-                    ||122<c)
+                if (c < 48
+                    || (57 < c && c < 65)
+                    || (90 < c && c < 97)
+                    || 122 < c)
                 {
                     return false;
                 }
@@ -37,6 +36,60 @@ namespace NonsensicalKit.Tools
             return true;
         }
 
+        /// <summary>
+        /// 获取格式化时间，自动判断顶级单位
+        /// </summary>
+        /// <param name="totalSecond"></param>
+        /// <returns></returns>
+        public static string GetFormatTime(float totalSecond)
+        {
+            var hour = (int)totalSecond / 3600;
+            var minute = (int)(totalSecond - hour * 3600) / 60;
+            var second = (int)(totalSecond - hour * 3600 - minute * 60);
+
+            if (hour>0)
+            {
+                return $"{hour:D2}:{minute:D2}:{second:D2}";
+            }
+            else
+            {
+                return $"{minute:D2}:{second:D2}";
+            }
+        }
+
+
+        /// <summary>
+        /// 获取格式化时间，顶级单位为小时
+        /// </summary>
+        /// <param name="totalSecond"></param>
+        /// <returns></returns>
+        public static string GetFormatHourTime(float totalSecond)
+        {
+            var hour = (int)totalSecond / 3600;
+            var minute = (int)(totalSecond - hour * 3600) / 60;
+            var second = (int)(totalSecond - hour * 3600 - minute * 60);
+                                                                        
+            return $"{hour:D2}:{minute:D2}:{second:D2}";
+        }
+
+        /// <summary>
+        /// 获取格式化时间，顶级单位为分钟
+        /// </summary>
+        /// <param name="totalSecond"></param>
+        /// <returns></returns>
+        public static string GetFormatMinuteTime(float totalSecond)
+        {
+            var minute = (int)(totalSecond ) / 60;
+            var second = (int)(totalSecond  - minute * 60);
+
+            return $"{minute:D2}:{second:D2}";
+        }
+
+        /// <summary>
+        /// 从Url中获取文件后缀
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static string GetFileExtensionFromUrl(string url)
         {
             url = url.Split('?')[0];
@@ -71,11 +124,11 @@ namespace NonsensicalKit.Tools
         public static string GetDuplicateName(string name)
         {
             int oldIndex = GetDuplicateIndex(name);
-            if (oldIndex>0)
+            if (oldIndex > 0)
             {
                 name = name.RemoveEnd(oldIndex.ToString().Length + 2);
             }
-            name+=$"({oldIndex+1})";
+            name += $"({oldIndex + 1})";
             return name;
         }
 
@@ -91,9 +144,9 @@ namespace NonsensicalKit.Tools
 
             int rightIndex = name.LastIndexOf(')');
             int length = rightIndex - leftIndex;
-            if (length<=0) return 0;
+            if (length <= 0) return 0;
 
-            string indexStr=name.Substring(leftIndex+1, length-1);
+            string indexStr = name.Substring(leftIndex + 1, length - 1);
             int index;
             if (int.TryParse(indexStr, out index) == false) return 0;
             if (index < 0) return 0;
@@ -106,11 +159,11 @@ namespace NonsensicalKit.Tools
         /// <param name="str"></param>
         /// <param name="removeLength"></param>
         /// <returns></returns>
-        public static string RemoveEnd(this string str,int removeLength)
+        public static string RemoveEnd(this string str, int removeLength)
         {
             int length = str.Length;
-            if (str.Length< removeLength) return str;
-            return str.Substring(0, length-removeLength);
+            if (str.Length < removeLength) return str;
+            return str.Substring(0, length - removeLength);
         }
 
         /// <summary>
@@ -217,7 +270,7 @@ namespace NonsensicalKit.Tools
             {
                 return str;
             }
-            if (str.Substring(length-7)!="(Clone)")
+            if (str.Substring(length - 7) != "(Clone)")
             {
                 return str;
             }
