@@ -6,6 +6,8 @@ namespace NonsensicalKit.Tools.EazyTool
 {
     public class MouseEventTrigger : NonsensicalMono
     {
+
+        [SerializeField] private bool useOnWebGL;
         [SerializeField] private bool enableRayHit = false;
         [SerializeField] UnityEvent m_OnMouseEnter = null;
         [SerializeField] UnityEvent m_OnMouseClick = null;
@@ -14,6 +16,14 @@ namespace NonsensicalKit.Tools.EazyTool
         private bool isEntered;
         private void Awake()
         {
+            if (useOnWebGL)
+            {
+                if (PlatformInfo.IsWebGL)
+                {
+                    enabled = true;
+                }
+            }
+
             if (enableRayHit)
             {
                 Subscribe<string>("onVirtualMouseEnter", OnVirtualMouseEnter);

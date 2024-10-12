@@ -7,11 +7,20 @@ public class CameraRayInteraction : MonoBehaviour
     [SerializeField] private Camera _camera;
     [SerializeField] private int _maxHitDistance = 1000;
     [SerializeField] private bool log;
-    private bool enableRayHit;
+    [SerializeField] private bool useOnWebGL;
+
+    [SerializeField] private bool enableRayHit;
 
     private void Awake()
     {
-        enableRayHit = true;
+        if (useOnWebGL)
+        {
+            if (PlatformInfo.IsWebGL)
+            {
+                enableRayHit = true;
+
+            }
+        }
     }
     private void Update()
     {

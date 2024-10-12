@@ -7,10 +7,12 @@ namespace NonsensicalKit.Tools.CameraTool
 {
     public class RotateCubePart : NonsensicalMono
     {
+        [SerializeField] private bool useOnWebGL;
+        [SerializeField] private bool enableRayHit = false;
         [SerializeField] private Vector3 m_dir;
         [SerializeField] private UnityEvent m_onMouseEnter;
         [SerializeField] private UnityEvent m_onMouseExit;
-        [SerializeField] private bool enableRayHit = false;
+
         private RotateCube _cube;
 
         private bool isEntered;
@@ -18,7 +20,14 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             _cube = GetComponentInParent<RotateCube>();
 
-            if ( enableRayHit)
+            if (useOnWebGL)
+            {
+                if (PlatformInfo.IsWebGL)
+                {
+                    enabled = true;
+                }
+            }
+            if (enableRayHit)
             {
                 Subscribe<string>("onVirtualMouseEnter", OnVirtualMouseEnter);
                 Subscribe<string>("onVirtualMouseClick", OnVirtualMouseClick);
