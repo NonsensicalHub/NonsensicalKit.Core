@@ -24,7 +24,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 if (PlatformInfo.IsWebGL)
                 {
-                    enabled = true;
+                    enableRayHit = true;
                 }
             }
             if (enableRayHit)
