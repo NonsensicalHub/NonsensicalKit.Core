@@ -20,7 +20,7 @@ namespace NonsensicalKit.Tools.EazyTool
             {
                 if (PlatformInfo.IsWebGL)
                 {
-                    enabled = true;
+                    enableRayHit = true;
                 }
             }
 
