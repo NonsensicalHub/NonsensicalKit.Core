@@ -8,7 +8,7 @@ namespace NonsensicalKit.Core
     /// <typeparam name="T"></typeparam>
     public struct Array3<T>
     {
-        public readonly T[] Array;
+        public readonly T[] TArray;
 
         public readonly int Length0;
         public readonly int Length1;
@@ -19,7 +19,7 @@ namespace NonsensicalKit.Core
 
         public Array3(int length0, int length1, int length2)
         {
-            Array = new T[length0 * length1 * length2];
+            TArray = new T[length0 * length1 * length2];
 
             Length0 = length0;
             Length1 = length1;
@@ -29,11 +29,30 @@ namespace NonsensicalKit.Core
             Step1 = length2;
         }
 
+        public Array3<T> CopyToNewArray(int length0, int length1, int length2)
+        {
+            Array3<T> newArray3 = new Array3<T>(length0, length1, length2);
+            int minL0 = Math.Min(Length0, length0);
+            int minL1 = Math.Min(Length1, length1);
+            int minL2 = Math.Min(Length2, length2);
+            for (int i = 0; i < minL0; i++)
+            {
+                for (int j = 0; j < minL1; j++)
+                {
+                    for (int k = 0; k < minL2; k++)
+                    {
+                        newArray3[i, j, k] = this[i, j, k];
+                    }
+                }
+            }
+            return newArray3;
+        }
+
         public void Reset(T state)
         {
-            for (int i = 0; i < Array.Length; i++)
+            for (int i = 0; i < TArray.Length; i++)
             {
-                Array[i] = state;
+                TArray[i] = state;
             }
         }
 
@@ -41,11 +60,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[index0 * Step0 + index1 * Step1 + index2];
+                return TArray[index0 * Step0 + index1 * Step1 + index2];
             }
             set
             {
-                Array[index0 * Step0 + index1 * Step1 + index2] = value;
+                TArray[index0 * Step0 + index1 * Step1 + index2] = value;
 
             }
         }
@@ -54,11 +73,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3];
+                return TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3];
             }
             set
             {
-                Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3] = value;
+                TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3] = value;
 
             }
         }
@@ -67,11 +86,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[index];
+                return TArray[index];
             }
             set
             {
-                Array[index] = value;
+                TArray[index] = value;
             }
         }
 
@@ -86,6 +105,23 @@ namespace NonsensicalKit.Core
         public int GetIndex(int index0, int index1, int index2)
         {
             return index0 * Step0 + index1 * Step1 + index2;
+        }
+
+        public T SafeGet(int index0, int index1, int index2)
+        {
+            if (index0<0|| index1<0|| index2<0)
+            {
+                return default;
+            }
+            var index = index0 * Step0 + index1 * Step1 + index2;
+            if (index >= TArray.Length)
+            {
+                return default;
+            }
+            else
+            {
+                return TArray[index];
+            }
         }
     }
 }
