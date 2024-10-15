@@ -1,5 +1,6 @@
 using NonsensicalKit.Core;
 using NonsensicalKit.Tools.EazyTool;
+using NonsensicalKit.Tools.EditorTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -14,6 +15,12 @@ namespace NonsensicalKit.Tools.CameraTool
         RightKeyControl,
         MiddleKeyControl,
         AlwaysControl,
+    }
+    public enum ControlFinger
+    {
+        Uncontrol,
+        OneFinger,
+        TwoFinger,
     }
 
     public class NonsensicalCamera : NonsensicalMono
@@ -41,6 +48,10 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] protected ControlMouseKey m_rotateControl = ControlMouseKey.RightKeyControl;
         [SerializeField] protected ControlMouseKey m_rollControl = ControlMouseKey.MiddleKeyControl;
         [SerializeField] protected ControlMouseKey m_DragZoomControl = ControlMouseKey.Uncontrol;
+        [SerializeField] protected bool m_enableMobileInput = false;
+        [ShowIF("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerMoveControl = ControlFinger.Uncontrol;
+        [ShowIF("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerRotateControl = ControlFinger.OneFinger;
+        [ShowIF("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerDragZoomControl = ControlFinger.TwoFinger;
         [SerializeField] protected bool m_UseKeyBoardControlMove = false;
 
         [SerializeField] protected bool m_lerpMove = true;      //插值移动
@@ -97,6 +108,13 @@ namespace NonsensicalKit.Tools.CameraTool
                     return true;
                 }
 
+                if (PlatformInfo.IsMobile)
+                {
+                    if (Input.touchCount > 0)
+                    {
+                        return !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
+                    }
+                }
                 return !_crtEventSystem.IsPointerOverGameObject();
             }
         }
@@ -115,6 +133,8 @@ namespace NonsensicalKit.Tools.CameraTool
         protected EventSystem _crtEventSystem;
         protected InputHub _input;
 
+        protected MobileInputHub _mobileInput;
+
         private Vector3 _startPos;      //初始视点位置
         private Quaternion _startRot;   //初始视点旋转
         private Vector3 _startPos2;     //初始相机位置
@@ -125,6 +145,7 @@ namespace NonsensicalKit.Tools.CameraTool
         private bool _needRoll = false;
         private bool _needDragZoom = false;
         private bool _mouseEventInitFlag = false;
+        private bool _fingerEventInitFlag = false;
 
         protected virtual void Awake()
         {
@@ -149,6 +170,11 @@ namespace NonsensicalKit.Tools.CameraTool
             _crtEventSystem = EventSystem.current;
             _input = InputHub.Instance;
             AddMouseEvent();
+            if (PlatformInfo.IsMobile)
+            {
+                _mobileInput = MobileInputHub.Instance;
+                AddMobileInputEvent();
+            }
         }
 
         private void OnEnable()
@@ -173,45 +199,68 @@ namespace NonsensicalKit.Tools.CameraTool
 
             if (IsOn)
             {
-                if (_MouseNotInUI)
+                if (PlatformInfo.IsMobile == false)
                 {
-                    var v = -_input.CrtZoom;
-                    if (v > 0)  //统一在不同平台中差异较大的滚动值
+                    if (_MouseNotInUI)
                     {
-                        v = 1f;
+                        var v = -_input.CrtZoom;
+                        if (v > 0)  //统一在不同平台中差异较大的滚动值
+                        {
+                            v = 1f;
+                        }
+                        else if (v < 0)
+                        {
+                            v = -1f;
+                        }
+                        if (v != 0)
+                        {
+                            AdjustZoom(v);
+                        }
                     }
-                    else if (v < 0)
+                    if (_needMove)
                     {
-                        v = -1f;
+                        AdjustPosition(_input.CrtMouseMove);
                     }
-                    if (v != 0)
+
+                    if (_needRotate)
                     {
-                        AdjustZoom(v);
+                        AdjustRotation(new Vector2(_input.CrtMouseMove.x, -_input.CrtMouseMove.y));
+                    }
+
+                    if (_needRoll)
+                    {
+                        AdjustRoll(_input.CrtMouseMove.x);
+                    }
+                    if (_needDragZoom)
+                    {
+                        AdjustDragZoom(_input.CrtMouseMove);
+                    }
+
+                    if (m_UseKeyBoardControlMove)
+                    {
+                        AdjustPosition(-_input.CrtMove);
                     }
                 }
+                else if (PlatformInfo.IsMobile)
+                {
+                    if (_MouseNotInUI == false)
+                    {
+                        return;
+                    }
+                    if (_needMove)
+                    {
+                        AdjustPosition(_mobileInput.TheOneFingerMove);
+                    }
 
-                if (_needMove)
-                {
-                    AdjustPosition(_input.CrtMouseMove);
-                }
+                    if (_needRotate)
+                    {
+                        AdjustRotation(new Vector2(_mobileInput.TheOneFingerMove.x, -_mobileInput.TheOneFingerMove.y));
+                    }
 
-                if (_needRotate)
-                {
-                    AdjustRotation(new Vector2(_input.CrtMouseMove.x, -_input.CrtMouseMove.y));
-                }
-
-                if (_needRoll)
-                {
-                    AdjustRoll(_input.CrtMouseMove.x);
-                }
-                if (_needDragZoom)
-                {
-                    AdjustDragZoom(_input.CrtMouseMove);
-                }
-
-                if (m_UseKeyBoardControlMove)
-                {
-                    AdjustPosition(-_input.CrtMove);
+                    if (_needDragZoom)
+                    {
+                        AdjustDragZoom(-_mobileInput.TwoFingerMove);
+                    }
                 }
             }
         }
@@ -259,6 +308,10 @@ namespace NonsensicalKit.Tools.CameraTool
             if (_mouseEventInitFlag)
             {
                 RemoveMouseEvent();
+            }
+            if (_fingerEventInitFlag)
+            {
+                RemoveMobileInputEvent();
             }
         }
 
@@ -501,6 +554,53 @@ namespace NonsensicalKit.Tools.CameraTool
                     break;
             }
         }
+        private void AddMobileInputEvent()
+        {
+            if (_fingerEventInitFlag) return;
+
+            _fingerEventInitFlag = true;
+
+            switch (m_fingerMoveControl)
+            {
+                case ControlFinger.OneFinger:
+                    _mobileInput.OnOneFingerDowm += StartMove;
+                    _mobileInput.OnOneFingerUp += StopMove;
+                    break;
+                case ControlFinger.TwoFinger:
+                    _mobileInput.OnTwoFingerDowm += StartMove;
+                    _mobileInput.OnTwoFingerUp += StopMove;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_fingerRotateControl)
+            {
+                case ControlFinger.OneFinger:
+                    _mobileInput.OnOneFingerDowm += StartRotate;
+                    _mobileInput.OnOneFingerUp += StopRotate;
+                    break;
+                case ControlFinger.TwoFinger:
+                    _mobileInput.OnTwoFingerDowm += StartRotate;
+                    _mobileInput.OnTwoFingerUp += StopRotate;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_fingerDragZoomControl)
+            {
+                case ControlFinger.OneFinger:
+                    _mobileInput.OnOneFingerDowm += StartZoom;
+                    _mobileInput.OnOneFingerUp += StopZoom;
+                    break;
+                case ControlFinger.TwoFinger:
+                    _mobileInput.OnTwoFingerDowm += StartZoom;
+                    _mobileInput.OnTwoFingerUp += StopZoom;
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         private void RemoveMouseEvent()
         {
@@ -589,6 +689,55 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+        }
+
+        private void RemoveMobileInputEvent()
+        {
+            if (!_fingerEventInitFlag) { return; }
+            _fingerEventInitFlag = false;
+
+            switch (m_fingerMoveControl)
+            {
+                case ControlFinger.OneFinger:
+                    _mobileInput.OnOneFingerDowm -= StartMove;
+                    _mobileInput.OnOneFingerUp -= StopMove;
+                    break;
+                case ControlFinger.TwoFinger:
+                    _mobileInput.OnTwoFingerDowm -= StartMove;
+                    _mobileInput.OnTwoFingerUp -= StopMove;
+                    break;
+                default:
+                    break;
+            }
+            switch (m_fingerRotateControl)
+            {
+                case ControlFinger.OneFinger:
+                    _mobileInput.OnOneFingerDowm -= StartRotate;
+                    _mobileInput.OnOneFingerUp -= StopRotate;
+                    break;
+                case ControlFinger.TwoFinger:
+                    _mobileInput.OnOneFingerDowm -= StartRotate;
+                    _mobileInput.OnOneFingerUp -= StopRotate;
+                    break;
+                default:
+                    break;
+            }
+
+            switch (m_fingerDragZoomControl)
+            {
+                case ControlFinger.OneFinger:
+                    _mobileInput.OnOneFingerDowm -= StartZoom;
+                    _mobileInput.OnOneFingerUp -= StopZoom;
+                    break;
+                case ControlFinger.TwoFinger:
+                    _mobileInput.OnTwoFingerDowm -= StartZoom;
+                    _mobileInput.OnTwoFingerUp -= StopZoom;
+                    break;
+
+                default:
+                    break;
+            }
+
         }
 
         private void StartMove()
