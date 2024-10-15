@@ -9,9 +9,10 @@ namespace NonsensicalKit.Tools.InputTool
     {
 
         private Vector2 _oneStartPosition;
+        private Vector2 _twoStartPosition;
         private Vector2 _twoDistance;
-        private Vector2 _twoLastDistance;
-        private float _distance;
+        private float _distanceDelta;
+        private float _startDistance;
         private void Update()
         {
 
@@ -50,23 +51,31 @@ namespace NonsensicalKit.Tools.InputTool
                     {
                         case TouchPhase.Began:
                             OnTwoFingerDowm?.Invoke();
+                            _twoStartPosition = touch2.position;
+
                             break;
                         case TouchPhase.Moved:
-                            _distance = Vector2.Distance(touch2.position, touch.position);
+                            _startDistance = Vector2.Distance(_twoStartPosition, touch.position);
+                            _distanceDelta = Vector2.Distance(touch2.position, touch.position) - _startDistance;
 
-                            _twoDistance = touch2.position - touch.position;
-                            TwoFingerMove = _twoDistance - _twoLastDistance;
-                            _twoLastDistance = _twoDistance;
-
-                            if (TwoFingerDistance != _distance)
+                            if (TwoFingerDistance != _distanceDelta)
                             {
-                                OnTwoFingerDistanceChanged?.Invoke(_distance);
-                                TwoFingerDistance = _distance;
+                                OnTwoFingerDistanceChanged?.Invoke(_distanceDelta);
+                                TwoFingerDistance = _distanceDelta;
                             }
+
+                            _twoDistance = (touch2.position - touch.position) - (_twoStartPosition - touch.position);
+                            if (TwoFingerMove != _twoDistance)
+                            {
+                                TwoFingerMove = _twoDistance;
+                            }
+
 
                             break;
                         case TouchPhase.Stationary:
                             ISTwoFingerHold = true;
+                            _twoStartPosition = touch2.position;
+
                             break;
                         case TouchPhase.Ended:
                             OnTwoFingerUp?.Invoke();

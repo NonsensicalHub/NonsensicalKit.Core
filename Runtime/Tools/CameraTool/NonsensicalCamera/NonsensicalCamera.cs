@@ -259,7 +259,19 @@ namespace NonsensicalKit.Tools.CameraTool
 
                     if (_needDragZoom)
                     {
-                        AdjustDragZoom(-_mobileInput.TwoFingerMove);
+                        var v = -_mobileInput.TwoFingerDistance;
+                        if (v > 0)  //统一在不同平台中差异较大的滚动值
+                        {
+                            v = 1f;
+                        }
+                        else if (v < 0)
+                        {
+                            v = -1f;
+                        }
+                        if (v != 0)
+                        {
+                            AdjustZoom(v);
+                        }
                     }
                 }
             }
