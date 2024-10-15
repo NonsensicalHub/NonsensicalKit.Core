@@ -8,7 +8,7 @@ namespace NonsensicalKit.Core
     /// <typeparam name="T"></typeparam>
     public struct Array4<T>
     {
-        public readonly T[] Array;
+        public readonly T[] TArray;
 
         public readonly int Length0;
         public readonly int Length1;
@@ -21,7 +21,7 @@ namespace NonsensicalKit.Core
 
         public Array4(int length0, int length1, int length2, int length3)
         {
-            Array = new T[length0 * length1 * length2 * length3];
+            TArray = new T[length0 * length1 * length2 * length3];
 
             Length0 = length0;
             Length1 = length1;
@@ -37,11 +37,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[index0 * Step0 + index1 * Step1 + index2 * Step2 + index3];
+                return TArray[index0 * Step0 + index1 * Step1 + index2 * Step2 + index3];
             }
             set
             {
-                Array[index0 * Step0 + index1 * Step1 + index2 * Step2 + index3] = value;
+                TArray[index0 * Step0 + index1 * Step1 + index2 * Step2 + index3] = value;
             }
         }
 
@@ -49,11 +49,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3 * Step2 + index3];
+                return TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3 * Step2 + index3];
             }
             set
             {
-                Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3 * Step2 + index3] = value;
+                TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3 * Step2 + index3] = value;
             }
         }
 
@@ -61,11 +61,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[index];
+                return TArray[index];
             }
             set
             {
-                Array[index] = value;
+                TArray[index] = value;
             }
         }
 

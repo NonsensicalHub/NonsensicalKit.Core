@@ -8,7 +8,7 @@ namespace NonsensicalKit.Core
     /// <typeparam name="T"></typeparam>
     public struct Array2<T> 
     {
-        public readonly T[] Array;
+        public readonly T[] TArray;
 
         public readonly int Length0;
         public readonly int Length1;
@@ -17,7 +17,7 @@ namespace NonsensicalKit.Core
 
         public Array2(int length0, int length1)
         {
-            Array = new T[length0 * length1];
+            TArray = new T[length0 * length1];
             Length0 = length0;
             Length1 = length1;
 
@@ -31,9 +31,9 @@ namespace NonsensicalKit.Core
 
         public void Reset(T state)
         {
-            for (int i = 0; i < Array.Length; i++)
+            for (int i = 0; i < TArray.Length; i++)
             {
-                Array[i] = state;
+                TArray[i] = state;
             }
         }
 
@@ -41,11 +41,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[index0 * Step0 + index1];
+                return TArray[index0 * Step0 + index1];
             }
             set
             {
-                Array[index0 * Step0 + index1] = value;
+                TArray[index0 * Step0 + index1] = value;
 
             }
         }
@@ -54,11 +54,11 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                return Array[index];
+                return TArray[index];
             }
             set
             {
-                Array[index] = value;
+                TArray[index] = value;
             }
         }
 

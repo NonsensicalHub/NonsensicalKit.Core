@@ -17,7 +17,6 @@ namespace NonsensicalKit.Tools.ObjectPool
         private Action<GameObject> initAction;  //取出时调用
         private Action<GameObjectPool, GameObject> _firstInitAction; //首次生成时调用
 
-
         public GameObjectPool(GameObject prefab)
         {
             this._prefab = prefab;
@@ -296,6 +295,78 @@ namespace NonsensicalKit.Tools.ObjectPool
                 _queue.Enqueue(item);
             }
             _actives.Clear();
+        }
+    }
+
+    [System.Serializable]
+    public class SerializableGameobjectPool
+    {
+        [SerializeField] private GameObject m_prefab;  //预制体
+        [SerializeField] private Transform m_usingPool;  
+        [SerializeField] private Transform m_catchPool; 
+        [SerializeField] private List<GameObject> m_using;  //使用中对象
+        [SerializeField] private List<GameObject> m_cache;  //缓存对象
+
+        /// <summary>
+        /// 取出对象
+        /// </summary>
+        /// <returns></returns>
+        public GameObject New()
+        {
+            GameObject newGo;
+            if (m_cache.Count > 0)
+            {
+                newGo = m_cache[0];
+                m_cache.RemoveAt(0);
+            }
+            else
+            {
+                newGo = GameObject.Instantiate(m_prefab);
+            }
+            newGo.transform.SetParent(m_usingPool);
+            m_using.Add(newGo);
+            return newGo;
+        }
+
+        /// <summary>
+        /// 放回对象
+        /// </summary>
+        /// <param name="go"></param>
+        public void Store(GameObject go)
+        {
+            if (m_using.Contains(go))
+            {
+                m_using.Remove(go);
+            }
+            if (m_cache.Contains(go) == false)
+            {
+                m_cache.Add(go);
+                go.transform.SetParent(m_catchPool);
+            }
+        }
+
+        public void Clear()
+        {
+            foreach (var item in m_using)
+            {
+                m_cache.Add(item);
+                item.transform.SetParent(m_catchPool);
+            }
+            m_using.Clear();
+        }
+
+        public void Clean()
+        {
+            foreach (var item in m_using)
+            {
+                UnityEngine.Object.DestroyImmediate(item);
+            }
+            foreach (var item in m_cache)
+            {
+                UnityEngine.Object.DestroyImmediate(item);
+            }
+            m_using.Clear();
+            m_cache.Clear();
         }
     }
 }
