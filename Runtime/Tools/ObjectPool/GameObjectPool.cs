@@ -302,8 +302,7 @@ namespace NonsensicalKit.Tools.ObjectPool
     public class SerializableGameobjectPool
     {
         [SerializeField] private GameObject m_prefab;  //预制体
-        [SerializeField] private Transform m_usingPool;  
-        [SerializeField] private Transform m_catchPool; 
+        [SerializeField] private Transform m_pool;
         [SerializeField] private List<GameObject> m_using;  //使用中对象
         [SerializeField] private List<GameObject> m_cache;  //缓存对象
 
@@ -321,9 +320,9 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
             else
             {
-                newGo = GameObject.Instantiate(m_prefab);
+                newGo = GameObject.Instantiate(m_prefab, m_pool);
             }
-            newGo.transform.SetParent(m_usingPool);
+            newGo.SetActive(true);
             m_using.Add(newGo);
             return newGo;
         }
@@ -334,14 +333,11 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// <param name="go"></param>
         public void Store(GameObject go)
         {
-            if (m_using.Contains(go))
+            if (m_using.Contains(go) && (m_cache.Contains(go) == false))
             {
                 m_using.Remove(go);
-            }
-            if (m_cache.Contains(go) == false)
-            {
                 m_cache.Add(go);
-                go.transform.SetParent(m_catchPool);
+                go.gameObject.SetActive(false);
             }
         }
 
@@ -349,8 +345,8 @@ namespace NonsensicalKit.Tools.ObjectPool
         {
             foreach (var item in m_using)
             {
+                item.SetActive(false);
                 m_cache.Add(item);
-                item.transform.SetParent(m_catchPool);
             }
             m_using.Clear();
         }

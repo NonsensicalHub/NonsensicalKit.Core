@@ -30,6 +30,11 @@
       "displayName": "NonsensicalCameraTemplate",
       "description": "Nonsensical\u6444\u50cf\u673a\u793a\u4f8b",
       "path": "Samples~/NonsensicalCameraTemplate"
+    },
+    {
+      "displayName": "NaughtyAttributes",
+      "description": "编辑器工具集",
+      "path": "Samples~/NaughtyAttributes"
     }
   ]
 }
