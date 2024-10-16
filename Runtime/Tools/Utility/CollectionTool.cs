@@ -6,8 +6,20 @@ namespace NonsensicalKit.Tools
     /// <summary>
     /// 字典快捷操作工具类
     /// </summary>
-    public static class DictionaryTool
+    public static class CollectionTool
     {
+        public static T SafeGet<T>(this IList<T> list, int index)
+        {
+            if (index<0||index>= list.Count)
+            {
+                return default;
+            }
+            else
+            {
+                return list[index];
+            }
+        }
+
         public static void ListAdd<Key, Value>(this Dictionary<Key, List<Value>> dictionary, Key key, Value value)
         {
             if (dictionary.ContainsKey(key))

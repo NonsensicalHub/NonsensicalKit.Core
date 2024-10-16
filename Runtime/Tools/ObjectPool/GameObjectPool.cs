@@ -304,7 +304,10 @@ namespace NonsensicalKit.Tools.ObjectPool
         [SerializeField] private GameObject m_prefab;  //预制体
         [SerializeField] private Transform m_pool;
         [SerializeField] private List<GameObject> m_using;  //使用中对象
-        [SerializeField] private List<GameObject> m_cache;  //缓存对象
+        [SerializeField] private List<GameObject> m_storage;  //存储对象
+
+        private List<GameObject> _cache;
+        private int _catchIndex;
 
         /// <summary>
         /// 取出对象
@@ -313,17 +316,24 @@ namespace NonsensicalKit.Tools.ObjectPool
         public GameObject New()
         {
             GameObject newGo;
-            if (m_cache.Count > 0)
+            if (_catchIndex < _cache.Count)
             {
-                newGo = m_cache[0];
-                m_cache.RemoveAt(0);
+                newGo = _cache[_catchIndex];
+                _catchIndex++;
+            }
+            else if (m_storage.Count > 0)
+            {
+                newGo = m_storage[0];
+                m_storage.RemoveAt(0);
+                newGo.SetActive(true);
+                m_using.Add(newGo);
             }
             else
             {
                 newGo = GameObject.Instantiate(m_prefab, m_pool);
+                newGo.SetActive(true);
+                m_using.Add(newGo);
             }
-            newGo.SetActive(true);
-            m_using.Add(newGo);
             return newGo;
         }
 
@@ -333,12 +343,34 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// <param name="go"></param>
         public void Store(GameObject go)
         {
-            if (m_using.Contains(go) && (m_cache.Contains(go) == false))
+            if (m_using.Contains(go) && (m_storage.Contains(go) == false))
             {
                 m_using.Remove(go);
-                m_cache.Add(go);
+                m_storage.Add(go);
                 go.gameObject.SetActive(false);
             }
+        }
+
+        public void Cache()
+        {
+            _cache = m_using;
+            _catchIndex = 0;
+            m_using = new List<GameObject>();
+        }
+
+        public void Flush()
+        {
+            if (_cache == null)
+            {
+                return;
+            }
+            for (; _catchIndex < _cache.Count; _catchIndex++)
+            {
+                _cache[_catchIndex].SetActive(false);
+                m_storage.Add(_cache[_catchIndex]);
+            }
+            _cache.Clear();
+            _cache = null;
         }
 
         public void Clear()
@@ -346,7 +378,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             foreach (var item in m_using)
             {
                 item.SetActive(false);
-                m_cache.Add(item);
+                m_storage.Add(item);
             }
             m_using.Clear();
         }
@@ -357,12 +389,12 @@ namespace NonsensicalKit.Tools.ObjectPool
             {
                 UnityEngine.Object.DestroyImmediate(item);
             }
-            foreach (var item in m_cache)
+            foreach (var item in m_storage)
             {
                 UnityEngine.Object.DestroyImmediate(item);
             }
             m_using.Clear();
-            m_cache.Clear();
+            m_storage.Clear();
         }
     }
 }
