@@ -168,12 +168,16 @@ namespace NonsensicalKit.Tools.CameraTool
         protected virtual void Start()
         {
             _crtEventSystem = EventSystem.current;
-            _input = InputHub.Instance;
-            AddMouseEvent();
+
             if (PlatformInfo.IsMobile)
             {
                 _mobileInput = MobileInputHub.Instance;
                 AddMobileInputEvent();
+            }
+            else
+            {
+                _input = InputHub.Instance;
+                AddMouseEvent();
             }
         }
 
@@ -219,7 +223,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     }
                     if (_needMove)
                     {
-                        AdjustPosition(_input.CrtMouseMove);
+                        AdjustPositionWithFixedInterval(_input.CrtMouseMove);
                     }
 
                     if (_needRotate)
@@ -249,7 +253,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     }
                     if (_needMove)
                     {
-                        AdjustPosition(_mobileInput.TheOneFingerMove);
+                        AdjustPositionWithFixedInterval(_mobileInput.TheOneFingerMove);
                     }
 
                     if (_needRotate)
@@ -388,7 +392,7 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="yaw"></param>
         public void SetPitchAndYaw(float pitch, float yaw)
         {
-            Debug.Log(pitch + " " + yaw);
+            //Debug.Log(pitch + " " + yaw);
 
             if (_targetPitch.NatureAngle() == pitch.NatureAngle() && _targetYaw.NatureAngle() == yaw.NatureAngle())
             {
@@ -471,6 +475,20 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
             float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * delta.magnitude * Time.deltaTime;
+
+            if (m_limitBox == null || m_limitBox.Contains(_targetPos + direction * distance))
+            {
+                _targetPos += direction * distance;
+            }
+        }
+        /// <summary>
+        /// 根据改变量进行位移(使用固定间隔时间)
+        /// </summary>
+        /// <param name="delta"></param>
+        protected void AdjustPositionWithFixedInterval(Vector2 delta, float interval = 0.02f)
+        {
+            Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
+            float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * delta.magnitude * interval;
 
             if (m_limitBox == null || m_limitBox.Contains(_targetPos + direction * distance))
             {
