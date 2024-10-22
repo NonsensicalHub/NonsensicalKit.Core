@@ -8,6 +8,14 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class CollectionTool
     {
+        public static void Fill<T>(this IList<T> list, T value)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i] = value;
+            }
+        }
+
         public static T SafeGet<T>(this IList<T> list, int index)
         {
             if (index<0||index>= list.Count)

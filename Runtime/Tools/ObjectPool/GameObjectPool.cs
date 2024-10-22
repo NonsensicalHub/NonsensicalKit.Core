@@ -1,11 +1,14 @@
+using NonsensicalKit.Tools.EditorTool;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Tools.ObjectPool
 {
     /// <summary>
-    /// GameObject对象池
+    /// GameObject对象池，只管理缓存对象
     /// </summary>
     public class GameObjectPool
     {
@@ -80,6 +83,9 @@ namespace NonsensicalKit.Tools.ObjectPool
         }
     }
 
+    /// <summary>
+    /// 除了缓存对象外，还管理了使用中对象
+    /// </summary>
     public class GameObjectPool_MK2
     {
         private GameObject _prefab;  //预制体
@@ -117,7 +123,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
             else
             {
-                GameObject t = GameObject.Instantiate(_prefab);
+                GameObject t = Object.Instantiate(_prefab);
                 _actives.Add(t);
                 _firstInitAction?.Invoke(this, t);
                 _initAction?.Invoke(t);
@@ -194,7 +200,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
             else
             {
-                C t = GameObject.Instantiate(_prefab);
+                C t = Object.Instantiate(_prefab);
                 _firstInitAction?.Invoke(this, t);
                 _initAction?.Invoke(t);
 
@@ -261,7 +267,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
             else
             {
-                newC = GameObject.Instantiate(_prefab);
+                newC = Object.Instantiate(_prefab);
                 _firstInitAction?.Invoke(this, newC);
             }
 
@@ -302,9 +308,11 @@ namespace NonsensicalKit.Tools.ObjectPool
     public class SerializableGameobjectPool
     {
         [SerializeField] private GameObject m_prefab;  //预制体
-        [SerializeField] private Transform m_pool;
+        [SerializeField] private Transform m_birthPoint;    //出生点
         [SerializeField] private List<GameObject> m_using;  //使用中对象
         [SerializeField] private List<GameObject> m_storage;  //存储对象
+
+        public GameObject Prefab => m_prefab;
 
         private List<GameObject> _cache;
         private int _catchIndex;
@@ -320,6 +328,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             {
                 newGo = _cache[_catchIndex];
                 _catchIndex++;
+                m_using.Add(newGo);
             }
             else if (m_storage.Count > 0)
             {
@@ -330,7 +339,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
             else
             {
-                newGo = GameObject.Instantiate(m_prefab, m_pool);
+                newGo = Object.Instantiate(m_prefab, m_birthPoint);
                 newGo.SetActive(true);
                 m_using.Add(newGo);
             }
@@ -338,7 +347,7 @@ namespace NonsensicalKit.Tools.ObjectPool
         }
 
         /// <summary>
-        /// 放回对象
+        /// 回收对象
         /// </summary>
         /// <param name="go"></param>
         public void Store(GameObject go)
@@ -351,6 +360,10 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
         }
 
+        /// <summary>
+        /// 和Flush配套使用
+        /// 缓存当前使用的对象，在取出对象时优先使用缓存的对象，在需要全部回收后重新配置时使用，避免回收后马上取用造成的不必要性能消耗
+        /// </summary>
         public void Cache()
         {
             _cache = m_using;
@@ -358,6 +371,9 @@ namespace NonsensicalKit.Tools.ObjectPool
             m_using = new List<GameObject>();
         }
 
+        /// <summary>
+        /// 和Catch配套使用，回收未取用的缓存
+        /// </summary>
         public void Flush()
         {
             if (_cache == null)
@@ -373,6 +389,9 @@ namespace NonsensicalKit.Tools.ObjectPool
             _cache = null;
         }
 
+        /// <summary>
+        /// 把使用中的对象全部回收
+        /// </summary>
         public void Clear()
         {
             foreach (var item in m_using)
@@ -383,18 +402,22 @@ namespace NonsensicalKit.Tools.ObjectPool
             m_using.Clear();
         }
 
+        /// <summary>
+        /// 销毁所有对象
+        /// </summary>
         public void Clean()
         {
             foreach (var item in m_using)
             {
-                UnityEngine.Object.DestroyImmediate(item);
+                item.Destroy();
             }
             foreach (var item in m_storage)
             {
-                UnityEngine.Object.DestroyImmediate(item);
+                item.Destroy();
             }
             m_using.Clear();
             m_storage.Clear();
+            _cache = null;
         }
     }
 }

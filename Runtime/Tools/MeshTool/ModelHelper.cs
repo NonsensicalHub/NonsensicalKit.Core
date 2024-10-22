@@ -1,7 +1,8 @@
 using NonsensicalKit.Core;
-using NonsensicalKit.Tools;
+using NonsensicalKit.Tools.EditorTool;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace NonsensicalKit.Tools.MeshTool
 {
@@ -20,21 +21,141 @@ namespace NonsensicalKit.Tools.MeshTool
                 GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 primitive.SetActive(false);
                 DefaultMaterial = primitive.GetComponent<MeshRenderer>().sharedMaterial;
-                Object.Destroy(primitive);
+                primitive.Destroy();
             }
             return DefaultMaterial;
         }
 
-        public static Material GetDefaultMaterialInEditor()
+        public static GameObject MergeMesh<T>(IEnumerable<T> components) where T : Component
         {
-            if (DefaultMaterialEditor == null)
+            GameObject mergeGo = new GameObject("Merge");
+
+            MeshFilter meshFilter = mergeGo.AddComponent<MeshFilter>();
+            meshFilter.mesh = new Mesh();
+            meshFilter.sharedMesh.indexFormat = IndexFormat.UInt32;
+            MeshRenderer meshRenderer = mergeGo.AddComponent<MeshRenderer>();
+
+            List<Material> materials = new List<Material>();
+
+            Dictionary<Material, List<CombineInstance>> combinesDic = new Dictionary<Material, List<CombineInstance>>();
+
+            Bounds bounds = default;
+            bool first = true;
+
+            foreach (var item in components)
             {
-                GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                primitive.SetActive(false);
-                DefaultMaterialEditor = primitive.GetComponent<MeshRenderer>().sharedMaterial;
-                Object.DestroyImmediate(primitive);
+                MeshFilter[] meshFilters = item.GetComponentsInChildren<MeshFilter>();
+                for (int i = 0; i < meshFilters.Length; i++)
+                {
+                    MeshRenderer renderer = meshFilters[i].GetComponent<MeshRenderer>();
+                    if (renderer == null) continue;
+
+                    Material mat = renderer.sharedMaterial;
+                    if (materials.Contains(mat) == false)
+                    {
+                        materials.Add(mat);
+                    }
+
+                    CombineInstance combine = new CombineInstance();
+                    if (first)
+                    {
+                        bounds = renderer.bounds;
+                        first = false;
+                    }
+                    else
+                    {
+                        bounds.Encapsulate(renderer.bounds);
+                    }
+                    combine.mesh = meshFilters[i].sharedMesh;
+                    combine.transform = meshFilters[i].transform.localToWorldMatrix;
+
+                    combinesDic.ListAdd(mat, combine);
+                }
             }
-            return DefaultMaterialEditor;
+
+            meshRenderer.sharedMaterials = materials.ToArray();
+            List<CombineInstance> combines = new List<CombineInstance>();
+            mergeGo.transform.position = bounds.center - new Vector3(0, bounds.extents.y, 0);
+            foreach (var item in materials)
+            {
+                var crtMesh = new Mesh();
+                crtMesh.indexFormat = IndexFormat.UInt32;
+                CombineInstance combine = new CombineInstance();
+                crtMesh.CombineMeshes(combinesDic[item].ToArray(), true, true);
+                combine.mesh = crtMesh;
+                combine.transform = mergeGo.transform.worldToLocalMatrix;
+                combines.Add(combine);
+            }
+
+            meshFilter.sharedMesh.CombineMeshes(combines.ToArray(), false, true);
+
+            return mergeGo;
+        }
+
+        public static GameObject MergeMesh(IEnumerable<GameObject> gos)
+        {
+            GameObject mergeGo = new GameObject("Merge");
+
+            MeshFilter meshFilter = mergeGo.AddComponent<MeshFilter>();
+            meshFilter.mesh = new Mesh();
+            meshFilter.sharedMesh.indexFormat = IndexFormat.UInt32;
+            MeshRenderer meshRenderer = mergeGo.AddComponent<MeshRenderer>();
+
+            List<Material> materials = new List<Material>();
+
+            Dictionary<Material, List<CombineInstance>> combinesDic = new Dictionary<Material, List<CombineInstance>>();
+
+            Bounds bounds = default;
+            bool first = true;
+
+            foreach (var item in gos)
+            {
+                MeshFilter[] meshFilters = item.GetComponentsInChildren<MeshFilter>();
+                for (int i = 0; i < meshFilters.Length; i++)
+                {
+                    MeshRenderer renderer = meshFilters[i].GetComponent<MeshRenderer>();
+                    if (renderer == null) continue;
+
+                    Material mat = renderer.sharedMaterial;
+                    if (materials.Contains(mat) == false)
+                    {
+                        materials.Add(mat);
+                    }
+
+                    CombineInstance combine = new CombineInstance();
+                    if (first)
+                    {
+                        bounds = renderer.bounds;
+                        first = false;
+                    }
+                    else
+                    {
+                        bounds.Encapsulate(renderer.bounds);
+                    }
+                    combine.mesh = meshFilters[i].sharedMesh;
+                    combine.transform = meshFilters[i].transform.localToWorldMatrix;
+
+                    combinesDic.ListAdd(mat, combine);
+                }
+            }
+            mergeGo.transform.position = bounds.center - new Vector3(0, bounds.extents.y, 0);
+
+            meshRenderer.sharedMaterials = materials.ToArray();
+            List<CombineInstance> combines = new List<CombineInstance>();
+            foreach (var item in materials)
+            {
+                var crtMesh = new Mesh();
+                crtMesh.indexFormat = IndexFormat.UInt32;
+                CombineInstance combine = new CombineInstance();
+                crtMesh.CombineMeshes(combinesDic[item].ToArray(), true, true);
+                combine.mesh = crtMesh;
+                combine.transform = mergeGo.transform.worldToLocalMatrix;
+                combines.Add(combine);
+            }
+
+            meshFilter.sharedMesh.CombineMeshes(combines.ToArray(), false, true);
+
+            return mergeGo;
         }
 
         /// <summary>

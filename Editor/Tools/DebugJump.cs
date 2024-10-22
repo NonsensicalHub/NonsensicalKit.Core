@@ -18,17 +18,17 @@ namespace NonsensicalKit.Core.Editor.Tools
         {
             string instanceName = EditorUtility.InstanceIDToObject(instanceID).name;
 
-            bool flag = false;
+            bool flag = true;
             //只处理需要处理的信息
             foreach (var item in JumpString)
             {
                 if (item.Equals(instanceName))
                 {
-                    flag = true;
+                    flag = false;
                     break;
                 }
             }
-            if (!flag)
+            if (flag)
             {
                 return false;
             }
