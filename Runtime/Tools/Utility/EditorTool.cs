@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace NonsensicalKit.Tools.EditorTool
+namespace NonsensicalKit.Tools
 {
-    public static class SafeEditor
+    public static class EditorTool
     {
         public static void SetDirty(this GameObject go)
         {

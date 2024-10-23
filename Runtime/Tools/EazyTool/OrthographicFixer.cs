@@ -1,4 +1,4 @@
-using NonsensicalKit.Tools.EditorTool;
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.EazyTool
@@ -16,9 +16,9 @@ namespace NonsensicalKit.Tools.EazyTool
 
 
         [SerializeField] private FixedMode m_fixedMode;
-        [SerializeField][ShowIF("m_fixedMode", FixedMode.FixedRadio)][Range(0, 1)] private float m_radio = 0.9f;
-        [SerializeField][ShowIF("m_fixedMode", FixedMode.FixedLeftDistance)][CustomLabel("Distance")] private float m_leftDistance = 200f;
-        [SerializeField][ShowIF("m_fixedMode", FixedMode.FixedRightDistance)][CustomLabel("Distance")] private float m_rightDistance = 200f;
+        [SerializeField][ShowIf("m_fixedMode", FixedMode.FixedRadio)][Range(0, 1)] private float m_radio = 0.9f;
+        [SerializeField][ShowIf("m_fixedMode", FixedMode.FixedLeftDistance)][Label("Distance")] private float m_leftDistance = 200f;
+        [SerializeField][ShowIf("m_fixedMode", FixedMode.FixedRightDistance)][Label("Distance")] private float m_rightDistance = 200f;
 
         private Transform _cameraTrans;
 

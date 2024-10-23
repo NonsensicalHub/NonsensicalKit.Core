@@ -1,6 +1,6 @@
+using NaughtyAttributes;
 using NonsensicalKit.Core;
 using NonsensicalKit.Tools.EazyTool;
-using NonsensicalKit.Tools.EditorTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -49,9 +49,9 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] protected ControlMouseKey m_rollControl = ControlMouseKey.MiddleKeyControl;
         [SerializeField] protected ControlMouseKey m_DragZoomControl = ControlMouseKey.Uncontrol;
         [SerializeField] protected bool m_enableMobileInput = false;
-        [ShowIF("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerMoveControl = ControlFinger.Uncontrol;
-        [ShowIF("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerRotateControl = ControlFinger.OneFinger;
-        [ShowIF("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerDragZoomControl = ControlFinger.TwoFinger;
+        [ShowIf("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerMoveControl = ControlFinger.Uncontrol;
+        [ShowIf("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerRotateControl = ControlFinger.OneFinger;
+        [ShowIf("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerDragZoomControl = ControlFinger.TwoFinger;
         [SerializeField] protected bool m_UseKeyBoardControlMove = false;
 
         [SerializeField] protected bool m_lerpMove = true;      //插值移动
