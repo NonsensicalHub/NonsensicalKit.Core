@@ -11,6 +11,28 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class GameObjectTool
     {
+        public static void SetChilds(this Transform t, IEnumerable<GameObject> childs)
+        {
+            if (childs != null)
+            {
+                foreach (var item in childs)
+                {
+                    item.transform.SetParent(t);
+                }
+            }
+        }
+
+        public static void SetChilds(this Transform t, IEnumerable<Transform> childs)
+        {
+            if (childs != null)
+            {
+                foreach (var item in childs)
+                {
+                    item.SetParent(t);
+                }
+            }
+        }
+
         public static T GetOrAddComponent<T>(this GameObject go) where T : Component
         {
             T o;
