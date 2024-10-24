@@ -315,6 +315,12 @@ namespace NonsensicalKit.Tools.ObjectPool
         private List<GameObject> _cache;
         private int _catchIndex;
 
+        public void Init(GameObject prefab, Transform birthPoint)
+        {
+            m_prefab = prefab;
+            m_birthPoint = birthPoint;
+        }
+
         /// <summary>
         /// 取出对象
         /// </summary>
