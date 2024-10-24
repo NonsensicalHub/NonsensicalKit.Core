@@ -22,11 +22,6 @@
       "path": "Samples~/PlayerController"
     },
     {
-      "displayName": "ShowIFSample",
-      "description": "\u63a7\u5236\u663e\u793a\u7f16\u8f91\u5668\u6269\u5c55\u5c5e\u6027\u793a\u4f8b",
-      "path": "Samples~/ShowIFSample"
-    },
-    {
       "displayName": "NonsensicalCameraTemplate",
       "description": "Nonsensical\u6444\u50cf\u673a\u793a\u4f8b",
       "path": "Samples~/NonsensicalCameraTemplate"
