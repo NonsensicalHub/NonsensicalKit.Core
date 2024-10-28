@@ -317,7 +317,17 @@ namespace NonsensicalKit.Tools.ObjectPool
         [SerializeField] private List<GameObject> m_using=new List<GameObject>(); //使用中对象
         [SerializeField] private List<GameObject> m_storage=new List<GameObject>(); //存储对象
 
-        public GameObject Prefab => m_prefab;
+        public GameObject Prefab
+        {
+            get
+            {
+                return m_prefab;
+            }
+            set
+            {
+                m_prefab = value;
+            }
+        }
 
         private List<GameObject> _cache;
         private int _catchIndex;
