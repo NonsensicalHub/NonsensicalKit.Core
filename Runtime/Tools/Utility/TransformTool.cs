@@ -70,7 +70,7 @@ namespace NonsensicalKit.Tools
             return bounds;
         }
 
-        public static Bounds BoundingBox(this Transform root)
+        public static Bounds BoundingBox(this Transform root,bool includeInactive=false)
         {
             Quaternion qn = root.rotation;
             root.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
@@ -79,7 +79,7 @@ namespace NonsensicalKit.Tools
 
             Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
 
-            Renderer[] childRenderers = root.GetComponentsInChildren<Renderer>();
+            Renderer[] childRenderers = root.GetComponentsInChildren<Renderer>(includeInactive);
 
             foreach (var item in childRenderers)
             {

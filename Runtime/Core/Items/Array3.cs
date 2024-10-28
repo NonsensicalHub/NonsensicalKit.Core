@@ -107,6 +107,23 @@ namespace NonsensicalKit.Core
         {
             return index0 * Step0 + index1 * Step1 + index2;
         }
+        
+        public void SafeSet(int index0, int index1, int index2,T value)
+        {
+            if (index0<0|| index1<0|| index2<0)
+            {
+                return ;
+            }
+            var index = index0 * Step0 + index1 * Step1 + index2;
+            if (index >= TArray.Length)
+            {
+                return ;
+            }
+            else
+            {
+                TArray[index] = value;
+            }
+        }
 
         public T SafeGet(int index0, int index1, int index2)
         {

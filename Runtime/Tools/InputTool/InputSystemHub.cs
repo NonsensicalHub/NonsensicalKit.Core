@@ -11,7 +11,7 @@ namespace NonsensicalKit.Tools.InputTool
 {
     public partial class InputHub : MonoSingleton<InputHub>
     {
-        private InputHubControls _Controls;
+        private InputHubControls _controls;
 
         protected override void Awake()
         {
@@ -21,44 +21,44 @@ namespace NonsensicalKit.Tools.InputTool
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            if (_Controls != null)
+            if (_controls != null)
             {
-                _Controls.Disable();
-                _Controls.Dispose();
+                _controls.Disable();
+                _controls.Dispose();
             }
         }
         private void InitInputSystem()
         {
-            _Controls = new InputHubControls();
-            _Controls.Enable();
+            _controls = new InputHubControls();
+            _controls.Enable();
 
-            _Controls.KeyAndMouse.mousePos.started += MousePosChanged;
-            _Controls.KeyAndMouse.mousePos.performed += MousePosChanged;
-            _Controls.KeyAndMouse.mousePos.canceled += MousePosChanged;
-            //_Controls.KeyAndMouse.mouseMove.started += MouseMoveChanged;
-            _Controls.KeyAndMouse.mouseMove.performed += MouseMoveChanged;
-            _Controls.KeyAndMouse.mouseMove.canceled += MouseMoveChanged;
-            _Controls.KeyAndMouse.zoom.started += ZoomChanged;
-            _Controls.KeyAndMouse.zoom.performed += ZoomChanged;
-            _Controls.KeyAndMouse.zoom.canceled += ZoomChanged;
+            _controls.KeyAndMouse.mousePos.started += MousePosChanged;
+            _controls.KeyAndMouse.mousePos.performed += MousePosChanged;
+            _controls.KeyAndMouse.mousePos.canceled += MousePosChanged;
+            //_controls.KeyAndMouse.mouseMove.started += MouseMoveChanged;
+            _controls.KeyAndMouse.mouseMove.performed += MouseMoveChanged;
+            _controls.KeyAndMouse.mouseMove.canceled += MouseMoveChanged;
+            _controls.KeyAndMouse.zoom.started += ZoomChanged;
+            _controls.KeyAndMouse.zoom.performed += ZoomChanged;
+            _controls.KeyAndMouse.zoom.canceled += ZoomChanged;
 
-            _Controls.KeyAndMouse.mouseLeft.started += MouseLeftButtonDown;
-            _Controls.KeyAndMouse.mouseLeft.canceled += MouseLeftButtonUp;
-            _Controls.KeyAndMouse.mouseRight.started += MouseRightButtonDown;
-            _Controls.KeyAndMouse.mouseRight.canceled += MouseRightButtonUp;
-            _Controls.KeyAndMouse.mouseMiddle.performed += MouseMiddleButtonDown;
-            _Controls.KeyAndMouse.mouseMiddle.canceled += MouseMiddleButtonUp;
+            _controls.KeyAndMouse.mouseLeft.started += MouseLeftButtonDown;
+            _controls.KeyAndMouse.mouseLeft.canceled += MouseLeftButtonUp;
+            _controls.KeyAndMouse.mouseRight.started += MouseRightButtonDown;
+            _controls.KeyAndMouse.mouseRight.canceled += MouseRightButtonUp;
+            _controls.KeyAndMouse.mouseMiddle.performed += MouseMiddleButtonDown;
+            _controls.KeyAndMouse.mouseMiddle.canceled += MouseMiddleButtonUp;
 
-            _Controls.KeyAndMouse.move.started += MoveChanged;
-            _Controls.KeyAndMouse.move.performed += MoveChanged;
-            _Controls.KeyAndMouse.move.canceled += MoveChanged;
+            _controls.KeyAndMouse.move.started += MoveChanged;
+            _controls.KeyAndMouse.move.performed += MoveChanged;
+            _controls.KeyAndMouse.move.canceled += MoveChanged;
 
-            _Controls.KeyAndMouse.fKey.performed += FKeyEnter;
-            _Controls.KeyAndMouse.spaceKey.performed += SpaceKeyEnter;
-            _Controls.KeyAndMouse.leftShift.started += LeftShiftKeyEnter;
-            _Controls.KeyAndMouse.leftShift.canceled += LeftShiftKeyLeave;
-            _Controls.KeyAndMouse.leftAlt.started += LeftAltKeyEnter;
-            _Controls.KeyAndMouse.leftAlt.canceled += LeftAltKeyLeave;
+            _controls.KeyAndMouse.fKey.performed += FKeyEnter;
+            _controls.KeyAndMouse.spaceKey.performed += SpaceKeyEnter;
+            _controls.KeyAndMouse.leftShift.started += LeftShiftKeyEnter;
+            _controls.KeyAndMouse.leftShift.canceled += LeftShiftKeyLeave;
+            _controls.KeyAndMouse.leftAlt.started += LeftAltKeyEnter;
+            _controls.KeyAndMouse.leftAlt.canceled += LeftAltKeyLeave;
         }
         private void MousePosChanged(InputAction.CallbackContext context)
         {
