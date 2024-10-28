@@ -10,12 +10,15 @@ namespace NonsensicalKit.Tools.ObjectPool
     /// </summary>
     public class GameObjectPool
     {
-        public Action<GameObjectPool, GameObject> FirstInitAction { set { _firstInitAction = value; } }
+        public Action<GameObjectPool, GameObject> FirstInitAction
+        {
+            set { _firstInitAction = value; }
+        }
 
-        private GameObject _prefab;  //预制体
-        private Queue<GameObject> _queue;    //待使用的对象
+        private GameObject _prefab; //预制体
+        private Queue<GameObject> _queue; //待使用的对象
         private Action<GameObject> _resetAction; //返回池中后调用
-        private Action<GameObject> initAction;  //取出时调用
+        private Action<GameObject> initAction; //取出时调用
         private Action<GameObjectPool, GameObject> _firstInitAction; //首次生成时调用
 
         public GameObjectPool(GameObject prefab)
@@ -75,6 +78,7 @@ namespace NonsensicalKit.Tools.ObjectPool
         {
             go.SetActive(false);
         }
+
         public static void DefaultInit(GameObject go)
         {
             go.SetActive(true);
@@ -86,11 +90,11 @@ namespace NonsensicalKit.Tools.ObjectPool
     /// </summary>
     public class GameObjectPool_MK2
     {
-        private GameObject _prefab;  //预制体
-        private Queue<GameObject> _queue;    //待使用的对象
-        private List<GameObject> _actives;    //使用中的对象
+        private GameObject _prefab; //预制体
+        private Queue<GameObject> _queue; //待使用的对象
+        private List<GameObject> _actives; //使用中的对象
         private Action<GameObject> _resetAction; //返回池中后调用
-        private Action<GameObject> _initAction;  //取出时调用
+        private Action<GameObject> _initAction; //取出时调用
         private Action<GameObjectPool_MK2, GameObject> _firstInitAction; //首次生成时调用
 
         public GameObjectPool_MK2(GameObject prefab,
@@ -154,16 +158,17 @@ namespace NonsensicalKit.Tools.ObjectPool
                 _resetAction?.Invoke(item);
                 _queue.Enqueue(item);
             }
+
             _actives.Clear();
         }
     }
 
     public class ComponentPool<C> where C : Component
     {
-        private C _prefab;  //预制体
-        private Queue<C> _queue;    //待使用的对象
+        private C _prefab; //预制体
+        private Queue<C> _queue; //待使用的对象
         private Action<C> _resetAction; //返回池中后调用
-        private Action<C> _initAction;  //取出时调用
+        private Action<C> _initAction; //取出时调用
         private Action<ComponentPool<C>, C> _firstInitAction; //首次生成时调用
 
         public ComponentPool(C prefab)
@@ -223,6 +228,7 @@ namespace NonsensicalKit.Tools.ObjectPool
         {
             go.gameObject.SetActive(false);
         }
+
         public static void DefaultInit(C go)
         {
             go.gameObject.SetActive(true);
@@ -232,11 +238,11 @@ namespace NonsensicalKit.Tools.ObjectPool
 
     public class ComponentPool_MK2<C> where C : Component
     {
-        private C _prefab;  //预制体
-        private Queue<C> _queue;    //待使用的对象
-        private List<C> _actives;    //使用中的对象
+        private C _prefab; //预制体
+        private Queue<C> _queue; //待使用的对象
+        private List<C> _actives; //使用中的对象
         private Action<C> _resetAction; //返回池中后调用
-        private Action<C> _initAction;  //取出时调用
+        private Action<C> _initAction; //取出时调用
         private Action<ComponentPool_MK2<C>, C> _firstInitAction; //首次生成时调用
 
         public ComponentPool_MK2(C prefab,
@@ -298,17 +304,18 @@ namespace NonsensicalKit.Tools.ObjectPool
                 _resetAction?.Invoke(item);
                 _queue.Enqueue(item);
             }
+
             _actives.Clear();
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public class SerializableGameobjectPool
     {
-        [SerializeField] private GameObject m_prefab;  //预制体
-        [SerializeField] private Transform m_birthPoint;    //出生点
-        [SerializeField] private List<GameObject> m_using;  //使用中对象
-        [SerializeField] private List<GameObject> m_storage;  //存储对象
+        [SerializeField] private GameObject m_prefab; //预制体
+        [SerializeField] private Transform m_birthPoint; //出生点
+        [SerializeField] private List<GameObject> m_using; //使用中对象
+        [SerializeField] private List<GameObject> m_storage; //存储对象
 
         public GameObject Prefab => m_prefab;
 
@@ -328,7 +335,7 @@ namespace NonsensicalKit.Tools.ObjectPool
         public GameObject New()
         {
             GameObject newGo;
-            if (_catchIndex < _cache.Count)
+            if ((_cache != null) && (_catchIndex < _cache.Count))
             {
                 newGo = _cache[_catchIndex];
                 _catchIndex++;
@@ -347,6 +354,7 @@ namespace NonsensicalKit.Tools.ObjectPool
                 newGo.SetActive(true);
                 m_using.Add(newGo);
             }
+
             return newGo;
         }
 
@@ -384,11 +392,13 @@ namespace NonsensicalKit.Tools.ObjectPool
             {
                 return;
             }
+
             for (; _catchIndex < _cache.Count; _catchIndex++)
             {
                 _cache[_catchIndex].SetActive(false);
                 m_storage.Add(_cache[_catchIndex]);
             }
+
             _cache.Clear();
             _cache = null;
         }
@@ -403,6 +413,7 @@ namespace NonsensicalKit.Tools.ObjectPool
                 item.SetActive(false);
                 m_storage.Add(item);
             }
+
             m_using.Clear();
         }
 
@@ -415,10 +426,12 @@ namespace NonsensicalKit.Tools.ObjectPool
             {
                 item.Destroy();
             }
+
             foreach (var item in m_storage)
             {
                 item.Destroy();
             }
+
             m_using.Clear();
             m_storage.Clear();
             _cache = null;
