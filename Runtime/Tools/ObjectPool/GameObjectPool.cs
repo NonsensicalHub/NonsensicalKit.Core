@@ -314,8 +314,8 @@ namespace NonsensicalKit.Tools.ObjectPool
     {
         [SerializeField] private GameObject m_prefab; //预制体
         [SerializeField] private Transform m_birthPoint; //出生点
-        [SerializeField] private List<GameObject> m_using; //使用中对象
-        [SerializeField] private List<GameObject> m_storage; //存储对象
+        [SerializeField] private List<GameObject> m_using=new List<GameObject>(); //使用中对象
+        [SerializeField] private List<GameObject> m_storage=new List<GameObject>(); //存储对象
 
         public GameObject Prefab => m_prefab;
 
