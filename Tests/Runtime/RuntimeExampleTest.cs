@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEngine.TestTools;
 
-namespace Nonsensicalkit.Core.Tests
+namespace NonsensicalKit.Core.Tests
 {
     class RuntimeExampleTest
     {

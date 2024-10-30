@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Nonsensicalkit.Core.Editor.Tests
+namespace NonsensicalKit.Core.Editor.Tests
 {
     class AggregatorEnumTest
     {
