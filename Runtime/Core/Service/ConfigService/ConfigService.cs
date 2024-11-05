@@ -5,22 +5,26 @@ using System.IO;
 using System.Reflection;
 using NonsensicalKit.Tools;
 using NonsensicalKit.Tools.NetworkTool;
-using UnityEditor;
-using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.Networking;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.Build;
+#endif
 
 namespace NonsensicalKit.Core.Service.Config
 {
     [ServicePrefab("Services/ConfigService")]
     public class ConfigService : NonsensicalMono, IMonoService
     {
-        [Tooltip("每次运行或打包前，自动搜索所有Config并设置")]
-        [SerializeField] private bool m_autoMode = true;
-        [Tooltip("生成和读取json文件")]
-        [SerializeField] private bool m_jsonMode = true;
-        [Tooltip("所有管理的配置文件，可以通过右键-Set All Config来快速设置项目内所有配置文件")]
-        [SerializeField] private ConfigObject[] m_configDatas;
+        [Tooltip("每次运行或打包前，自动搜索所有Config并设置")] [SerializeField]
+        private bool m_autoMode = true;
+
+        [Tooltip("生成和读取json文件")] [SerializeField]
+        private bool m_jsonMode = true;
+
+        [Tooltip("所有管理的配置文件，可以通过右键-Set All Config来快速设置项目内所有配置文件")] [SerializeField]
+        private ConfigObject[] m_configDatas;
 
         private Dictionary<string, ConfigData> _configs;
 
@@ -31,6 +35,7 @@ namespace NonsensicalKit.Core.Service.Config
         public Action InitCompleted { get; set; }
 
         #region Init
+
         private void Awake()
         {
             _configs = new Dictionary<string, ConfigData>();
@@ -70,6 +75,7 @@ namespace NonsensicalKit.Core.Service.Config
                     yield return null;
                 }
             }
+
             IsReady = true;
             InitCompleted?.Invoke();
         }
@@ -77,6 +83,7 @@ namespace NonsensicalKit.Core.Service.Config
         #endregion
 
         #region GetValue
+
         /// <summary>
         /// 使用类型来获取配置信息，返回匹配的第一个
         /// </summary>
@@ -94,6 +101,7 @@ namespace NonsensicalKit.Core.Service.Config
                     break;
                 }
             }
+
             return t != null;
         }
 
@@ -106,6 +114,7 @@ namespace NonsensicalKit.Core.Service.Config
                     return configData as T;
                 }
             }
+
             return null;
         }
 
@@ -154,6 +163,7 @@ namespace NonsensicalKit.Core.Service.Config
                     values.Add(configData as T);
                 }
             }
+
             return values.Count > 0;
         }
 
@@ -167,6 +177,7 @@ namespace NonsensicalKit.Core.Service.Config
                     values.Add(configData as T);
                 }
             }
+
             return values;
         }
 
@@ -196,6 +207,7 @@ namespace NonsensicalKit.Core.Service.Config
                     }
                 }
             }
+
             return false;
         }
 
@@ -215,8 +227,10 @@ namespace NonsensicalKit.Core.Service.Config
                     }
                 }
             }
+
             return default;
         }
+
         #endregion
 
         #region private method
@@ -239,6 +253,7 @@ namespace NonsensicalKit.Core.Service.Config
             {
                 Debug.LogError("获取配置文件失败：" + path);
             }
+
             _count--;
         }
 
@@ -249,7 +264,8 @@ namespace NonsensicalKit.Core.Service.Config
         /// <returns></returns>
         private string GetFilePath(ConfigData configData)
         {
-            string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs", configData.GetType().ToString() + "_" + configData.ConfigID + ".json");
+            string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs",
+                configData.GetType().ToString() + "_" + configData.ConfigID + ".json");
             return configFilePath;
         }
 
@@ -281,6 +297,7 @@ namespace NonsensicalKit.Core.Service.Config
         #endregion
 
         #region Editor Method
+
 #if UNITY_EDITOR
         /// <summary>
         /// 搜索项目内所有配置文件并赋值
@@ -295,9 +312,9 @@ namespace NonsensicalKit.Core.Service.Config
 
         private T[] GetAllInstances<T>() where T : ScriptableObject
         {
-            string[] guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);  //FindAssets uses tags check documentation for more info
+            string[] guids = AssetDatabase.FindAssets("t:" + typeof(T).Name); //FindAssets uses tags check documentation for more info
             T[] a = new T[guids.Length];
-            for (int i = 0; i < guids.Length; i++)         //probably could get optimized 
+            for (int i = 0; i < guids.Length; i++) //probably could get optimized 
             {
                 string path = AssetDatabase.GUIDToAssetPath(guids[i]);
                 a[i] = AssetDatabase.LoadAssetAtPath<T>(path);
@@ -319,6 +336,7 @@ namespace NonsensicalKit.Core.Service.Config
                     Debug.LogError("尚未进行配置");
                     return;
                 }
+
                 for (int i = 0; i < m_configDatas.Length; i++)
                 {
                     var data = m_configDatas[i].GetData();
@@ -339,6 +357,7 @@ namespace NonsensicalKit.Core.Service.Config
             {
                 FindAndSetAllConfig();
             }
+
             if (m_jsonMode)
             {
                 WriteConfigs();
@@ -385,6 +404,7 @@ namespace NonsensicalKit.Core.Service.Config
             }
         }
 #endif
+
         #endregion
     }
 }
