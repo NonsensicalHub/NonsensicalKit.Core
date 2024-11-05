@@ -187,7 +187,7 @@ namespace NonsensicalKit.Tools
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008;
 
             // Create buffer for file names
-            string fileNames = new String(new char[2048]);
+            string fileNames = new String(new char[8192]);
             openFileName.file = Marshal.StringToBSTR(fileNames);
             openFileName.maxFile = fileNames.Length;
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
@@ -235,7 +235,7 @@ namespace NonsensicalKit.Tools
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
 
             // Create buffer for file names
-            string fileNames = new String(new char[2048]);
+            string fileNames = new String(new char[8192]);
             openFileName.file = Marshal.StringToBSTR(fileNames);
             openFileName.maxFile = fileNames.Length;
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
@@ -284,7 +284,7 @@ namespace NonsensicalKit.Tools
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
 
             // Create buffer for file names
-            string fileNames = new String(new char[2048]);
+            string fileNames = new String(new char[ 8192]);
             openFileName.file = Marshal.StringToBSTR(fileNames);
             openFileName.maxFile = fileNames.Length;
 
@@ -303,7 +303,6 @@ namespace NonsensicalKit.Tools
                     openFileName.file = (IntPtr)pointer;
                     file = Marshal.PtrToStringAuto(openFileName.file);
                 }
-
                 if (selectedFilesList.Count == 1)
                 {
                     fileFullNames = selectedFilesList;

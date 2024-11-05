@@ -10,7 +10,7 @@ namespace NonsensicalKit.Tools.EazyTool
     {
         private void Awake()
         {
-            if (PlatformInfo.IsEditor)
+            if (!PlatformInfo.IsEditor)
             {
                 gameObject.SetActive(false);
                 Destroy(gameObject);

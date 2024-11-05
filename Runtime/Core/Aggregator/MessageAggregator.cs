@@ -5,7 +5,7 @@ namespace NonsensicalKit.Core
 {
     /* 经简单测试，循环十万次调用单一方法时，publish的时间消耗是直接引用调用的20倍，但大量调用时间仍在可接受范围内
      * 消息聚合器应当只用于模块之间的通信，且当通信过于频繁时不应使用，模块内部使用应直接引用的方式进行值的传递
-     * 
+     *
      * TODO:避免在publish中执行了Subscribe或Unsubscribe导致不可预料的情况
      * TODO:事件队列
      */
@@ -30,19 +30,22 @@ namespace NonsensicalKit.Core
                 return _instance;
             }
         }
+
         private static MessageAggregator<T1, T2, T3> _instance;
 
         private readonly Dictionary<int, Action<T1, T2, T3>> _messages = new Dictionary<int, Action<T1, T2, T3>>();
         private readonly Dictionary<int, Dictionary<string, Action<T1, T2, T3>>> _IDMessages = new Dictionary<int, Dictionary<string, Action<T1, T2, T3>>>();
         private readonly Dictionary<string, Action<T1, T2, T3>> _strMessages = new Dictionary<string, Action<T1, T2, T3>>();
-        private readonly Dictionary<string, Dictionary<string, Action<T1, T2, T3>>> _strIDMessages = new Dictionary<string, Dictionary<string, Action<T1, T2, T3>>>();
+
+        private readonly Dictionary<string, Dictionary<string, Action<T1, T2, T3>>> _strIDMessages =
+            new Dictionary<string, Dictionary<string, Action<T1, T2, T3>>>();
 
         private MessageAggregator()
         {
-
         }
 
         #region int
+
         public void Subscribe(int name, Action<T1, T2, T3> handler)
         {
             if (!_messages.ContainsKey(name))
@@ -123,9 +126,11 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
 
         #region string
+
         public void Subscribe(string name, Action<T1, T2, T3> handler)
         {
             if (!_strMessages.ContainsKey(name))
@@ -205,6 +210,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
     }
 
@@ -222,6 +228,7 @@ namespace NonsensicalKit.Core
                 return _instance;
             }
         }
+
         private static MessageAggregator<T1, T2> _instance;
 
         private readonly Dictionary<int, Action<T1, T2>> _messages = new Dictionary<int, Action<T1, T2>>();
@@ -231,10 +238,10 @@ namespace NonsensicalKit.Core
 
         private MessageAggregator()
         {
-
         }
 
         #region int
+
         public void Subscribe(int name, Action<T1, T2> handler)
         {
             if (!_messages.ContainsKey(name))
@@ -315,9 +322,11 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
 
         #region string
+
         public void Subscribe(string name, Action<T1, T2> handler)
         {
             if (!_strMessages.ContainsKey(name))
@@ -397,6 +406,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
     }
 
@@ -414,6 +424,7 @@ namespace NonsensicalKit.Core
                 return _instance;
             }
         }
+
         private static MessageAggregator<T> _instance;
 
         private readonly Dictionary<int, Action<T>> _messages = new Dictionary<int, Action<T>>();
@@ -423,10 +434,10 @@ namespace NonsensicalKit.Core
 
         private MessageAggregator()
         {
-
         }
 
         #region int
+
         public void Subscribe(int name, Action<T> handler)
         {
             if (!_messages.ContainsKey(name))
@@ -507,9 +518,11 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
 
         #region string
+
         public void Subscribe(string name, Action<T> handler)
         {
             if (!_strMessages.ContainsKey(name))
@@ -589,6 +602,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
     }
 
@@ -606,6 +620,7 @@ namespace NonsensicalKit.Core
                 return _instance;
             }
         }
+
         private static MessageAggregator _instance;
 
         private readonly Dictionary<int, Action> _messages = new Dictionary<int, Action>();
@@ -615,10 +630,10 @@ namespace NonsensicalKit.Core
 
         private MessageAggregator()
         {
-
         }
 
         #region int
+
         public void Subscribe(int name, Action handler)
         {
             if (!_messages.ContainsKey(name))
@@ -699,9 +714,11 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
 
         #region string
+
         public void Subscribe(string name, Action handler)
         {
             if (!_strMessages.ContainsKey(name))
@@ -781,6 +798,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
     }
 }

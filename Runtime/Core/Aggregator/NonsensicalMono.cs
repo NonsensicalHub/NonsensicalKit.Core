@@ -29,32 +29,32 @@ namespace NonsensicalKit.Core
                 switch (types.Length)
                 {
                     case 0:
-                        {
-                            messageAggregator = typeof(MessageAggregator);
-                            instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                            Action = typeof(Action);
-                        }
+                    {
+                        messageAggregator = typeof(MessageAggregator);
+                        instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                        Action = typeof(Action);
+                    }
                         break;
                     case 1:
-                        {
-                            messageAggregator = typeof(MessageAggregator<>).MakeGenericType(types);
-                            instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                            Action = typeof(Action<>).MakeGenericType(types);
-                        }
+                    {
+                        messageAggregator = typeof(MessageAggregator<>).MakeGenericType(types);
+                        instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                        Action = typeof(Action<>).MakeGenericType(types);
+                    }
                         break;
                     case 2:
-                        {
-                            messageAggregator = typeof(MessageAggregator<,>).MakeGenericType(types);
-                            instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                            Action = typeof(Action<,>).MakeGenericType(types);
-                        }
+                    {
+                        messageAggregator = typeof(MessageAggregator<,>).MakeGenericType(types);
+                        instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                        Action = typeof(Action<,>).MakeGenericType(types);
+                    }
                         break;
                     case 3:
-                        {
-                            messageAggregator = typeof(MessageAggregator<,,>).MakeGenericType(types);
-                            instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                            Action = typeof(Action<,,>).MakeGenericType(types);
-                        }
+                    {
+                        messageAggregator = typeof(MessageAggregator<,,>).MakeGenericType(types);
+                        instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                        Action = typeof(Action<,,>).MakeGenericType(types);
+                    }
                         break;
                     default:
                         continue;
@@ -72,6 +72,7 @@ namespace NonsensicalKit.Core
                     ts[0] = typeof(string);
                     os[0] = subscribeInfo.Str;
                 }
+
                 if (useID)
                 {
                     ts[1] = typeof(string);
@@ -118,7 +119,6 @@ namespace NonsensicalKit.Core
                 }
                 else
                 {
-
                     ts[0] = typeof(int);
                     os[0] = registerInfo.Index;
 
@@ -314,6 +314,7 @@ namespace NonsensicalKit.Core
         }
 
         #region Subscribe
+
         protected void Subscribe<T1, T2, T3>(int index, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(index, func);
@@ -321,6 +322,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, func, typeof(T1), typeof(T2), typeof(T3));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T1, T2>(int index, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(index, func);
@@ -328,6 +330,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, func, typeof(T1), typeof(T2));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T>(int index, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(index, func);
@@ -335,6 +338,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, func, typeof(T));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe(int index, Action func)
         {
             MessageAggregator.Instance.Subscribe(index, func);
@@ -342,22 +346,27 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, func);
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T1, T2, T3>(Enum index, Action<T1, T2, T3> func)
         {
             Subscribe(Convert.ToInt32(index), func);
         }
+
         protected void Subscribe<T1, T2>(Enum index, Action<T1, T2> func)
         {
             Subscribe(Convert.ToInt32(index), func);
         }
+
         protected void Subscribe<T>(Enum index, Action<T> func)
         {
             Subscribe(Convert.ToInt32(index), func);
         }
+
         protected void Subscribe(Enum index, Action func)
         {
             Subscribe(Convert.ToInt32(index), func);
         }
+
         protected void Subscribe<T1, T2, T3>(int index, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(index, id, func);
@@ -365,6 +374,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, id, func, typeof(T1), typeof(T2), typeof(T3));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T1, T2>(int index, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(index, id, func);
@@ -372,6 +382,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, id, func, typeof(T1), typeof(T2));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T>(int index, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(index, id, func);
@@ -379,6 +390,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, id, func, typeof(T));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe(int index, string id, Action func)
         {
             MessageAggregator.Instance.Subscribe(index, id, func);
@@ -386,22 +398,27 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(index, id, func);
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe(Enum index, string id, Action func)
         {
             Subscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Subscribe<T1, T2, T3>(Enum index, string id, Action<T1, T2, T3> func)
         {
             Subscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Subscribe<T1, T2>(Enum index, string id, Action<T1, T2> func)
         {
             Subscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Subscribe<T>(Enum index, string id, Action<T> func)
         {
             Subscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Subscribe<T1, T2, T3>(string str, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(str, func);
@@ -409,6 +426,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, func, typeof(T1), typeof(T2), typeof(T3));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T1, T2>(string str, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(str, func);
@@ -416,6 +434,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, func, typeof(T1), typeof(T2));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T>(string str, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(str, func);
@@ -423,6 +442,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, func, typeof(T));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe(string str, Action func)
         {
             MessageAggregator.Instance.Subscribe(str, func);
@@ -430,6 +450,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, func);
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T1, T2, T3>(string str, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(str, id, func);
@@ -437,6 +458,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, id, func, typeof(T1), typeof(T2), typeof(T3));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T1, T2>(string str, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(str, id, func);
@@ -444,6 +466,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, id, func, typeof(T1), typeof(T2));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe<T>(string str, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(str, id, func);
@@ -451,6 +474,7 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, id, func, typeof(T));
             _subscribeInfos.Add(temp);
         }
+
         protected void Subscribe(string str, string id, Action func)
         {
             MessageAggregator.Instance.Subscribe(str, id, func);
@@ -458,48 +482,56 @@ namespace NonsensicalKit.Core
             SubscribeInfo temp = new SubscribeInfo(str, id, func);
             _subscribeInfos.Add(temp);
         }
+
         #endregion
 
         #region Unsubscribe
+
         protected void Unsubscribe<T1, T2, T3>(int index, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(index, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
+                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T1, T2>(int index, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(index, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action<T1, T2>))
+                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T>(int index, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(index, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action<T>))
+                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action<T>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe(int index, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(index, func);
@@ -513,116 +545,137 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void Unsubscribe<T1, T2, T3>(Enum index, Action<T1, T2, T3> func)
         {
             Unsubscribe(Convert.ToInt32(index), func);
         }
+
         protected void Unsubscribe<T1, T2>(Enum index, Action<T1, T2> func)
         {
             Unsubscribe(Convert.ToInt32(index), func);
         }
+
         protected void Unsubscribe<T>(Enum index, Action<T> func)
         {
             Unsubscribe(Convert.ToInt32(index), func);
         }
+
         protected void Unsubscribe(Enum index, Action func)
         {
             Unsubscribe(Convert.ToInt32(index), func);
         }
+
         protected void Unsubscribe<T1, T2, T3>(int index, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(index, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
+                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T1, T2>(int index, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(index, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action<T1, T2>))
+                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T>(int index, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(index, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action<T>))
+                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action<T>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe(int index, string id, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(index, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action))
+                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T1, T2, T3>(Enum index, string id, Action<T1, T2, T3> func)
         {
             Unsubscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Unsubscribe<T1, T2>(Enum index, string id, Action<T1, T2> func)
         {
             Unsubscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Unsubscribe<T>(Enum index, string id, Action<T> func)
         {
             Unsubscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Unsubscribe(Enum index, string id, Action func)
         {
             Unsubscribe(Convert.ToInt32(index), id, func);
         }
+
         protected void Unsubscribe<T1, T2, T3>(string str, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(str, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
+                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T1, T2>(string str, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(str, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action<T1, T2>))
+                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T>(string str, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(str, func);
@@ -636,6 +689,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void Unsubscribe(string str, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(str, func);
@@ -649,160 +703,195 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void Unsubscribe<T1, T2, T3>(string str, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(str, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
+                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T1, T2>(string str, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(str, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action<T1, T2>))
+                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe<T>(string str, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(str, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action<T>))
+                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action<T>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         protected void Unsubscribe(string str, string id, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(str, id, func);
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action))
+                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
                 }
             }
         }
+
         #endregion
 
         #region Publish
+
         protected void Publish<T1, T2, T3>(int index, T1 data1, T2 data2, T3 data3)
         {
             MessageAggregator<T1, T2, T3>.Instance.Publish(index, data1, data2, data3);
         }
+
         protected void Publish<T1, T2>(int index, T1 data1, T2 data2)
         {
             MessageAggregator<T1, T2>.Instance.Publish(index, data1, data2);
         }
+
         protected void Publish<T>(int index, T data)
         {
             MessageAggregator<T>.Instance.Publish(index, data);
         }
+
         protected void Publish(int index)
         {
             MessageAggregator.Instance.Publish(index);
         }
+
         protected void Publish<T1, T2, T3>(Enum index, T1 data1, T2 data2, T3 data3)
         {
             MessageAggregator<T1, T2, T3>.Instance.Publish(Convert.ToInt32(index), data1, data2, data3);
         }
+
         protected void Publish<T1, T2>(Enum index, T1 data1, T2 data2)
         {
             MessageAggregator<T1, T2>.Instance.Publish(Convert.ToInt32(index), data1, data2);
         }
+
         protected void Publish<T>(Enum index, T data)
         {
             MessageAggregator<T>.Instance.Publish(Convert.ToInt32(index), data);
         }
+
         protected void Publish(Enum index)
         {
             MessageAggregator.Instance.Publish(Convert.ToInt32(index));
         }
+
         protected void PublishWithID<T1, T2, T3>(int index, string id, T1 data1, T2 data2, T3 data3)
         {
             MessageAggregator<T1, T2, T3>.Instance.PublishWithID(index, id, data1, data2, data3);
         }
+
         protected void PublishWithID<T1, T2>(int index, string id, T1 data1, T2 data2)
         {
             MessageAggregator<T1, T2>.Instance.PublishWithID(index, id, data1, data2);
         }
+
         protected void PublishWithID<T>(int index, string id, T data)
         {
             MessageAggregator<T>.Instance.PublishWithID(index, id, data);
         }
+
         protected void PublishWithID(int index, string id)
         {
             MessageAggregator.Instance.PublishWithID(index, id);
         }
+
         protected void PublishWithID<T1, T2, T3>(Enum index, string id, T1 data1, T2 data2, T3 data3)
         {
             MessageAggregator<T1, T2, T3>.Instance.PublishWithID(Convert.ToInt32(index), id, data1, data2, data3);
         }
+
         protected void PublishWithID<T1, T2>(Enum index, string id, T1 data1, T2 data2)
         {
             MessageAggregator<T1, T2>.Instance.PublishWithID(Convert.ToInt32(index), id, data1, data2);
         }
+
         protected void PublishWithID<T>(Enum index, string id, T data)
         {
             MessageAggregator<T>.Instance.PublishWithID(Convert.ToInt32(index), id, data);
         }
+
         protected void PublishWithID(Enum index, string id)
         {
             MessageAggregator.Instance.PublishWithID(Convert.ToInt32(index), id);
         }
+
         protected void Publish<T1, T2, T3>(string str, T1 data1, T2 data2, T3 data3)
         {
             MessageAggregator<T1, T2, T3>.Instance.Publish(str, data1, data2, data3);
         }
+
         protected void Publish<T1, T2>(string str, T1 data1, T2 data2)
         {
             MessageAggregator<T1, T2>.Instance.Publish(str, data1, data2);
         }
+
         protected void Publish<T>(string str, T data)
         {
             MessageAggregator<T>.Instance.Publish(str, data);
         }
+
         protected void Publish(string str)
         {
             MessageAggregator.Instance.Publish(str);
         }
+
         protected void PublishWithID<T1, T2, T3>(string str, string id, T1 data1, T2 data2, T3 data3)
         {
             MessageAggregator<T1, T2, T3>.Instance.PublishWithID(str, id, data1, data2, data3);
         }
+
         protected void PublishWithID<T1, T2>(string str, string id, T1 data1, T2 data2)
         {
             MessageAggregator<T1, T2>.Instance.PublishWithID(str, id, data1, data2);
         }
+
         protected void PublishWithID<T>(string str, string id, T data)
         {
             MessageAggregator<T>.Instance.PublishWithID(str, id, data);
         }
+
         protected void PublishWithID(string str, string id)
         {
             MessageAggregator.Instance.PublishWithID(str, id);
         }
+
         #endregion
 
         #region Register
+
         protected void Register<T>(Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(func);
@@ -810,6 +899,7 @@ namespace NonsensicalKit.Core
             RegisterInfo temp = new RegisterInfo(func, typeof(T));
             _registerInfos.Add(temp);
         }
+
         protected void Register<T>(string name, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(name, func);
@@ -817,6 +907,7 @@ namespace NonsensicalKit.Core
             RegisterInfo temp = new RegisterInfo(name, func, typeof(T));
             _registerInfos.Add(temp);
         }
+
         protected void Register<T>(int index, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(index, func);
@@ -824,13 +915,16 @@ namespace NonsensicalKit.Core
             RegisterInfo temp = new RegisterInfo(index, func, typeof(T));
             _registerInfos.Add(temp);
         }
+
         protected void Register<T>(Enum index, Func<T> func)
         {
             Register(Convert.ToInt32(index), func);
         }
+
         #endregion
 
         #region Unregister
+
         protected void Unregister<T>(Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(func);
@@ -844,6 +938,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void Unregister<T>(string name, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(name, func);
@@ -857,6 +952,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void Unregister<T>(int index, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(index, func);
@@ -870,13 +966,16 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void Unregister<T>(Enum index, Func<T> func)
         {
             Unregister(Convert.ToInt32(index), func);
         }
+
         #endregion
 
         #region AddListener
+
         protected void AddListener<T>(Action<T> func)
         {
             ObjectAggregator<T>.Instance.AddListener(func);
@@ -884,6 +983,7 @@ namespace NonsensicalKit.Core
             ListenerInfo temp = new ListenerInfo(func, typeof(T));
             _listenerInfos.Add(temp);
         }
+
         protected void AddListener<T>(string name, Action<T> func)
         {
             ObjectAggregator<T>.Instance.AddListener(name, func);
@@ -891,6 +991,7 @@ namespace NonsensicalKit.Core
             ListenerInfo temp = new ListenerInfo(name, func, typeof(T));
             _listenerInfos.Add(temp);
         }
+
         protected void AddListener<T>(int index, Action<T> func)
         {
             ObjectAggregator<T>.Instance.AddListener(index, func);
@@ -898,13 +999,16 @@ namespace NonsensicalKit.Core
             ListenerInfo temp = new ListenerInfo(index, func, typeof(T));
             _listenerInfos.Add(temp);
         }
+
         protected void AddListener<T>(Enum index, Action<T> func)
         {
             AddListener(Convert.ToInt32(index), func);
         }
+
         #endregion
 
         #region RemoveListener
+
         protected void RemoveListener<T>(Action<T> func)
         {
             ObjectAggregator<T>.Instance.RemoveListener(func);
@@ -918,6 +1022,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void RemoveListener<T>(string name, Action<T> func)
         {
             ObjectAggregator<T>.Instance.RemoveListener(name, func);
@@ -931,6 +1036,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void RemoveListener<T>(int index, Action<T> func)
         {
             ObjectAggregator<T>.Instance.RemoveListener(index, func);
@@ -944,10 +1050,12 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         protected void RemoveListener<T>(Enum index, Action<T> func)
         {
             RemoveListener(Convert.ToInt32(index), func);
         }
+
         #endregion
     }
 }

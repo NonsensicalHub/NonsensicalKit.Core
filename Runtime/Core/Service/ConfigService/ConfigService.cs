@@ -1,10 +1,12 @@
-using NonsensicalKit.Tools;
-using NonsensicalKit.Tools.NetworkTool;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using NonsensicalKit.Tools;
+using NonsensicalKit.Tools.NetworkTool;
+using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -259,7 +261,7 @@ namespace NonsensicalKit.Core.Service.Config
         /// <param name="configData"></param>
         private void SetData(string str, Type type, ConfigObject configData)
         {
-            MethodInfo deserializeMethod = Tools.JsonTool.DESERIALIZE_METHOD.MakeGenericMethod(new Type[] { type });
+            MethodInfo deserializeMethod = JsonTool.DESERIALIZE_METHOD.MakeGenericMethod(new Type[] { type });
             object deserializeData = null;
             try
             {
@@ -288,17 +290,17 @@ namespace NonsensicalKit.Core.Service.Config
         {
             var v = GetAllInstances<ConfigObject>();
             m_configDatas = v;
-            UnityEditor.EditorUtility.SetDirty(gameObject);
+            EditorUtility.SetDirty(gameObject);
         }
 
         private T[] GetAllInstances<T>() where T : ScriptableObject
         {
-            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:" + typeof(T).Name);  //FindAssets uses tags check documentation for more info
+            string[] guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);  //FindAssets uses tags check documentation for more info
             T[] a = new T[guids.Length];
             for (int i = 0; i < guids.Length; i++)         //probably could get optimized 
             {
-                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[i]);
-                a[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
+                string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+                a[i] = AssetDatabase.LoadAssetAtPath<T>(path);
             }
 
             return a;
@@ -323,7 +325,7 @@ namespace NonsensicalKit.Core.Service.Config
                     string path = GetFilePath(data);
                     string str = FileTool.ReadAllText(path);
                     SetData(str, data.GetType(), m_configDatas[i]);
-                    UnityEditor.EditorUtility.SetDirty(m_configDatas[i]);
+                    EditorUtility.SetDirty(m_configDatas[i]);
                 }
             }
         }
@@ -368,17 +370,17 @@ namespace NonsensicalKit.Core.Service.Config
                 {
                     try
                     {
-                        string json = Tools.JsonTool.SerializeObject(data);
+                        string json = JsonTool.SerializeObject(data);
                         FileTool.WriteTxt(GetFilePath(data), json);
                     }
                     catch (Exception e)
                     {
-                        throw new UnityEditor.Build.BuildFailedException($"配置{data.ConfigID}json文件写入{GetFilePath(data)}失败\r\n{e.Message}");
+                        throw new BuildFailedException($"配置{data.ConfigID}json文件写入{GetFilePath(data)}失败\r\n{e.Message}");
                     }
                 }
                 else
                 {
-                    throw new UnityEditor.Build.BuildFailedException($"相同类型配置的ID重复: {crtID}");
+                    throw new BuildFailedException($"相同类型配置的ID重复: {crtID}");
                 }
             }
         }

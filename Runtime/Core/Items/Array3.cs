@@ -46,6 +46,7 @@ namespace NonsensicalKit.Core
                     }
                 }
             }
+
             return newArray3;
         }
 
@@ -59,40 +60,20 @@ namespace NonsensicalKit.Core
 
         public T this[int index0, int index1, int index2]
         {
-            get
-            {
-                return TArray[index0 * Step0 + index1 * Step1 + index2];
-            }
-            set
-            {
-                TArray[index0 * Step0 + index1 * Step1 + index2] = value;
-
-            }
+            get => TArray[index0 * Step0 + index1 * Step1 + index2];
+            set => TArray[index0 * Step0 + index1 * Step1 + index2] = value;
         }
 
         public T this[Int3 int3]
         {
-            get
-            {
-                return TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3];
-            }
-            set
-            {
-                TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3] = value;
-
-            }
+            get => TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3];
+            set => TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3] = value;
         }
 
         public T this[int index]
         {
-            get
-            {
-                return TArray[index];
-            }
-            set
-            {
-                TArray[index] = value;
-            }
+            get => TArray[index];
+            set => TArray[index] = value;
         }
 
         public Tuple<int, int, int> GetIndexTuple(int index)
@@ -107,17 +88,18 @@ namespace NonsensicalKit.Core
         {
             return index0 * Step0 + index1 * Step1 + index2;
         }
-        
-        public void SafeSet(int index0, int index1, int index2,T value)
+
+        public void SafeSet(int index0, int index1, int index2, T value)
         {
-            if (index0<0|| index1<0|| index2<0)
+            if (index0 < 0 || index1 < 0 || index2 < 0)
             {
-                return ;
+                return;
             }
+
             var index = index0 * Step0 + index1 * Step1 + index2;
             if (index >= TArray.Length)
             {
-                return ;
+                return;
             }
             else
             {
@@ -127,19 +109,13 @@ namespace NonsensicalKit.Core
 
         public T SafeGet(int index0, int index1, int index2)
         {
-            if (index0<0|| index1<0|| index2<0)
+            if (index0 < 0 || index1 < 0 || index2 < 0)
             {
                 return default;
             }
+
             var index = index0 * Step0 + index1 * Step1 + index2;
-            if (index >= TArray.Length)
-            {
-                return default;
-            }
-            else
-            {
-                return TArray[index];
-            }
+            return index >= TArray.Length ? default : TArray[index];
         }
     }
 }
