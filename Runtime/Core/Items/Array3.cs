@@ -97,11 +97,7 @@ namespace NonsensicalKit.Core
             }
 
             var index = index0 * Step0 + index1 * Step1 + index2;
-            if (index >= TArray.Length)
-            {
-                return;
-            }
-            else
+            if (index < TArray.Length)
             {
                 TArray[index] = value;
             }
