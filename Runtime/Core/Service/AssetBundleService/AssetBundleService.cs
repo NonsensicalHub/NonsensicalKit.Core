@@ -20,6 +20,7 @@ namespace NonsensicalKit.Core.Service.Asset
         [SerializeField] private string m_editorBasePath = "..\\AssetBundles";
         [SerializeField] private int m_version = 10000;
         [SerializeField] private string[] m_preDownloadBundles; //需要提前下载的ab包
+        [SerializeField] private bool m_logMessage;
 
         public bool IsReady { get; private set; }
 
@@ -34,6 +35,8 @@ namespace NonsensicalKit.Core.Service.Asset
 
         public int LoadBundleCount { get; private set; } //当前加载的包的数量
 
+        public HashSet<string> _bundleLogBuffer=new HashSet<string>();
+        
         private string _rootUrl; //基础url拼接平台字符串得出的根路径
 
         private readonly Dictionary<string, AssetBundleContext> _assstBundleDic = new Dictionary<string, AssetBundleContext>(); //key是包名，value是ab包上下文信息
@@ -189,7 +192,11 @@ namespace NonsensicalKit.Core.Service.Asset
         public void LoadAssetBundle(string bundlePath, Action<string> onComplete = null, Action<string, float> onLoading = null, Action<string> onLoaded = null)
         {
             bundlePath = bundlePath.ToLower();
-            LogCore.Info("加载ab包：" + bundlePath);
+            if (m_logMessage&&_bundleLogBuffer.Contains(bundlePath)==false)
+            {
+                LogCore.Info("加载ab包：" + bundlePath);
+                _bundleLogBuffer.Add(bundlePath);
+            }
             if (_assstBundleDic.ContainsKey(bundlePath) == false)
             {
                 LogCore.Warning($"错误的包名：{bundlePath}");
