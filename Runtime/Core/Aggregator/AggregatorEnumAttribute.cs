@@ -7,9 +7,5 @@ namespace NonsensicalKit.Core
     /// </summary>
     public class AggregatorEnumAttribute : Attribute
     {
-        public AggregatorEnumAttribute()
-        {
-
-        }
     }
 }

@@ -10,9 +10,9 @@ namespace NonsensicalKit.Core
     /// </summary>
     public abstract class NonsensicalMono : MonoBehaviour
     {
-        private List<SubscribeInfo> _subscribeInfos = new List<SubscribeInfo>();
-        private List<RegisterInfo> _registerInfos = new List<RegisterInfo>();
-        private List<ListenerInfo> _listenerInfos = new List<ListenerInfo>();
+        private readonly List<SubscribeInfo> _subscribeInfos = new();
+        private readonly List<RegisterInfo> _registerInfos = new();
+        private readonly List<ListenerInfo> _listenerInfos = new();
 
         protected virtual void OnDestroy()
         {
@@ -25,35 +25,35 @@ namespace NonsensicalKit.Core
                 Type[] types = subscribeInfo.Types;
                 Type messageAggregator;
                 object instance;
-                Type Action;
+                Type action;
                 switch (types.Length)
                 {
                     case 0:
                     {
                         messageAggregator = typeof(MessageAggregator);
                         instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                        Action = typeof(Action);
+                        action = typeof(Action);
                     }
                         break;
                     case 1:
                     {
                         messageAggregator = typeof(MessageAggregator<>).MakeGenericType(types);
                         instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                        Action = typeof(Action<>).MakeGenericType(types);
+                        action = typeof(Action<>).MakeGenericType(types);
                     }
                         break;
                     case 2:
                     {
                         messageAggregator = typeof(MessageAggregator<,>).MakeGenericType(types);
                         instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                        Action = typeof(Action<,>).MakeGenericType(types);
+                        action = typeof(Action<,>).MakeGenericType(types);
                     }
                         break;
                     case 3:
                     {
                         messageAggregator = typeof(MessageAggregator<,,>).MakeGenericType(types);
                         instance = messageAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                        Action = typeof(Action<,,>).MakeGenericType(types);
+                        action = typeof(Action<,,>).MakeGenericType(types);
                     }
                         break;
                     default:
@@ -76,13 +76,13 @@ namespace NonsensicalKit.Core
                 if (useID)
                 {
                     ts[1] = typeof(string);
-                    ts[2] = Action;
+                    ts[2] = action;
                     os[1] = subscribeInfo.ID;
                     os[2] = subscribeInfo.Func;
                 }
                 else
                 {
-                    ts[1] = Action;
+                    ts[1] = action;
                     os[1] = subscribeInfo.Func;
                 }
 
@@ -92,15 +92,12 @@ namespace NonsensicalKit.Core
 
             foreach (var registerInfo in _registerInfos)
             {
-                int keytype = registerInfo.keyType;
+                int keytype = registerInfo.KeyType;
                 Type type = registerInfo.Type;
-                Type objectAggregator;
-                object instance;
-                Type func;
 
-                objectAggregator = typeof(ObjectAggregator<>).MakeGenericType(type);
-                instance = objectAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                func = typeof(Func<>).MakeGenericType(type);
+                var objectAggregator = typeof(ObjectAggregator<>).MakeGenericType(type);
+                var instance = objectAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                var func = typeof(Func<>).MakeGenericType(type);
 
                 Type[] ts = new Type[keytype == 0 ? 1 : 2];
                 object[] os = new object[keytype == 0 ? 1 : 2];
@@ -132,15 +129,12 @@ namespace NonsensicalKit.Core
 
             foreach (var listenerInfo in _listenerInfos)
             {
-                int keytype = listenerInfo.keyType;
+                int keytype = listenerInfo.KeyType;
                 Type type = listenerInfo.Type;
-                Type objectAggregator;
-                object instance;
-                Type action;
 
-                objectAggregator = typeof(ObjectAggregator<>).MakeGenericType(type);
-                instance = objectAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-                action = typeof(Action<>).MakeGenericType(type);
+                var objectAggregator = typeof(ObjectAggregator<>).MakeGenericType(type);
+                var instance = objectAggregator.GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                var action = typeof(Action<>).MakeGenericType(type);
 
                 Type[] ts = new Type[keytype == 0 ? 1 : 2];
                 object[] os = new object[keytype == 0 ? 1 : 2];
@@ -188,13 +182,13 @@ namespace NonsensicalKit.Core
 
         protected struct SubscribeInfo
         {
-            public bool UseInt;
-            public bool UseID;
-            public Type[] Types;
-            public int Index;
-            public string Str;
-            public string ID;
-            public object Func;
+            public readonly bool UseInt;
+            public readonly bool UseID;
+            public readonly Type[] Types;
+            public readonly int Index;
+            public readonly string Str;
+            public readonly string ID;
+            public readonly object Func;
 
             public SubscribeInfo(int index, object func, params Type[] types)
             {
@@ -243,15 +237,15 @@ namespace NonsensicalKit.Core
 
         protected struct RegisterInfo
         {
-            public int keyType; //0代表类型键，1代表字符串键，2代表数字键
-            public int Index;
-            public Type Type;
-            public string Str;
-            public object Func;
+            public readonly int KeyType; //0代表类型键，1代表字符串键，2代表数字键
+            public readonly int Index;
+            public readonly Type Type;
+            public readonly string Str;
+            public readonly object Func;
 
             public RegisterInfo(object func, Type type)
             {
-                keyType = 0;
+                KeyType = 0;
                 Index = 0;
                 Str = null;
                 Func = func;
@@ -260,7 +254,7 @@ namespace NonsensicalKit.Core
 
             public RegisterInfo(string str, object func, Type type)
             {
-                keyType = 1;
+                KeyType = 1;
                 Index = 0;
                 Str = str;
                 Func = func;
@@ -269,7 +263,7 @@ namespace NonsensicalKit.Core
 
             public RegisterInfo(int index, object func, Type type)
             {
-                keyType = 2;
+                KeyType = 2;
                 Index = index;
                 Str = null;
                 Func = func;
@@ -279,15 +273,15 @@ namespace NonsensicalKit.Core
 
         protected struct ListenerInfo
         {
-            public int keyType; //0代表类型键，1代表字符串键，2代表数字键
-            public int Index;
-            public Type Type;
-            public string Str;
-            public object Func;
+            public readonly int KeyType; //0代表类型键，1代表字符串键，2代表数字键
+            public readonly int Index;
+            public readonly Type Type;
+            public readonly string Str;
+            public readonly object Func;
 
             public ListenerInfo(object func, Type type)
             {
-                keyType = 0;
+                KeyType = 0;
                 Index = 0;
                 Str = null;
                 Func = func;
@@ -296,7 +290,7 @@ namespace NonsensicalKit.Core
 
             public ListenerInfo(string str, object func, Type type)
             {
-                keyType = 1;
+                KeyType = 1;
                 Index = 0;
                 Str = str;
                 Func = func;
@@ -305,7 +299,7 @@ namespace NonsensicalKit.Core
 
             public ListenerInfo(int index, object func, Type type)
             {
-                keyType = 2;
+                KeyType = 2;
                 Index = index;
                 Str = null;
                 Func = func;
@@ -931,7 +925,7 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _registerInfos.Count; i++)
             {
-                if (_registerInfos[i].keyType == 0 && func.Equals(_registerInfos[i].Func as Func<T>))
+                if (_registerInfos[i].KeyType == 0 && func.Equals(_registerInfos[i].Func as Func<T>))
                 {
                     _registerInfos.RemoveAt(i);
                     break;
@@ -945,7 +939,7 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _registerInfos.Count; i++)
             {
-                if (_registerInfos[i].keyType == 1 && name == _registerInfos[i].Str && func.Equals(_registerInfos[i].Func as Func<T>))
+                if (_registerInfos[i].KeyType == 1 && name == _registerInfos[i].Str && func.Equals(_registerInfos[i].Func as Func<T>))
                 {
                     _registerInfos.RemoveAt(i);
                     break;
@@ -959,7 +953,7 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _registerInfos.Count; i++)
             {
-                if (_registerInfos[i].keyType == 2 && index == _registerInfos[i].Index && func.Equals(_registerInfos[i].Func as Func<T>))
+                if (_registerInfos[i].KeyType == 2 && index == _registerInfos[i].Index && func.Equals(_registerInfos[i].Func as Func<T>))
                 {
                     _registerInfos.RemoveAt(i);
                     break;
@@ -1015,7 +1009,7 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _listenerInfos.Count; i++)
             {
-                if (_listenerInfos[i].keyType == 0 && func.Equals(_listenerInfos[i].Func as Func<T>))
+                if (_listenerInfos[i].KeyType == 0 && func.Equals(_listenerInfos[i].Func as Func<T>))
                 {
                     _listenerInfos.RemoveAt(i);
                     break;
@@ -1029,7 +1023,7 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _listenerInfos.Count; i++)
             {
-                if (_listenerInfos[i].keyType == 1 && name == _listenerInfos[i].Str && func.Equals(_listenerInfos[i].Func as Func<T>))
+                if (_listenerInfos[i].KeyType == 1 && name == _listenerInfos[i].Str && func.Equals(_listenerInfos[i].Func as Func<T>))
                 {
                     _listenerInfos.RemoveAt(i);
                     break;
@@ -1043,7 +1037,7 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _listenerInfos.Count; i++)
             {
-                if (_listenerInfos[i].keyType == 2 && index == _listenerInfos[i].Index && func.Equals(_listenerInfos[i].Func as Func<T>))
+                if (_listenerInfos[i].KeyType == 2 && index == _listenerInfos[i].Index && func.Equals(_listenerInfos[i].Func as Func<T>))
                 {
                     _listenerInfos.RemoveAt(i);
                     break;

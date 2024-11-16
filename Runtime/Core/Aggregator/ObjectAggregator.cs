@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NonsensicalKit.Core
 {
@@ -8,41 +9,30 @@ namespace NonsensicalKit.Core
     /// </summary>
     public class ObjectAggregator<T>
     {
-        public static ObjectAggregator<T> Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ObjectAggregator<T>();
-                }
-
-                return _instance;
-            }
-        }
+        public static ObjectAggregator<T> Instance => _instance ??= new ObjectAggregator<T>();
         private static ObjectAggregator<T> _instance;
 
         private T _field;
-        private Func<T> _fallBack = null;
-        private Action<T> _listener = null;
+        private Func<T> _fallBack;
+        private Action<T> _listener;
 
-        private readonly Dictionary<int, T> _intFields = new Dictionary<int, T>();
-        private readonly Dictionary<int, Func<T>> _intFallBacks = new Dictionary<int, Func<T>>();
-        private readonly Dictionary<int, Action<T>> _intFieldListeners = new Dictionary<int, Action<T>>();
+        private readonly Dictionary<int, T> _intFields = new();
+        private readonly Dictionary<int, Func<T>> _intFallBacks = new();
+        private readonly Dictionary<int, Action<T>> _intFieldListeners = new();
 
-        private readonly Dictionary<string, T> _strFields = new Dictionary<string, T>();
-        private readonly Dictionary<string, Func<T>> _strFallBacks = new Dictionary<string, Func<T>>();
-        private readonly Dictionary<string, Action<T>> _strFieldListeners = new Dictionary<string, Action<T>>();
+        private readonly Dictionary<string, T> _strFields = new();
+        private readonly Dictionary<string, Func<T>> _strFallBacks = new();
+        private readonly Dictionary<string, Action<T>> _strFieldListeners = new();
 
         /// <summary>
         /// 私有构造函数防止外部生成新对象
         /// </summary>
         private ObjectAggregator()
         {
-
         }
 
         #region Type
+
         public void Set(T value)
         {
             _field = value;
@@ -91,51 +81,49 @@ namespace NonsensicalKit.Core
             {
                 return list;
             }
+
             var ds = _fallBack.GetInvocationList();
-            foreach (Func<T> item in ds)
+            foreach (var delegates in ds)
             {
+                var item = (Func<T>)delegates;
                 if (item != null)
                 {
                     list.Add(item());
                 }
             }
+
             return list;
         }
 
-        public void Register(Func<T> fallback)
+        public void Register([DisallowNull] Func<T> fallback)
         {
             _fallBack += fallback;
             _listener?.Invoke(fallback());
         }
 
-        public void Unregister(Func<T> fallback)
+        public void Unregister([DisallowNull] Func<T> fallback)
         {
             _fallBack -= fallback;
         }
 
-        public void AddListener(Action<T> listener)
+        public void AddListener([DisallowNull] Action<T> listener)
         {
             _listener += listener;
         }
 
-        public void RemoveListener(Action<T> listener)
+        public void RemoveListener([DisallowNull] Action<T> listener)
         {
             _listener -= listener;
         }
+
         #endregion
 
 
         #region int
+
         public void Set(int name, T value)
         {
-            if (!_intFields.ContainsKey(name))
-            {
-                _intFields.Add(name, value);
-            }
-            else
-            {
-                _intFields[name] = value;
-            }
+            _intFields[name] = value;
             if (_intFieldListeners.ContainsKey(name))
             {
                 _intFieldListeners[name]?.Invoke(value);
@@ -183,8 +171,9 @@ namespace NonsensicalKit.Core
             if (_intFallBacks.ContainsKey(name))
             {
                 var ds = _intFallBacks[name].GetInvocationList();
-                foreach (Func<T> item in ds)
+                foreach (var delegates in ds)
                 {
+                    var item = (Func<T>)delegates;
                     if (item != null)
                     {
                         list.Add(item());
@@ -195,23 +184,20 @@ namespace NonsensicalKit.Core
             return list;
         }
 
-        public void Register(int name, Func<T> fallback)
+        public void Register(int name, [DisallowNull] Func<T> fallback)
         {
-            if (!_intFallBacks.ContainsKey(name))
-            {
-                _intFallBacks.Add(name, fallback);
-            }
-            else
+            if (!_intFallBacks.TryAdd(name, fallback))
             {
                 _intFallBacks[name] += fallback;
             }
+
             if (_intFieldListeners.ContainsKey(name))
             {
                 _intFieldListeners[name]?.Invoke(fallback());
             }
         }
 
-        public void Unregister(int name, Func<T> fallback)
+        public void Unregister(int name, [DisallowNull] Func<T> fallback)
         {
             if (_intFallBacks.ContainsKey(name))
             {
@@ -223,19 +209,15 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void AddListener(int name, Action<T> listener)
+        public void AddListener(int name, [DisallowNull] Action<T> listener)
         {
-            if (!_intFieldListeners.ContainsKey(name))
-            {
-                _intFieldListeners.Add(name, listener);
-            }
-            else
+            if (!_intFieldListeners.TryAdd(name, listener))
             {
                 _intFieldListeners[name] += listener;
             }
         }
 
-        public void RemoveListener(int name, Action<T> listener)
+        public void RemoveListener(int name, [DisallowNull] Action<T> listener)
         {
             if (_intFieldListeners.ContainsKey(name))
             {
@@ -247,27 +229,22 @@ namespace NonsensicalKit.Core
                 }
             }
         }
-        #endregion  
+
+        #endregion
 
 
         #region string
-        public void Set(string name, T value)
+
+        public void Set([DisallowNull] string name, T value)
         {
-            if (!_strFields.ContainsKey(name))
-            {
-                _strFields.Add(name, value);
-            }
-            else
-            {
-                _strFields[name] = value;
-            }
+            _strFields[name] = value;
             if (_strFieldListeners.ContainsKey(name))
             {
                 _strFieldListeners[name]?.Invoke(value);
             }
         }
 
-        public T Get(string name)
+        public T Get([DisallowNull] string name)
         {
             if (_strFields.ContainsKey(name) && _strFields[name] != null)
             {
@@ -283,7 +260,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public bool TryGet(string name, out T value)
+        public bool TryGet([DisallowNull] string name, out T value)
         {
             if (_strFields.ContainsKey(name) && _strFields[name] != null)
             {
@@ -302,14 +279,15 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public List<T> GetAll(string name)
+        public List<T> GetAll([DisallowNull] string name)
         {
             List<T> list = new List<T>();
             if (_strFallBacks.ContainsKey(name))
             {
                 var ds = _strFallBacks[name].GetInvocationList();
-                foreach (Func<T> item in ds)
+                foreach (var delegates in ds)
                 {
+                    var item = (Func<T>)delegates;
                     if (item != null)
                     {
                         list.Add(item());
@@ -320,23 +298,20 @@ namespace NonsensicalKit.Core
             return list;
         }
 
-        public void Register(string name, Func<T> fallback)
+        public void Register([DisallowNull] string name, [DisallowNull] Func<T> fallback)
         {
-            if (!_strFallBacks.ContainsKey(name))
-            {
-                _strFallBacks.Add(name, fallback);
-            }
-            else
+            if (!_strFallBacks.TryAdd(name, fallback))
             {
                 _strFallBacks[name] += fallback;
             }
+
             if (_strFieldListeners.ContainsKey(name))
             {
                 _strFieldListeners[name]?.Invoke(fallback());
             }
         }
 
-        public void Unregister(string name, Func<T> fallback)
+        public void Unregister([DisallowNull] string name, [DisallowNull] Func<T> fallback)
         {
             if (_strFallBacks.ContainsKey(name))
             {
@@ -347,19 +322,16 @@ namespace NonsensicalKit.Core
                 }
             }
         }
-        public void AddListener(string name, Action<T> listener)
+
+        public void AddListener([DisallowNull] string name, [DisallowNull] Action<T> listener)
         {
-            if (!_strFieldListeners.ContainsKey(name))
-            {
-                _strFieldListeners.Add(name, listener);
-            }
-            else
+            if (!_strFieldListeners.TryAdd(name, listener))
             {
                 _strFieldListeners[name] += listener;
             }
         }
 
-        public void RemoveListener(string name, Action<T> listener)
+        public void RemoveListener([DisallowNull] string name, [DisallowNull] Action<T> listener)
         {
             if (_strFieldListeners.ContainsKey(name))
             {
@@ -371,6 +343,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         #endregion
     }
 }

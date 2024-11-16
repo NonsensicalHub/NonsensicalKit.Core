@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NonsensicalKit.Core
 {
@@ -18,27 +19,14 @@ namespace NonsensicalKit.Core
     /// <typeparam name="T3"></typeparam>
     public class MessageAggregator<T1, T2, T3>
     {
-        public static MessageAggregator<T1, T2, T3> Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MessageAggregator<T1, T2, T3>();
-                }
-
-                return _instance;
-            }
-        }
+        public static MessageAggregator<T1, T2, T3> Instance => _instance ??= new MessageAggregator<T1, T2, T3>();
 
         private static MessageAggregator<T1, T2, T3> _instance;
 
-        private readonly Dictionary<int, Action<T1, T2, T3>> _messages = new Dictionary<int, Action<T1, T2, T3>>();
-        private readonly Dictionary<int, Dictionary<string, Action<T1, T2, T3>>> _IDMessages = new Dictionary<int, Dictionary<string, Action<T1, T2, T3>>>();
-        private readonly Dictionary<string, Action<T1, T2, T3>> _strMessages = new Dictionary<string, Action<T1, T2, T3>>();
-
-        private readonly Dictionary<string, Dictionary<string, Action<T1, T2, T3>>> _strIDMessages =
-            new Dictionary<string, Dictionary<string, Action<T1, T2, T3>>>();
+        private readonly Dictionary<int, Action<T1, T2, T3>> _messages = new();
+        private readonly Dictionary<int, Dictionary<string, Action<T1, T2, T3>>> _idMessages = new();
+        private readonly Dictionary<string, Action<T1, T2, T3>> _strMessages = new();
+        private readonly Dictionary<string, Dictionary<string, Action<T1, T2, T3>>> _strIDMessages = new();
 
         private MessageAggregator()
         {
@@ -46,19 +34,15 @@ namespace NonsensicalKit.Core
 
         #region int
 
-        public void Subscribe(int name, Action<T1, T2, T3> handler)
+        public void Subscribe(int name, [DisallowNull] Action<T1, T2, T3> handler)
         {
-            if (!_messages.ContainsKey(name))
-            {
-                _messages.Add(name, handler);
-            }
-            else
+            if (!_messages.TryAdd(name, handler))
             {
                 _messages[name] += handler;
             }
         }
 
-        public void Unsubscribe(int name, Action<T1, T2, T3> handler)
+        public void Unsubscribe(int name, [DisallowNull] Action<T1, T2, T3> handler)
         {
             if (_messages.ContainsKey(name))
             {
@@ -79,50 +63,49 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(int name, string id, Action<T1, T2, T3> handler)
+        public void Subscribe(int name, [DisallowNull] string id, [DisallowNull] Action<T1, T2, T3> handler)
         {
-            if (!_IDMessages.ContainsKey(name))
+            if (!_idMessages.ContainsKey(name))
             {
-                _IDMessages.Add(name, new Dictionary<string, Action<T1, T2, T3>>());
+                _idMessages.Add(name, new Dictionary<string, Action<T1, T2, T3>>());
             }
 
-
-            if (_IDMessages[name].ContainsKey(id))
+            if (_idMessages[name].ContainsKey(id))
             {
-                _IDMessages[name][id] += handler;
+                _idMessages[name][id] += handler;
             }
             else
             {
-                _IDMessages[name][id] = handler;
+                _idMessages[name][id] = handler;
             }
         }
 
-        public void Unsubscribe(int name, string id, Action<T1, T2, T3> handler)
+        public void Unsubscribe(int name, [DisallowNull] string id, [DisallowNull] Action<T1, T2, T3> handler)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id] -= handler;
-                    if (_IDMessages[name][id] == null)
+                    _idMessages[name][id] -= handler;
+                    if (_idMessages[name][id] == null)
                     {
-                        _IDMessages[name].Remove(id);
-                        if (_IDMessages[name] == null)
+                        _idMessages[name].Remove(id);
+                        if (_idMessages[name] == null)
                         {
-                            _IDMessages.Remove(name);
+                            _idMessages.Remove(name);
                         }
                     }
                 }
             }
         }
 
-        public void PublishWithID(int name, string id, T1 value1, T2 value2, T3 value3)
+        public void PublishWithID(int name, [DisallowNull] string id, T1 value1, T2 value2, T3 value3)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id](value1, value2, value3);
+                    _idMessages[name][id](value1, value2, value3);
                 }
             }
         }
@@ -131,19 +114,15 @@ namespace NonsensicalKit.Core
 
         #region string
 
-        public void Subscribe(string name, Action<T1, T2, T3> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] Action<T1, T2, T3> handler)
         {
-            if (!_strMessages.ContainsKey(name))
-            {
-                _strMessages.Add(name, handler);
-            }
-            else
+            if (!_strMessages.TryAdd(name, handler))
             {
                 _strMessages[name] += handler;
             }
         }
 
-        public void Unsubscribe(string name, Action<T1, T2, T3> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] Action<T1, T2, T3> handler)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -156,7 +135,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Publish(string name, T1 value1, T2 value2, T3 value3)
+        public void Publish([DisallowNull] string name, T1 value1, T2 value2, T3 value3)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -164,7 +143,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(string name, string id, Action<T1, T2, T3> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2, T3> handler)
         {
             if (!_strIDMessages.ContainsKey(name))
             {
@@ -181,7 +160,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Unsubscribe(string name, string id, Action<T1, T2, T3> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2, T3> handler)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -200,7 +179,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void PublishWithID(string name, string id, T1 value1, T2 value2, T3 value3)
+        public void PublishWithID([DisallowNull] string name, [DisallowNull] string id, T1 value1, T2 value2, T3 value3)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -216,25 +195,14 @@ namespace NonsensicalKit.Core
 
     public class MessageAggregator<T1, T2>
     {
-        public static MessageAggregator<T1, T2> Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MessageAggregator<T1, T2>();
-                }
-
-                return _instance;
-            }
-        }
+        public static MessageAggregator<T1, T2> Instance => _instance ??= new MessageAggregator<T1, T2>();
 
         private static MessageAggregator<T1, T2> _instance;
 
-        private readonly Dictionary<int, Action<T1, T2>> _messages = new Dictionary<int, Action<T1, T2>>();
-        private readonly Dictionary<int, Dictionary<string, Action<T1, T2>>> _IDMessages = new Dictionary<int, Dictionary<string, Action<T1, T2>>>();
-        private readonly Dictionary<string, Action<T1, T2>> _strMessages = new Dictionary<string, Action<T1, T2>>();
-        private readonly Dictionary<string, Dictionary<string, Action<T1, T2>>> _strIDMessages = new Dictionary<string, Dictionary<string, Action<T1, T2>>>();
+        private readonly Dictionary<int, Action<T1, T2>> _messages = new();
+        private readonly Dictionary<int, Dictionary<string, Action<T1, T2>>> _idMessages = new();
+        private readonly Dictionary<string, Action<T1, T2>> _strMessages = new();
+        private readonly Dictionary<string, Dictionary<string, Action<T1, T2>>> _strIDMessages = new();
 
         private MessageAggregator()
         {
@@ -242,19 +210,15 @@ namespace NonsensicalKit.Core
 
         #region int
 
-        public void Subscribe(int name, Action<T1, T2> handler)
+        public void Subscribe(int name, [DisallowNull] Action<T1, T2> handler)
         {
-            if (!_messages.ContainsKey(name))
-            {
-                _messages.Add(name, handler);
-            }
-            else
+            if (!_messages.TryAdd(name, handler))
             {
                 _messages[name] += handler;
             }
         }
 
-        public void Unsubscribe(int name, Action<T1, T2> handler)
+        public void Unsubscribe(int name, [DisallowNull] Action<T1, T2> handler)
         {
             if (_messages.ContainsKey(name))
             {
@@ -275,50 +239,50 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(int name, string id, Action<T1, T2> handler)
+        public void Subscribe(int name, [DisallowNull] string id, [DisallowNull] Action<T1, T2> handler)
         {
-            if (!_IDMessages.ContainsKey(name))
+            if (!_idMessages.ContainsKey(name))
             {
-                _IDMessages.Add(name, new Dictionary<string, Action<T1, T2>>());
+                _idMessages.Add(name, new Dictionary<string, Action<T1, T2>>());
             }
 
 
-            if (_IDMessages[name].ContainsKey(id))
+            if (_idMessages[name].ContainsKey(id))
             {
-                _IDMessages[name][id] += handler;
+                _idMessages[name][id] += handler;
             }
             else
             {
-                _IDMessages[name][id] = handler;
+                _idMessages[name][id] = handler;
             }
         }
 
-        public void Unsubscribe(int name, string id, Action<T1, T2> handler)
+        public void Unsubscribe(int name, [DisallowNull] string id, [DisallowNull] Action<T1, T2> handler)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id] -= handler;
-                    if (_IDMessages[name][id] == null)
+                    _idMessages[name][id] -= handler;
+                    if (_idMessages[name][id] == null)
                     {
-                        _IDMessages[name].Remove(id);
-                        if (_IDMessages[name] == null)
+                        _idMessages[name].Remove(id);
+                        if (_idMessages[name] == null)
                         {
-                            _IDMessages.Remove(name);
+                            _idMessages.Remove(name);
                         }
                     }
                 }
             }
         }
 
-        public void PublishWithID(int name, string id, T1 value1, T2 value2)
+        public void PublishWithID(int name, [DisallowNull] string id, T1 value1, T2 value2)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id](value1, value2);
+                    _idMessages[name][id](value1, value2);
                 }
             }
         }
@@ -327,19 +291,15 @@ namespace NonsensicalKit.Core
 
         #region string
 
-        public void Subscribe(string name, Action<T1, T2> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] Action<T1, T2> handler)
         {
-            if (!_strMessages.ContainsKey(name))
-            {
-                _strMessages.Add(name, handler);
-            }
-            else
+            if (!_strMessages.TryAdd(name, handler))
             {
                 _strMessages[name] += handler;
             }
         }
 
-        public void Unsubscribe(string name, Action<T1, T2> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] Action<T1, T2> handler)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -352,7 +312,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Publish(string name, T1 value1, T2 value2)
+        public void Publish([DisallowNull] string name, T1 value1, T2 value2)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -360,7 +320,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(string name, string id, Action<T1, T2> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2> handler)
         {
             if (!_strIDMessages.ContainsKey(name))
             {
@@ -377,7 +337,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Unsubscribe(string name, string id, Action<T1, T2> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2> handler)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -396,7 +356,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void PublishWithID(string name, string id, T1 value1, T2 value2)
+        public void PublishWithID([DisallowNull] string name, [DisallowNull] string id, T1 value1, T2 value2)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -412,25 +372,14 @@ namespace NonsensicalKit.Core
 
     public class MessageAggregator<T>
     {
-        public static MessageAggregator<T> Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MessageAggregator<T>();
-                }
-
-                return _instance;
-            }
-        }
+        public static MessageAggregator<T> Instance => _instance ??= new MessageAggregator<T>();
 
         private static MessageAggregator<T> _instance;
 
-        private readonly Dictionary<int, Action<T>> _messages = new Dictionary<int, Action<T>>();
-        private readonly Dictionary<int, Dictionary<string, Action<T>>> _IDMessages = new Dictionary<int, Dictionary<string, Action<T>>>();
-        private readonly Dictionary<string, Action<T>> _strMessages = new Dictionary<string, Action<T>>();
-        private readonly Dictionary<string, Dictionary<string, Action<T>>> _strIDMessages = new Dictionary<string, Dictionary<string, Action<T>>>();
+        private readonly Dictionary<int, Action<T>> _messages = new();
+        private readonly Dictionary<int, Dictionary<string, Action<T>>> _idMessages = new();
+        private readonly Dictionary<string, Action<T>> _strMessages = new();
+        private readonly Dictionary<string, Dictionary<string, Action<T>>> _strIDMessages = new();
 
         private MessageAggregator()
         {
@@ -438,19 +387,15 @@ namespace NonsensicalKit.Core
 
         #region int
 
-        public void Subscribe(int name, Action<T> handler)
+        public void Subscribe(int name, [DisallowNull] Action<T> handler)
         {
-            if (!_messages.ContainsKey(name))
-            {
-                _messages.Add(name, handler);
-            }
-            else
+            if (!_messages.TryAdd(name, handler))
             {
                 _messages[name] += handler;
             }
         }
 
-        public void Unsubscribe(int name, Action<T> handler)
+        public void Unsubscribe(int name, [DisallowNull] Action<T> handler)
         {
             if (_messages.ContainsKey(name))
             {
@@ -471,50 +416,50 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(int name, string id, Action<T> handler)
+        public void Subscribe(int name, [DisallowNull] string id, [DisallowNull] Action<T> handler)
         {
-            if (!_IDMessages.ContainsKey(name))
+            if (!_idMessages.ContainsKey(name))
             {
-                _IDMessages.Add(name, new Dictionary<string, Action<T>>());
+                _idMessages.Add(name, new Dictionary<string, Action<T>>());
             }
 
 
-            if (_IDMessages[name].ContainsKey(id))
+            if (_idMessages[name].ContainsKey(id))
             {
-                _IDMessages[name][id] += handler;
+                _idMessages[name][id] += handler;
             }
             else
             {
-                _IDMessages[name][id] = handler;
+                _idMessages[name][id] = handler;
             }
         }
 
-        public void Unsubscribe(int name, string id, Action<T> handler)
+        public void Unsubscribe(int name, [DisallowNull] string id, [DisallowNull] Action<T> handler)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id] -= handler;
-                    if (_IDMessages[name][id] == null)
+                    _idMessages[name][id] -= handler;
+                    if (_idMessages[name][id] == null)
                     {
-                        _IDMessages[name].Remove(id);
-                        if (_IDMessages[name] == null)
+                        _idMessages[name].Remove(id);
+                        if (_idMessages[name] == null)
                         {
-                            _IDMessages.Remove(name);
+                            _idMessages.Remove(name);
                         }
                     }
                 }
             }
         }
 
-        public void PublishWithID(int name, string id, T value)
+        public void PublishWithID(int name, [DisallowNull] string id, T value)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id](value);
+                    _idMessages[name][id](value);
                 }
             }
         }
@@ -523,19 +468,15 @@ namespace NonsensicalKit.Core
 
         #region string
 
-        public void Subscribe(string name, Action<T> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] Action<T> handler)
         {
-            if (!_strMessages.ContainsKey(name))
-            {
-                _strMessages.Add(name, handler);
-            }
-            else
+            if (!_strMessages.TryAdd(name, handler))
             {
                 _strMessages[name] += handler;
             }
         }
 
-        public void Unsubscribe(string name, Action<T> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] Action<T> handler)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -548,7 +489,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Publish(string name, T value)
+        public void Publish([DisallowNull] string name, T value)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -556,7 +497,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(string name, string id, Action<T> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T> handler)
         {
             if (!_strIDMessages.ContainsKey(name))
             {
@@ -573,7 +514,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Unsubscribe(string name, string id, Action<T> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T> handler)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -592,7 +533,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void PublishWithID(string name, string id, T value)
+        public void PublishWithID([DisallowNull] string name, [DisallowNull] string id, T value)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -608,23 +549,12 @@ namespace NonsensicalKit.Core
 
     public class MessageAggregator
     {
-        public static MessageAggregator Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MessageAggregator();
-                }
-
-                return _instance;
-            }
-        }
+        public static MessageAggregator Instance => _instance ??= new MessageAggregator();
 
         private static MessageAggregator _instance;
 
         private readonly Dictionary<int, Action> _messages = new Dictionary<int, Action>();
-        private readonly Dictionary<int, Dictionary<string, Action>> _IDMessages = new Dictionary<int, Dictionary<string, Action>>();
+        private readonly Dictionary<int, Dictionary<string, Action>> _idMessages = new Dictionary<int, Dictionary<string, Action>>();
         private readonly Dictionary<string, Action> _strMessages = new Dictionary<string, Action>();
         private readonly Dictionary<string, Dictionary<string, Action>> _strIDMessages = new Dictionary<string, Dictionary<string, Action>>();
 
@@ -634,19 +564,15 @@ namespace NonsensicalKit.Core
 
         #region int
 
-        public void Subscribe(int name, Action handler)
+        public void Subscribe(int name, [DisallowNull] Action handler)
         {
-            if (!_messages.ContainsKey(name))
-            {
-                _messages.Add(name, handler);
-            }
-            else
+            if (!_messages.TryAdd(name, handler))
             {
                 _messages[name] += handler;
             }
         }
 
-        public void Unsubscribe(int name, Action handler)
+        public void Unsubscribe(int name, [DisallowNull] Action handler)
         {
             if (_messages.ContainsKey(name))
             {
@@ -667,50 +593,50 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(int name, string id, Action handler)
+        public void Subscribe(int name, [DisallowNull] string id, [DisallowNull] Action handler)
         {
-            if (!_IDMessages.ContainsKey(name))
+            if (!_idMessages.ContainsKey(name))
             {
-                _IDMessages.Add(name, new Dictionary<string, Action>());
+                _idMessages.Add(name, new Dictionary<string, Action>());
             }
 
 
-            if (_IDMessages[name].ContainsKey(id))
+            if (_idMessages[name].ContainsKey(id))
             {
-                _IDMessages[name][id] += handler;
+                _idMessages[name][id] += handler;
             }
             else
             {
-                _IDMessages[name][id] = handler;
+                _idMessages[name][id] = handler;
             }
         }
 
-        public void Unsubscribe(int name, string id, Action handler)
+        public void Unsubscribe(int name, [DisallowNull] string id, [DisallowNull] Action handler)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id] -= handler;
-                    if (_IDMessages[name][id] == null)
+                    _idMessages[name][id] -= handler;
+                    if (_idMessages[name][id] == null)
                     {
-                        _IDMessages[name].Remove(id);
-                        if (_IDMessages[name] == null)
+                        _idMessages[name].Remove(id);
+                        if (_idMessages[name] == null)
                         {
-                            _IDMessages.Remove(name);
+                            _idMessages.Remove(name);
                         }
                     }
                 }
             }
         }
 
-        public void PublishWithID(int name, string id)
+        public void PublishWithID(int name, [DisallowNull] string id)
         {
-            if (_IDMessages.ContainsKey(name))
+            if (_idMessages.ContainsKey(name))
             {
-                if (_IDMessages[name].ContainsKey(id))
+                if (_idMessages[name].ContainsKey(id))
                 {
-                    _IDMessages[name][id]();
+                    _idMessages[name][id]();
                 }
             }
         }
@@ -719,19 +645,15 @@ namespace NonsensicalKit.Core
 
         #region string
 
-        public void Subscribe(string name, Action handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] Action handler)
         {
-            if (!_strMessages.ContainsKey(name))
-            {
-                _strMessages.Add(name, handler);
-            }
-            else
+            if (!_strMessages.TryAdd(name, handler))
             {
                 _strMessages[name] += handler;
             }
         }
 
-        public void Unsubscribe(string name, Action handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] Action handler)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -744,7 +666,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Publish(string name)
+        public void Publish([DisallowNull] string name)
         {
             if (_strMessages.ContainsKey(name))
             {
@@ -752,7 +674,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe(string name, string id, Action handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action handler)
         {
             if (!_strIDMessages.ContainsKey(name))
             {
@@ -769,7 +691,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Unsubscribe(string name, string id, Action handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action handler)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -788,7 +710,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void PublishWithID(string name, string id)
+        public void PublishWithID([DisallowNull] string name, [DisallowNull] string id)
         {
             if (_strIDMessages.ContainsKey(name))
             {
