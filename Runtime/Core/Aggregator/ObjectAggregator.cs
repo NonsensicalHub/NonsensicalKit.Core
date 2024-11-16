@@ -39,6 +39,7 @@ namespace NonsensicalKit.Core
             _listener?.Invoke(value);
         }
 
+        [return: MaybeNull]
         public T Get()
         {
             if (_field != null)
@@ -55,7 +56,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public bool TryGet(out T value)
+        public bool TryGet([MaybeNull] out T value)
         {
             if (_field != null)
             {
@@ -130,6 +131,7 @@ namespace NonsensicalKit.Core
             }
         }
 
+        [return: MaybeNull]
         public T Get(int name)
         {
             if (_intFields.ContainsKey(name) && _intFields[name] != null)
@@ -146,7 +148,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public bool TryGet(int name, out T value)
+        public bool TryGet(int name, [MaybeNull] out T value)
         {
             if (_intFields.ContainsKey(name) && _intFields[name] != null)
             {
@@ -165,6 +167,7 @@ namespace NonsensicalKit.Core
             }
         }
 
+        [return: NotNull]
         public List<T> GetAll(int name)
         {
             List<T> list = new List<T>();
@@ -244,6 +247,7 @@ namespace NonsensicalKit.Core
             }
         }
 
+        [return: MaybeNull]
         public T Get([DisallowNull] string name)
         {
             if (_strFields.ContainsKey(name) && _strFields[name] != null)
@@ -260,7 +264,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public bool TryGet([DisallowNull] string name, out T value)
+        public bool TryGet([DisallowNull] string name, [MaybeNull] out T value)
         {
             if (_strFields.ContainsKey(name) && _strFields[name] != null)
             {

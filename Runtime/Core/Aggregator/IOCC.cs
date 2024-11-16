@@ -381,12 +381,13 @@ namespace NonsensicalKit.Core
             ObjectAggregator<T>.Instance.Set(value);
         }
 
+        [return: MaybeNull]
         public static T Get<T>()
         {
             return ObjectAggregator<T>.Instance.Get();
         }
 
-        public static bool TryGet<T>(out T value)
+        public static bool TryGet<T>([MaybeNull] out T value)
         {
             return ObjectAggregator<T>.Instance.TryGet(out value);
         }
@@ -421,12 +422,13 @@ namespace NonsensicalKit.Core
             ObjectAggregator<T>.Instance.Set(index, value);
         }
 
+        [return: MaybeNull]
         public static T Get<T>(int index)
         {
             return ObjectAggregator<T>.Instance.Get(index);
         }
 
-        public static bool TryGet<T>(int index, out T value)
+        public static bool TryGet<T>(int index, [MaybeNull] out T value)
         {
             return ObjectAggregator<T>.Instance.TryGet(index, out value);
         }
@@ -461,12 +463,13 @@ namespace NonsensicalKit.Core
             ObjectAggregator<T>.Instance.Set(Convert.ToInt32(index), value);
         }
 
+        [return: MaybeNull]
         public static T Get<T>([DisallowNull] Enum index)
         {
             return ObjectAggregator<T>.Instance.Get(Convert.ToInt32(index));
         }
 
-        public static bool TryGet<T>([DisallowNull] Enum index, out T value)
+        public static bool TryGet<T>([DisallowNull] Enum index, [MaybeNull] out T value)
         {
             return ObjectAggregator<T>.Instance.TryGet(Convert.ToInt32(index), out value);
         }
@@ -501,12 +504,13 @@ namespace NonsensicalKit.Core
             ObjectAggregator<T>.Instance.Set(name, value);
         }
 
+        [return: MaybeNull]
         public static T Get<T>([DisallowNull] string name)
         {
             return ObjectAggregator<T>.Instance.Get(name);
         }
 
-        public static bool TryGet<T>([DisallowNull] string name, out T value)
+        public static bool TryGet<T>([DisallowNull] string name, [MaybeNull] out T value)
         {
             return ObjectAggregator<T>.Instance.TryGet(name, out value);
         }
