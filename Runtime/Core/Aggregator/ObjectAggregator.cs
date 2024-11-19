@@ -167,7 +167,6 @@ namespace NonsensicalKit.Core
             }
         }
 
-        [return: NotNull]
         public List<T> GetAll(int name)
         {
             List<T> list = new List<T>();

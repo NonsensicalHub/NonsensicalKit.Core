@@ -15,13 +15,13 @@ namespace NonsensicalKit.Tools
         /// 算出RaycastAll碰撞到的所有点位中最近的点并返回
         /// 用于不适合分层（layer）时的最近射线碰撞点获取
         /// </summary>
-        /// <param name="_value"></param>
+        /// <param name="array"></param>
         /// <param name="check"></param>
         /// <returns></returns>
-        public static RaycastHit? GetClosest(this RaycastHit[] _value, CheckRaycastHit check)
+        public static RaycastHit? GetClosest(this RaycastHit[] array, CheckRaycastHit check)
         {
             List<RaycastHit> hits = new List<RaycastHit>();
-            foreach (var item in _value)
+            foreach (var item in array)
             {
                 if (check(item))
                 {
@@ -147,7 +147,7 @@ namespace NonsensicalKit.Tools
 
         private static Vector2? GetHorizonCross(float y, Vector2 p1, Vector2 p2, float rectMinX, float rectMaxX)
         {
-            if (p1.y == p2.y)
+            if (Mathf.Approximately(p1.y, p2.y))
             {
                 return null;
             }
