@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace NonsensicalKit.Core
 {
@@ -7,9 +6,10 @@ namespace NonsensicalKit.Core
     /// 使用一维数组实现三维数组
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [Serializable]
     public struct Array3<T>
     {
-        public readonly T[] TArray;
+        public T[] m_Array;
 
         public readonly int Length0;
         public readonly int Length1;
@@ -20,7 +20,7 @@ namespace NonsensicalKit.Core
 
         public Array3(int length0, int length1, int length2)
         {
-            TArray = new T[length0 * length1 * length2];
+            m_Array = new T[length0 * length1 * length2];
 
             Length0 = length0;
             Length1 = length1;
@@ -52,28 +52,28 @@ namespace NonsensicalKit.Core
 
         public void Reset(T state)
         {
-            for (int i = 0; i < TArray.Length; i++)
+            for (int i = 0; i < m_Array.Length; i++)
             {
-                TArray[i] = state;
+                m_Array[i] = state;
             }
         }
 
         public T this[int index0, int index1, int index2]
         {
-            get => TArray[index0 * Step0 + index1 * Step1 + index2];
-            set => TArray[index0 * Step0 + index1 * Step1 + index2] = value;
+            get => m_Array[index0 * Step0 + index1 * Step1 + index2];
+            set => m_Array[index0 * Step0 + index1 * Step1 + index2] = value;
         }
 
         public T this[Int3 int3]
         {
-            get => TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3];
-            set => TArray[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3] = value;
+            get => m_Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3];
+            set => m_Array[int3.I1 * Step0 + int3.I2 * Step1 + int3.I3] = value;
         }
 
         public T this[int index]
         {
-            get => TArray[index];
-            set => TArray[index] = value;
+            get => m_Array[index];
+            set => m_Array[index] = value;
         }
 
         public Tuple<int, int, int> GetIndexTuple(int index)
@@ -97,9 +97,9 @@ namespace NonsensicalKit.Core
             }
 
             var index = index0 * Step0 + index1 * Step1 + index2;
-            if (index < TArray.Length)
+            if (index < m_Array.Length)
             {
-                TArray[index] = value;
+                m_Array[index] = value;
             }
         }
 
@@ -111,7 +111,7 @@ namespace NonsensicalKit.Core
             }
 
             var index = index0 * Step0 + index1 * Step1 + index2;
-            return index >= TArray.Length ? default : TArray[index];
+            return index >= m_Array.Length ? default : m_Array[index];
         }
     }
 }

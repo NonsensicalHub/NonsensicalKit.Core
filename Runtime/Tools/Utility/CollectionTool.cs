@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace NonsensicalKit.Tools
@@ -8,6 +9,53 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class CollectionTool
     {
+        public static IList Resize(IList list, Type type, int size)
+        {
+            int delta = size;
+            if (list != null)
+            {
+                delta = size - list.Count;
+            }
+
+            bool remove = delta < 0;
+
+            IList newList = (list != null) ? (IList)Activator.CreateInstance(type, list) : (IList)Activator.CreateInstance(type);
+
+            Type elementType = type.GetGenericArguments()[0];
+
+            if (remove)
+            {
+                for (int i = 0; i < -delta; ++i)
+                {
+                    newList.RemoveAt(newList.Count - 1);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < delta; ++i)
+                {
+                    newList.Add(GetDefault(elementType));
+                }
+            }
+
+            return newList;
+        }
+
+        private static object GetDefault(Type type)
+        {
+            if (type == typeof(string))
+            {
+                return string.Empty;
+            }
+
+            if (type.IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+
+            return null;
+        }
+
         public static void Fill<T>(this IList<T> list, T value)
         {
             for (int i = 0; i < list.Count; i++)
@@ -18,7 +66,7 @@ namespace NonsensicalKit.Tools
 
         public static T SafeGet<T>(this IList<T> list, int index)
         {
-            if (index<0||index>= list.Count)
+            if (index < 0 || index >= list.Count)
             {
                 return default;
             }
@@ -28,7 +76,7 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        public static void ListAdd<Key, Value>(this Dictionary<Key, List<Value>> dictionary, Key key, Value value)
+        public static void ListAdd<TKey, TValue>(this Dictionary<TKey, List<TValue>> dictionary, TKey key, TValue value)
         {
             if (dictionary.ContainsKey(key))
             {
@@ -36,11 +84,11 @@ namespace NonsensicalKit.Tools
             }
             else
             {
-                dictionary.Add(key, new List<Value>() { value });
+                dictionary.Add(key, new List<TValue>() { value });
             }
         }
 
-        public static void ActionAdd<Key>(this Dictionary<Key, Action> dictionary, Key key, Action value)
+        public static void ActionAdd<TKey>(this Dictionary<TKey, Action> dictionary, TKey key, Action value)
         {
             if (dictionary.ContainsKey(key))
             {
@@ -52,7 +100,7 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        public static void ActionAdd<Key, Value>(this Dictionary<Key, Action<Value>> dictionary, Key key, Action<Value> value)
+        public static void ActionAdd<TKey, TValue>(this Dictionary<TKey, Action<TValue>> dictionary, TKey key, Action<TValue> value)
         {
             if (dictionary.ContainsKey(key))
             {
@@ -64,7 +112,7 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        public static void ActionAdd<Key, Value1,Value2>(this Dictionary<Key, Action<Value1,Value2>> dictionary, Key key, Action<Value1, Value2> value)
+        public static void ActionAdd<TKey, TValue1, TValue2>(this Dictionary<TKey, Action<TValue1, TValue2>> dictionary, TKey key, Action<TValue1, TValue2> value)
         {
             if (dictionary.ContainsKey(key))
             {

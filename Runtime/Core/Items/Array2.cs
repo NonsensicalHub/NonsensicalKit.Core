@@ -6,9 +6,10 @@ namespace NonsensicalKit.Core
     /// 使用一维数组实现二维数组
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [Serializable]
     public struct Array2<T>
     {
-        public readonly T[] TArray;
+        public T[] m_Array;
 
         public readonly int Length0;
         public readonly int Length1;
@@ -17,7 +18,7 @@ namespace NonsensicalKit.Core
 
         public Array2(int length0, int length1)
         {
-            TArray = new T[length0 * length1];
+            m_Array = new T[length0 * length1];
             Length0 = length0;
             Length1 = length1;
 
@@ -31,22 +32,22 @@ namespace NonsensicalKit.Core
 
         public void Reset(T state)
         {
-            for (int i = 0; i < TArray.Length; i++)
+            for (int i = 0; i < m_Array.Length; i++)
             {
-                TArray[i] = state;
+                m_Array[i] = state;
             }
         }
 
         public T this[int index0, int index1]
         {
-            get { return TArray[index0 * Step0 + index1]; }
-            set { TArray[index0 * Step0 + index1] = value; }
+            get { return m_Array[index0 * Step0 + index1]; }
+            set { m_Array[index0 * Step0 + index1] = value; }
         }
 
         public T this[int index]
         {
-            get { return TArray[index]; }
-            set { TArray[index] = value; }
+            get { return m_Array[index]; }
+            set { m_Array[index] = value; }
         }
 
         public Tuple<int, int> GetIndexTuple(int index)
