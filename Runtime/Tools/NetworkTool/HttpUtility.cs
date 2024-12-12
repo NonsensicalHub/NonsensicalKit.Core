@@ -1,10 +1,9 @@
-using NonsensicalKit.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
+using NonsensicalKit.Core;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -16,6 +15,7 @@ namespace NonsensicalKit.Tools.NetworkTool
     public static class HttpUtility
     {
         #region Extensions
+
         public static IEnumerator Get(this UnityWebRequest unityWebRequest, string url)
         {
             unityWebRequest.method = "GET";
@@ -40,14 +40,14 @@ namespace NonsensicalKit.Tools.NetworkTool
             yield return unityWebRequest.SendWebRequest();
         }
 
-        public static IEnumerator Post(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> formData, Dictionary<string, string> header)
+        public static IEnumerator Post(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> formData,
+            Dictionary<string, string> header)
         {
             unityWebRequest.method = "Post";
             unityWebRequest.url = url;
             IncreaseHeader(unityWebRequest, header);
             var form = CreateForm(formData);
-            byte[] array = null;
-            array = form.data;
+            var array = form.data;
             if (array.Length == 0)
             {
                 array = null;
@@ -57,96 +57,109 @@ namespace NonsensicalKit.Tools.NetworkTool
             {
                 unityWebRequest.uploadHandler = new UploadHandlerRaw(array);
             }
+
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
             yield return unityWebRequest.SendWebRequest();
         }
+
         public static IEnumerator Post(this UnityWebRequest unityWebRequest, string url, string json)
         {
             unityWebRequest.method = "Post";
             unityWebRequest.url = url;
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-            unityWebRequest.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+            unityWebRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
             yield return unityWebRequest.SendWebRequest();
         }
-        #endregion
 
-        #region GET 
-        public static IEnumerator Get(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator GetAudio(this UnityWebRequest unityWebRequest, string url)
         {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
+            AudioType audioType;
+            switch (StringTool.GetFileExtensionFromUrl(url))
             {
-                unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+                case ".ogg":
+                    audioType = AudioType.OGGVORBIS;
+                    break;
+                case ".wav":
+                    audioType = AudioType.WAV;
+                    break;
+                default:
+                    audioType = AudioType.MPEG;
+                    break;
             }
+
+            unityWebRequest.method = "GET";
+            unityWebRequest.url = url;
+            unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, audioType);
+            yield return unityWebRequest.SendWebRequest();
         }
 
-        public static IEnumerator Get(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        #endregion
+
+        #region GET
+
+        public static IEnumerator Get(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
-                IncreaseHeader(unityWebRequest, header);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+        }
+
+        public static IEnumerator Get(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
+        {
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            IncreaseHeader(unityWebRequest, header);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
         public static IEnumerator GetNoSSL(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Get(url))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
-                unityWebRequest.certificateHandler = new BypassCertificate();
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Get(url);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            unityWebRequest.certificateHandler = new BypassCertificate();
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
-        public static IEnumerator GetWithArgs(string url, Dictionary<string, string> fields, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator GetWithArgs(string url, Dictionary<string, string> fields, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
         {
             string uri = GetArgsStr(url, fields);
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(uri))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(uri);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
-        public static IEnumerator GetWithArgs(string url, Dictionary<string, string> fields, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator GetWithArgs(string url, Dictionary<string, string> fields, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
             string uri = GetArgsStr(url, fields);
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(uri))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
-                IncreaseHeader(unityWebRequest, header);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(uri);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            IncreaseHeader(unityWebRequest, header);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
         public static IEnumerator GetPicture(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerTexture(true);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url);
+            unityWebRequest.downloadHandler = new DownloadHandlerTexture(true);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
         public static IEnumerator GetWav(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, AudioType.WAV);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url);
+            unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, AudioType.WAV);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
         public static IEnumerator GetAudio(string url, AudioType audioType, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, audioType);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url);
+            unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, audioType);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
         public static IEnumerator GetAudio(string url, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
@@ -164,235 +177,231 @@ namespace NonsensicalKit.Tools.NetworkTool
                     audioType = AudioType.MPEG;
                     break;
             }
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url))
-            {
-                unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, audioType);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url);
+            unityWebRequest.downloadHandler = new DownloadHandlerAudioClip(url, audioType);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
+
         #endregion
 
         #region Post
-        public static IEnumerator Post(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+
+        public static IEnumerator Post(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST"))
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            IncreaseHeader(unityWebRequest, header);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+        }
+
+        public static IEnumerator Post(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback,
+            Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
+        {
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            IncreaseHeader(unityWebRequest, header);
+            if (uploadProcessCallback == null && downloadProcessCallback == null)
             {
-                IncreaseHeader(unityWebRequest, header);
                 yield return SendRequest(unityWebRequest, callback, iHandleWebError);
             }
-        }
-
-        public static IEnumerator Post(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback, Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
-        {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST"))
+            else
             {
-                IncreaseHeader(unityWebRequest, header);
-                if (uploadProcessCallback == null && downloadProcessCallback == null)
+                NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
+                while (!unityWebRequest.isDone)
                 {
-                    yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-                }
-                else
-                {
-                    NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
-                    while (!unityWebRequest.isDone)
-                    {
-                        uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
-                        downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
-                        yield return null;
-                    }
+                    uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
+                    downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
                     yield return null;
                 }
+
+                yield return null;
             }
         }
 
-        public static IEnumerator Post(string url, Dictionary<string, string> formData, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator Post(string url, Dictionary<string, string> formData, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
             yield return Post(url, CreateForm(formData), header, callback, iHandleWebError);
         }
 
-        public static IEnumerator Post(string url, string json, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator Post(string url, string json, Dictionary<string, string> header, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST"))
-            {
-                byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-                unityWebRequest.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-                unityWebRequest.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-                unityWebRequest.SetRequestHeader("Content-Type", "application/json");
-                IncreaseHeader(unityWebRequest, header);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+            unityWebRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            unityWebRequest.SetRequestHeader("Content-Type", "application/json");
+            IncreaseHeader(unityWebRequest, header);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
-        public static IEnumerator Post(string url, WWWForm form, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator Post(string url, WWWForm form, Dictionary<string, string> header, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, form))
-            {
-                IncreaseHeader(unityWebRequest, header);
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, form);
+            IncreaseHeader(unityWebRequest, header);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
-        public static IEnumerator Post(string url, WWWForm form, Dictionary<string, string> header, Action<UnityWebRequest> callback, Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator Post(string url, WWWForm form, Dictionary<string, string> header, Action<UnityWebRequest> callback,
+            Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, form))
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, form);
+            unityWebRequest.useHttpContinue = false;
+            IncreaseHeader(unityWebRequest, header);
+            if (uploadProcessCallback == null && downloadProcessCallback == null)
             {
-                unityWebRequest.useHttpContinue = false;
-                IncreaseHeader(unityWebRequest, header);
-                if (uploadProcessCallback == null && downloadProcessCallback == null)
+                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+            }
+            else
+            {
+                NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
+                while (!unityWebRequest.isDone)
                 {
-                    yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-                }
-                else
-                {
-                    NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
-                    while (!unityWebRequest.isDone)
-                    {
-                        uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
-                        downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
-                        yield return null;
-                    }
+                    uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
+                    downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
                     yield return null;
                 }
+
+                yield return null;
             }
         }
 
-        public static IEnumerator Post(string url, List<IMultipartFormSection> formData, Dictionary<string, string> header, Action<UnityWebRequest> callback, Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator Post(string url, List<IMultipartFormSection> formData, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback, Action<float> uploadProcessCallback, Action<float> downloadProcessCallback,
+            IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, formData))
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, formData);
+            unityWebRequest.useHttpContinue = false;
+            IncreaseHeader(unityWebRequest, header);
+            if (uploadProcessCallback == null && downloadProcessCallback == null)
             {
-                unityWebRequest.useHttpContinue = false;
-                IncreaseHeader(unityWebRequest, header);
-                if (uploadProcessCallback == null && downloadProcessCallback == null)
-                {
-                    yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-                }
-                else
-                {
-                    NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
-                    while (!unityWebRequest.isDone)
-                    {
-                        uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
-                        downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
-                        yield return null;
-                    }
-                    yield return null;
-                }
-            }
-        }
-
-        public static IEnumerator Post(string url, List<IMultipartFormSection> formData, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
-        {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, formData))
-            {
-                IncreaseHeader(unityWebRequest, header);
                 yield return SendRequest(unityWebRequest, callback, iHandleWebError);
             }
+            else
+            {
+                NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
+                while (!unityWebRequest.isDone)
+                {
+                    uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
+                    downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
+                    yield return null;
+                }
+
+                yield return null;
+            }
         }
 
-        public static IEnumerator PostWithArgs(string url, Dictionary<string, string> fields, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator Post(string url, List<IMultipartFormSection> formData, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        {
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, formData);
+            IncreaseHeader(unityWebRequest, header);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+        }
+
+        public static IEnumerator PostWithArgs(string url, Dictionary<string, string> fields, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
         {
             string uri = GetArgsStr(url, fields);
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(uri, new WWWForm()))
-            {
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(uri, new WWWForm());
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
-        public static IEnumerator PostWithArgs(string url, Dictionary<string, string> fields, Action<UnityWebRequest> callback, Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator PostWithArgs(string url, Dictionary<string, string> fields, Action<UnityWebRequest> callback,
+            Action<float> uploadProcessCallback, Action<float> downloadProcessCallback, IHandleWebError iHandleWebError = null)
         {
             string uri = GetArgsStr(url, fields);
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(uri, new WWWForm()))
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(uri, new WWWForm());
+            if (uploadProcessCallback == null && downloadProcessCallback == null)
             {
-                if (uploadProcessCallback == null && downloadProcessCallback == null)
-                {
-                    yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-                }
-                else
-                {
-                    NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
-                    while (!unityWebRequest.isDone)
-                    {
-                        uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
-                        downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
-                        yield return null;
-                    }
-                    yield return null;
-                }
-            }
-        }
-
-        public static IEnumerator PostTexture(string url, Dictionary<string, string> formData, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
-        {
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, CreateForm(formData)))
-            {
-                DownloadHandlerTexture downloadTexture = new DownloadHandlerTexture(true);
-                unityWebRequest.downloadHandler = downloadTexture;
-                IncreaseHeader(unityWebRequest, header);
                 yield return SendRequest(unityWebRequest, callback, iHandleWebError);
             }
+            else
+            {
+                NonsensicalInstance.Instance.StartCoroutine(SendRequest(unityWebRequest, callback, iHandleWebError));
+                while (!unityWebRequest.isDone)
+                {
+                    uploadProcessCallback?.Invoke(unityWebRequest.uploadProgress);
+                    downloadProcessCallback?.Invoke(unityWebRequest.downloadProgress);
+                    yield return null;
+                }
+
+                yield return null;
+            }
         }
 
-        public static IEnumerator UploadFiles(string url, List<string> names, List<string> urls, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator PostTexture(string url, Dictionary<string, string> formData, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        {
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, CreateForm(formData));
+            DownloadHandlerTexture downloadTexture = new DownloadHandlerTexture(true);
+            unityWebRequest.downloadHandler = downloadTexture;
+            IncreaseHeader(unityWebRequest, header);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+        }
+
+        public static IEnumerator UploadFiles(string url, List<string> names, List<string> urls, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
             List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
             for (int i = 0; i < urls.Count; i++)
             {
-                using (UnityWebRequest crtFileRequest = UnityWebRequest.Get(urls[i]))
-                {
-                    yield return crtFileRequest.SendWebRequest();
+                using UnityWebRequest crtFileRequest = UnityWebRequest.Get(urls[i]);
+                yield return crtFileRequest.SendWebRequest();
 
-                    formData.Add(new MultipartFormFileSection(Path.GetFileName(names[i]), crtFileRequest.downloadHandler.data));
-                }
+                formData.Add(new MultipartFormFileSection(Path.GetFileName(names[i]), crtFileRequest.downloadHandler.data));
             }
 
             yield return Post(url, formData, header, callback, iHandleWebError);
         }
 
-        public static IEnumerator UploadLocalFiles(string url, List<string> fileFullNames, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator UploadLocalFiles(string url, List<string> fileFullNames, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
             List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
 
             foreach (var item in fileFullNames)
             {
-                using (FileStream fs = new FileStream(item, FileMode.Open, FileAccess.Read))
+                using FileStream fs = new FileStream(item, FileMode.Open, FileAccess.Read);
+                try
                 {
-                    try
-                    {
-                        byte[] buffur = new byte[fs.Length];
-                        fs.Read(buffur, 0, (int)fs.Length);
-                        formData.Add(new MultipartFormFileSection(Path.GetFileName(item), buffur));
-                    }
-                    catch (Exception ex)
-                    {
-                        throw ex;
-                    }
+                    byte[] buffur = new byte[fs.Length];
+                    fs.Read(buffur, 0, (int)fs.Length);
+                    formData.Add(new MultipartFormFileSection(Path.GetFileName(item), buffur));
+                }
+                catch (Exception )
+                {
+                    
                 }
             }
+
             yield return Post(url, formData, header, callback, iHandleWebError);
         }
 
-        public static IEnumerator UploadBinaryFile(string url, string fieldName, byte[] fileByte, string fileName, string contentType, Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        public static IEnumerator UploadBinaryFile(string url, string fieldName, byte[] fileByte, string fileName, string contentType,
+            Dictionary<string, string> header, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
         {
             WWWForm form = new WWWForm();
             form.AddBinaryData(fieldName, fileByte, fileName, contentType);
 
-            using (UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, form))
-            {
-                unityWebRequest.useHttpContinue = false;
-                IncreaseHeader(unityWebRequest, header);
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, form);
+            unityWebRequest.useHttpContinue = false;
+            IncreaseHeader(unityWebRequest, header);
 
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
+
         #endregion
 
         #region Special
-        public static IEnumerator LoadAssetbundle(string uri, uint version, uint crc, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+
+        public static IEnumerator LoadAssetbundle(string uri, uint version, uint crc, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
         {
-            using (UnityWebRequest unityWebRequest = UnityWebRequestAssetBundle.GetAssetBundle(uri, version, crc))
-            {
-                yield return SendRequest(unityWebRequest, callback, iHandleWebError);
-            }
+            using UnityWebRequest unityWebRequest = UnityWebRequestAssetBundle.GetAssetBundle(uri, version, crc);
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
         public static Dictionary<string, string> GetJsonHeader()
@@ -401,9 +410,11 @@ namespace NonsensicalKit.Tools.NetworkTool
             jsonHeader.Add("Content-Type", "application/json;charset=utf-8");
             return jsonHeader;
         }
+
         #endregion
 
         #region PrivateMethod
+
         private static WWWForm CreateForm(Dictionary<string, string> formData)
         {
             WWWForm form = new WWWForm();
@@ -414,6 +425,7 @@ namespace NonsensicalKit.Tools.NetworkTool
                     form.AddField(item.Key, item.Value);
                 }
             }
+
             return form;
         }
 
@@ -430,7 +442,8 @@ namespace NonsensicalKit.Tools.NetworkTool
                     sb.Append(item.Value);
                     sb.Append("&");
                 }
-                sb.Remove(sb.Length - 1, 1);   //去掉结尾的&
+
+                sb.Remove(sb.Length - 1, 1); //去掉结尾的&
                 return sb.ToString();
             }
             else
@@ -450,7 +463,8 @@ namespace NonsensicalKit.Tools.NetworkTool
             }
         }
 
-        private static IEnumerator SendRequest(UnityWebRequest unityWebRequest, Action<UnityWebRequest> callback, IHandleWebError iHandleWebError = null)
+        private static IEnumerator SendRequest(UnityWebRequest unityWebRequest, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
         {
             yield return unityWebRequest.SendWebRequest();
 
@@ -480,6 +494,7 @@ namespace NonsensicalKit.Tools.NetworkTool
                 }
             }
         }
+
         #endregion
     }
 
