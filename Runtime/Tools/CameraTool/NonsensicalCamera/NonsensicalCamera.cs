@@ -1,6 +1,6 @@
 using NaughtyAttributes;
 using NonsensicalKit.Core;
-using NonsensicalKit.Tools.EazyTool;
+using NonsensicalKit.Tools.EasyTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace NonsensicalKit.Tools.EazyTool.Tests
+namespace NonsensicalKit.Tools.EasyTool.Tests
 {
     public class SearchToolTest : MonoBehaviour
     {

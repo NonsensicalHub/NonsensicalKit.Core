@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     /// <summary>
     /// 自定义Quaternion，用于求四元数差值

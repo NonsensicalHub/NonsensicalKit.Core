@@ -5,7 +5,7 @@ using NonsensicalKit.Tools.MeshTool;
 using UnityEditor;
 #endif
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     public class RenderBox : MonoBehaviour
     {

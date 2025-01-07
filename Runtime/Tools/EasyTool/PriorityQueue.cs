@@ -2,7 +2,7 @@ using NonsensicalKit.Tools;
 using System;
 using System.Text;
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     /// <summary>
     /// 可自定义判断方法的优先队列
