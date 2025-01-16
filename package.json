@@ -30,6 +30,11 @@
       "displayName": "NaughtyAttributes",
       "description": "编辑器工具集",
       "path": "Samples~/NaughtyAttributes"
+    },
+    {
+      "displayName": "Timer",
+      "description": "定时器工具",
+      "path": "Samples~/Timer"
     }
   ]
 }
