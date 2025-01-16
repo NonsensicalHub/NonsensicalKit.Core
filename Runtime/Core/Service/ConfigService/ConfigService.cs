@@ -44,7 +44,7 @@ namespace NonsensicalKit.Core.Service.Config
 
         protected IEnumerator OnInitStart()
         {
-            if (PlatformInfo.IsEditor || (m_jsonMode))
+            if (PlatformInfo.IsEditor || (!m_jsonMode))
             {
                 foreach (var item in m_configDatas)
                 {
