@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     /// <summary>
     /// 可观察链表，可以监听各种改变的事件

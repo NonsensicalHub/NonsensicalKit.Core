@@ -2,7 +2,7 @@ using NonsensicalKit.Core;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     public class MouseEventTrigger : NonsensicalMono
     {

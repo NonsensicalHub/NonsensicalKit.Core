@@ -1,7 +1,7 @@
 using NonsensicalKit.Core;
 using UnityEngine;
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     /// <summary>
     /// 在非编辑器环境下自动销毁

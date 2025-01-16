@@ -1,7 +1,7 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     public enum FixedMode
     {

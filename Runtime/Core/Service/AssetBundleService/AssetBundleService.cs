@@ -21,6 +21,7 @@ namespace NonsensicalKit.Core.Service.Asset
         [SerializeField] private int m_version = 10000;
         [SerializeField] private string[] m_preDownloadBundles; //需要提前下载的ab包
         [SerializeField] private bool m_logMessage;
+        [SerializeField] private bool m_dynamicUrlBase = true;
 
         public bool IsReady { get; private set; }
 
@@ -35,11 +36,13 @@ namespace NonsensicalKit.Core.Service.Asset
 
         public int LoadBundleCount { get; private set; } //当前加载的包的数量
 
-        public HashSet<string> _bundleLogBuffer=new HashSet<string>();
-        
+        private HashSet<string> _bundleLogBuffer = new HashSet<string>();
+
         private string _rootUrl; //基础url拼接平台字符串得出的根路径
 
-        private readonly Dictionary<string, AssetBundleContext> _assstBundleDic = new Dictionary<string, AssetBundleContext>(); //key是包名，value是ab包上下文信息
+        private readonly Dictionary<string, AssetBundleContext>
+            _assetBundleDic = new Dictionary<string, AssetBundleContext>(); //key是包名，value是ab包上下文信息
+
 
         protected void Awake()
         {
@@ -81,8 +84,9 @@ namespace NonsensicalKit.Core.Service.Asset
                 }
 
                 _rootUrl = Path.Combine(Application.dataPath, m_editorBasePath, PlatformInfo.GetPlaformFolderName());
+                StartCoroutine(InitCor());
             }
-            else
+            else if (!m_dynamicUrlBase)
             {
                 if (string.IsNullOrEmpty(m_runtimeBaseUrl))
                 {
@@ -90,9 +94,9 @@ namespace NonsensicalKit.Core.Service.Asset
                 }
 
                 _rootUrl = Path.Combine(m_runtimeBaseUrl, PlatformInfo.GetPlaformFolderName());
-            }
 
-            StartCoroutine(InitCor());
+                StartCoroutine(InitCor());
+            }
         }
 
         /// <summary>
@@ -106,23 +110,29 @@ namespace NonsensicalKit.Core.Service.Asset
             yield return assetBundleCreateRequest.SendWebRequest();
             AssetBundle assetBundle = (assetBundleCreateRequest.downloadHandler as DownloadHandlerAssetBundle)?.assetBundle;
 
-            if (assetBundle == null)
+            if (assetBundle is null)
             {
                 LogCore.Warning("未找到AssetBundles:" + _rootUrl);
                 yield break;
             }
 
-            _assstBundleDic.Clear();
+            _assetBundleDic.Clear();
 
             var manifestRequest = assetBundle.LoadAssetAsync<AssetBundleManifest>("AssetBundleManifest");
             yield return manifestRequest;
             AssetBundleManifest assetBundleManifest = manifestRequest.asset as AssetBundleManifest;
 
+            if (assetBundleManifest is null)
+            {
+                LogCore.Warning("AssetBundles无法解析:" + _rootUrl);
+                yield break;
+            }
+
             string[] bundles = assetBundleManifest.GetAllAssetBundles();
 
             foreach (var item in bundles)
             {
-                _assstBundleDic.Add(item, new AssetBundleContext(item, assetBundleManifest.GetDirectDependencies(item)));
+                _assetBundleDic.Add(item, new AssetBundleContext(item, assetBundleManifest.GetDirectDependencies(item)));
             }
 
 
@@ -143,7 +153,7 @@ namespace NonsensicalKit.Core.Service.Asset
         private IEnumerator PreDownloadCor()
         {
             yield return null;
-            for (int i = 0; i < m_preDownloadBundles.Length; i++)
+            foreach (var t in m_preDownloadBundles)
             {
                 //当上一次加载还未完成或者有其他加载正在进行则延迟下一次加载
                 while (LoadBundleCount > 0)
@@ -151,15 +161,15 @@ namespace NonsensicalKit.Core.Service.Asset
                     yield return null;
                 }
 
-                var _crtPreDownloadBundleName = m_preDownloadBundles[i];
-                LogCore.Info("开始提前下载包：" + _crtPreDownloadBundleName);
-                LoadAssetBundle(_crtPreDownloadBundleName, null, null);
+                var crtPreDownloadBundleName = t;
+                LogCore.Info("开始提前下载包：" + crtPreDownloadBundleName);
+                LoadAssetBundle(crtPreDownloadBundleName);
                 while (LoadBundleCount > 0)
                 {
                     yield return null;
                 }
 
-                UnloadUnusedBundle(_crtPreDownloadBundleName);
+                UnloadUnusedBundle(crtPreDownloadBundleName);
             }
 
             LogCore.Info("提前下载完成");
@@ -174,13 +184,13 @@ namespace NonsensicalKit.Core.Service.Asset
         public bool CheckAssetBundle(string bundlePath)
         {
             bundlePath = bundlePath.ToLower();
-            if (_assstBundleDic.ContainsKey(bundlePath) == false)
+            if (_assetBundleDic.TryGetValue(bundlePath, out var value) == false)
             {
                 LogCore.Warning($"错误的包名：{bundlePath}");
                 return false;
             }
 
-            return _assstBundleDic[bundlePath].IsLoadCompleted;
+            return value.IsLoadCompleted;
         }
 
         /// <summary>
@@ -189,21 +199,24 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="bundlePath"></param>
         /// <param name="onComplete"></param>
         /// <param name="onLoading"></param>
-        public void LoadAssetBundle(string bundlePath, Action<string> onComplete = null, Action<string, float> onLoading = null, Action<string> onLoaded = null)
+        /// <param name="onLoaded"></param>
+        public void LoadAssetBundle(string bundlePath, Action<string> onComplete = null, Action<string, float> onLoading = null,
+            Action<string> onLoaded = null)
         {
             bundlePath = bundlePath.ToLower();
-            if (m_logMessage&&_bundleLogBuffer.Contains(bundlePath)==false)
+            if (m_logMessage && _bundleLogBuffer.Contains(bundlePath) == false)
             {
                 LogCore.Info("加载ab包：" + bundlePath);
                 _bundleLogBuffer.Add(bundlePath);
             }
-            if (_assstBundleDic.ContainsKey(bundlePath) == false)
+
+            if (_assetBundleDic.TryGetValue(bundlePath, out var value) == false)
             {
                 LogCore.Warning($"错误的包名：{bundlePath}");
                 return;
             }
 
-            if (_assstBundleDic[bundlePath].IsLoadCompleted)
+            if (value.IsLoadCompleted)
             {
                 try
                 {
@@ -218,18 +231,18 @@ namespace NonsensicalKit.Core.Service.Asset
                 return;
             }
 
-            if (_assstBundleDic[bundlePath].IsLoading == false)
+            if (_assetBundleDic[bundlePath].IsLoading == false)
             {
-                _assstBundleDic[bundlePath].OnLoadCompleted = onComplete;
-                _assstBundleDic[bundlePath].OnLoading = onLoading;
-                _assstBundleDic[bundlePath].OnLoaded = onLoaded;
+                _assetBundleDic[bundlePath].OnLoadCompleted = onComplete;
+                _assetBundleDic[bundlePath].OnLoading = onLoading;
+                _assetBundleDic[bundlePath].OnLoaded = onLoaded;
                 StartCoroutine(LoadAssetBundleCoroutine(bundlePath));
             }
             else
             {
-                _assstBundleDic[bundlePath].OnLoadCompleted += onComplete;
-                _assstBundleDic[bundlePath].OnLoading += onLoading;
-                _assstBundleDic[bundlePath].OnLoaded += onLoaded;
+                _assetBundleDic[bundlePath].OnLoadCompleted += onComplete;
+                _assetBundleDic[bundlePath].OnLoading += onLoading;
+                _assetBundleDic[bundlePath].OnLoaded += onLoaded;
             }
         }
 
@@ -237,31 +250,29 @@ namespace NonsensicalKit.Core.Service.Asset
         /// 加载Ab包协程
         /// </summary>
         /// <param name="bundlePath"></param>
-        /// <param name="onComplete"></param>
-        /// <param name="onLoading"></param>
         /// <returns></returns>
         private IEnumerator LoadAssetBundleCoroutine(string bundlePath)
         {
             LoadBundleCount++;
-            _assstBundleDic[bundlePath].IsLoading = true;
+            _assetBundleDic[bundlePath].IsLoading = true;
 
             string bundleUrl = Path.Combine(_rootUrl, bundlePath);
 
             var request = UnityWebRequestAssetBundle.GetAssetBundle(bundleUrl, (uint)m_version, 0);
 
             request.SendWebRequest();
-            float crtProcess;
             do
             {
                 yield return null;
-                crtProcess = request.downloadProgress;
-                _assstBundleDic[bundlePath].OnLoading?.Invoke(bundlePath, crtProcess);
+                var crtProcess = request.downloadProgress;
+                _assetBundleDic[bundlePath].OnLoading?.Invoke(bundlePath, crtProcess);
                 OnBundleLoading?.Invoke(bundlePath, crtProcess);
-            } while (!request.isDone);
+            }
+            while (!request.isDone);
 
             AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(request);
 
-            if (assetBundle == null)
+            if (!assetBundle)
             {
                 LogCore.Error($"AB包加载失败，路径：{bundleUrl}");
                 //Todo:错误处理
@@ -270,25 +281,25 @@ namespace NonsensicalKit.Core.Service.Asset
 
             try
             {
-                _assstBundleDic[bundlePath].OnLoaded?.Invoke(bundlePath);
+                _assetBundleDic[bundlePath].OnLoaded?.Invoke(bundlePath);
             }
             catch (Exception)
             {
             }
 
-            _assstBundleDic[bundlePath].OnLoaded = null;
-            _assstBundleDic[bundlePath].IsLoaded = true;
-            _assstBundleDic[bundlePath].AssetBundlePack = assetBundle;
+            _assetBundleDic[bundlePath].OnLoaded = null;
+            _assetBundleDic[bundlePath].IsLoaded = true;
+            _assetBundleDic[bundlePath].AssetBundlePack = assetBundle;
 
             //加载依赖包
             //应当先加载自己再加载依赖包，防止出现互相依赖时互相等待的情况
             //但应当等待加载完成后再回调_onCompleted，保证使用时不出现引用丢失
-            string[] dependencies = _assstBundleDic[bundlePath].Dependencies;
+            string[] dependencies = _assetBundleDic[bundlePath].Dependencies;
             int completeCount = 0;
             foreach (var item in dependencies)
             {
-                _assstBundleDic[item].DependencieCount++;
-                LoadAssetBundle(item, null, null, (p) => { completeCount++; });
+                _assetBundleDic[item].DependencyCount++;
+                LoadAssetBundle(item, null, null, (_) => { completeCount++; });
             }
 
             while (completeCount < dependencies.Length)
@@ -296,21 +307,21 @@ namespace NonsensicalKit.Core.Service.Asset
                 yield return null;
             }
 
-            _assstBundleDic[bundlePath].IsLoading = false;
-            _assstBundleDic[bundlePath].OnLoading = null;
+            _assetBundleDic[bundlePath].IsLoading = false;
+            _assetBundleDic[bundlePath].OnLoading = null;
 
-            _assstBundleDic[bundlePath].IsLoadCompleted = true;
+            _assetBundleDic[bundlePath].IsLoadCompleted = true;
 
             try
             {
-                _assstBundleDic[bundlePath].OnLoadCompleted?.Invoke(bundlePath);
+                _assetBundleDic[bundlePath].OnLoadCompleted?.Invoke(bundlePath);
                 OnBundleCompleted?.Invoke(bundlePath);
             }
             catch (Exception)
             {
             }
 
-            _assstBundleDic[bundlePath].OnLoadCompleted = null;
+            _assetBundleDic[bundlePath].OnLoadCompleted = null;
 
             LoadBundleCount--;
         }
@@ -324,26 +335,28 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="resourceName">资源名</param>
         /// <param name="bundlePath">包名</param>
         /// <param name="onCompleted">完成回调</param>
+        /// <param name="onLoading"></param>
         public void LoadResource<T>(string resourceName, string bundlePath, Action<string, string, T> onCompleted,
             Action<string, string, float> onLoading = null) where T : Object
         {
             bundlePath = bundlePath.ToLower();
 
-            if (_assstBundleDic.ContainsKey(bundlePath) == false)
+            if (_assetBundleDic.ContainsKey(bundlePath) == false)
             {
                 LogCore.Warning($"错误的包名{bundlePath}");
                 return;
             }
 
-            if (_assstBundleDic[bundlePath].IsLoadCompleted)
+            if (_assetBundleDic[bundlePath].IsLoadCompleted)
             {
-                _assstBundleDic[bundlePath].LoadCount++;
-                StartCoroutine(LoadResourceCoroutine<T>(resourceName, bundlePath, _assstBundleDic[bundlePath].AssetBundlePack, onCompleted, onLoading));
+                _assetBundleDic[bundlePath].LoadCount++;
+                StartCoroutine(
+                    LoadResourceCoroutine(resourceName, bundlePath, _assetBundleDic[bundlePath].AssetBundlePack, onCompleted, onLoading));
             }
             else
             {
-                StartCoroutine(WaitAssetBundleLoad<T>(resourceName, bundlePath, onCompleted, onLoading));
-                LoadAssetBundle(bundlePath, null);
+                StartCoroutine(WaitAssetBundleLoad(resourceName, bundlePath, onCompleted, onLoading));
+                LoadAssetBundle(bundlePath);
             }
         }
 
@@ -359,13 +372,13 @@ namespace NonsensicalKit.Core.Service.Asset
         private IEnumerator WaitAssetBundleLoad<T>(string resourceName, string bundlePath, Action<string, string, T> onCompleted,
             Action<string, string, float> onLoading) where T : Object
         {
-            while (_assstBundleDic[bundlePath].IsLoadCompleted == false)
+            while (_assetBundleDic[bundlePath].IsLoadCompleted == false)
             {
                 yield return null;
             }
 
-            _assstBundleDic[bundlePath].LoadCount++;
-            StartCoroutine(LoadResourceCoroutine<T>(resourceName, bundlePath, _assstBundleDic[bundlePath].AssetBundlePack, onCompleted, onLoading));
+            _assetBundleDic[bundlePath].LoadCount++;
+            StartCoroutine(LoadResourceCoroutine(resourceName, bundlePath, _assetBundleDic[bundlePath].AssetBundlePack, onCompleted, onLoading));
         }
 
         /// <summary>
@@ -373,10 +386,13 @@ namespace NonsensicalKit.Core.Service.Asset
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="resourceName"></param>
+        /// <param name="bundlePath"></param>
         /// <param name="assetBundle"></param>
         /// <param name="onCompleted"></param>
+        /// <param name="onLoading"></param>
         /// <returns></returns>
-        private IEnumerator LoadResourceCoroutine<T>(string resourceName, string bundlePath, AssetBundle assetBundle, Action<string, string, T> onCompleted,
+        private IEnumerator LoadResourceCoroutine<T>(string resourceName, string bundlePath, AssetBundle assetBundle,
+            Action<string, string, T> onCompleted,
             Action<string, string, float> onLoading) where T : Object
         {
             AssetBundleRequest assetBundleRequest = assetBundle.LoadAssetAsync<T>(resourceName);
@@ -393,13 +409,14 @@ namespace NonsensicalKit.Core.Service.Asset
 
                     onLoading(bundlePath, resourceName, assetBundleRequest.progress);
                     OnResourceLoading?.Invoke(bundlePath, resourceName, assetBundleRequest.progress);
-                } while (!assetBundleRequest.isDone);
+                }
+                while (!assetBundleRequest.isDone);
             }
 
             if (assetBundleRequest.asset != null)
             {
-                T Object = assetBundleRequest.asset as T;
-                onCompleted(bundlePath, resourceName, Object);
+                T obj = assetBundleRequest.asset as T;
+                onCompleted(bundlePath, resourceName, obj);
                 OnResourceCompleted?.Invoke(bundlePath, resourceName);
             }
             else
@@ -417,18 +434,17 @@ namespace NonsensicalKit.Core.Service.Asset
         public void ReleaseAsset(string bundleName)
         {
             bundleName = bundleName.ToLower();
-            _assstBundleDic[bundleName].LoadCount--;
+            _assetBundleDic[bundleName].LoadCount--;
         }
 
         /// <summary>
         /// 如果未被使用则卸载ab包
         /// </summary>
         /// <param name="bundleName"></param>
-        /// <param name="unloadAllObjects"></param>
         public void UnloadUnusedBundle(string bundleName)
         {
             bundleName = bundleName.ToLower();
-            if (_assstBundleDic[bundleName].LoadCount == 0 && _assstBundleDic[bundleName].DependencieCount == 0)
+            if (_assetBundleDic[bundleName].LoadCount == 0 && _assetBundleDic[bundleName].DependencyCount == 0)
             {
                 UnloadBundle(bundleName);
             }
@@ -438,29 +454,29 @@ namespace NonsensicalKit.Core.Service.Asset
         /// 强制卸载ab包
         /// </summary>
         /// <param name="bundleName"></param>
-        /// <param name="unloadAllObjects"></param>
+        /// <param name="checkDependencie"></param>
         public void UnloadBundle(string bundleName, bool checkDependencie = true)
         {
             bundleName = bundleName.ToLower();
-            if (_assstBundleDic.ContainsKey(bundleName))
+            if (_assetBundleDic.ContainsKey(bundleName))
             {
-                var bundle = _assstBundleDic[bundleName];
+                var bundle = _assetBundleDic[bundleName];
                 if (bundle.AssetBundlePack != null)
                 {
                     bundle.AssetBundlePack.Unload(true);
                     bundle.AssetBundlePack = null;
                     if (checkDependencie)
                     {
-                        string[] dependencies = _assstBundleDic[bundleName].Dependencies;
+                        string[] dependencies = _assetBundleDic[bundleName].Dependencies;
                         foreach (var item in dependencies)
                         {
-                            _assstBundleDic[item].DependencieCount--;
+                            _assetBundleDic[item].DependencyCount--;
                             UnloadUnusedBundle(item);
                         }
                     }
                     else
                     {
-                        bundle.DependencieCount = 0;
+                        bundle.DependencyCount = 0;
                     }
                 }
 
@@ -480,7 +496,7 @@ namespace NonsensicalKit.Core.Service.Asset
         /// </summary>
         public void UnloadAllUnusedBundles()
         {
-            foreach (var item in _assstBundleDic)
+            foreach (var item in _assetBundleDic)
             {
                 UnloadUnusedBundle(item.Key);
             }
@@ -492,7 +508,7 @@ namespace NonsensicalKit.Core.Service.Asset
         public void UnloadAllBundles()
         {
             StopAllCoroutines();
-            foreach (var item in _assstBundleDic)
+            foreach (var item in _assetBundleDic)
             {
                 UnloadBundle(item.Key, false);
             }
@@ -508,8 +524,8 @@ namespace NonsensicalKit.Core.Service.Asset
             public bool IsLoading; //是否正在进行加载
             public bool IsLoaded; //是否已经加载完成
             public bool IsLoadCompleted; //是否已经完全加载完成
-            public int LoadCount = 0; //包内对象加载的次数
-            public int DependencieCount = 0; //被其他包依赖加载的次数
+            public int LoadCount; //包内对象加载的次数
+            public int DependencyCount; //被其他包依赖加载的次数
 
             public Action<string> OnLoadCompleted; //完全加载完成事件
             public Action<string> OnLoaded; //加载完成事件，此时依赖包可能尚未加载

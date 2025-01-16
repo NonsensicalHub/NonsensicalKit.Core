@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace NonsensicalKit.Tools.EazyTool
+namespace NonsensicalKit.Tools.EasyTool
 {
     public class SimplePageController : MonoBehaviour
     {
