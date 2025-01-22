@@ -16,6 +16,7 @@ namespace NonsensicalKit.Tools.CameraTool
         MiddleKeyControl,
         AlwaysControl,
     }
+
     public enum ControlFinger
     {
         Uncontrol,
@@ -25,39 +26,48 @@ namespace NonsensicalKit.Tools.CameraTool
 
     public class NonsensicalCamera : NonsensicalMono
     {
-        [SerializeField] private Transform m_viewPoint;     //视点
-        [SerializeField] private Transform m_camera;        //相机
+        [SerializeField] private Transform m_viewPoint; //视点
+        [SerializeField] private Transform m_camera; //相机
 
         [SerializeField] private bool m_isLimitPith = true;
-        [Range(-90, 90)][SerializeField] protected float m_minPitch = -90;  //最小俯仰角
-        [Range(-90, 90)][SerializeField] protected float m_maxPitch = 90;   //最大俯仰角
+        [Range(-90, 90)] [SerializeField] protected float m_minPitch = -90; //最小俯仰角
+        [Range(-90, 90)] [SerializeField] protected float m_maxPitch = 90; //最大俯仰角
 
-        [SerializeField] protected float m_minDistance = 1;        //最近距离
-        [SerializeField] protected float m_maxDistance = 100;       //最远距离
+        [SerializeField] protected float m_minDistance = 1; //最近距离
+        [SerializeField] protected float m_maxDistance = 100; //最远距离
 
-        [SerializeField] protected float m_moveSpeedMinZoom = 1;    //最小移动速度，速度和距离正相关
-        [SerializeField] protected float m_moveSpeedMaxZoom = 10;   //最大移动速度
-        [SerializeField] protected float m_rotationSpeed = 1;      //旋转速率
-        [SerializeField] protected float m_rollSpeed = 1;      //翻滚速率
-        [SerializeField] protected float m_zoomSpeed = 1;     //缩放速率
-        [SerializeField] protected float m_dragZoomSpeed = 1;     //拖缩缩放速率
+        [SerializeField] protected float m_moveSpeedMinZoom = 1; //最小移动速度，速度和距离正相关
+        [SerializeField] protected float m_moveSpeedMaxZoom = 10; //最大移动速度
+        [SerializeField] protected float m_rotationSpeed = 1; //旋转速率
+        [SerializeField] protected float m_rollSpeed = 1; //翻滚速率
+        [SerializeField] protected float m_zoomSpeed = 1; //缩放速率
+        [SerializeField] protected float m_dragZoomSpeed = 1; //拖缩缩放速率
 
-        [SerializeField] protected bool m_checkUI = true;       //是否在鼠标悬浮在UI上时禁止控制相机
+        [SerializeField] protected bool m_checkUI = true; //是否在鼠标悬浮在UI上时禁止控制相机
 
         [SerializeField] protected ControlMouseKey m_moveControl = ControlMouseKey.LeftKeyControl;
         [SerializeField] protected ControlMouseKey m_rotateControl = ControlMouseKey.RightKeyControl;
         [SerializeField] protected ControlMouseKey m_rollControl = ControlMouseKey.MiddleKeyControl;
         [SerializeField] protected ControlMouseKey m_DragZoomControl = ControlMouseKey.Uncontrol;
         [SerializeField] protected bool m_enableMobileInput = false;
-        [ShowIf("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerMoveControl = ControlFinger.Uncontrol;
-        [ShowIf("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerRotateControl = ControlFinger.OneFinger;
-        [ShowIf("m_enableMobileInput"), SerializeField] protected ControlFinger m_fingerDragZoomControl = ControlFinger.TwoFinger;
+
+        [ShowIf("m_enableMobileInput"), SerializeField]
+        protected ControlFinger m_fingerMoveControl = ControlFinger.Uncontrol;
+
+        [ShowIf("m_enableMobileInput"), SerializeField]
+        protected ControlFinger m_fingerRotateControl = ControlFinger.OneFinger;
+
+        [ShowIf("m_enableMobileInput"), SerializeField]
+        protected ControlFinger m_fingerDragZoomControl = ControlFinger.TwoFinger;
+
         [SerializeField] protected bool m_UseKeyBoardControlMove = false;
 
-        [SerializeField] protected bool m_lerpMove = true;      //插值移动
-        [SerializeField] protected bool m_autoInit = true;      //自动初始化
+        [SerializeField] protected bool m_lerpMove = true; //插值移动
+        [SerializeField] protected bool m_autoInit = true; //自动初始化
         [SerializeField] protected bool m_resetOnEnable = true; //重新激活时回到初始位置
-        [SerializeField][FormerlySerializedAs("m_renderBox")] protected RenderBox m_limitBox;
+
+        [SerializeField] [FormerlySerializedAs("m_renderBox")]
+        protected RenderBox m_limitBox;
 
         public bool IsOn { get; set; } = true;
         public Quaternion CrtRotate { get; set; }
@@ -76,6 +86,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 _targetZoom = Mathf.Clamp01(value);
             }
         }
+
         /// <summary>
         /// 目标距离
         /// </summary>
@@ -115,30 +126,31 @@ namespace NonsensicalKit.Tools.CameraTool
                         return !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
                     }
                 }
+
                 return !_crtEventSystem.IsPointerOverGameObject();
             }
         }
 
-        protected Vector3 _targetPos;   //视点目标位置，运行时会不断接近
-        protected float _targetZoom;    //目标缩放，范围在0到1之间
-        protected float _targetYaw;     //目标旋转角
-        protected float _targetPitch;   //目标俯仰角
-        protected float _targetRoll;    //目标翻滚角
+        protected Vector3 _targetPos; //视点目标位置，运行时会不断接近
+        protected float _targetZoom; //目标缩放，范围在0到1之间
+        protected float _targetYaw; //目标旋转角
+        protected float _targetPitch; //目标俯仰角
+        protected float _targetRoll; //目标翻滚角
 
-        private float _crtZoom;         //当前缩放
-        private float _crtPitch;        //当前俯仰角
-        private float _crtYaw;          //当前旋转角
-        private float _crtRoll;         //当前翻滚角
+        private float _crtZoom; //当前缩放
+        private float _crtPitch; //当前俯仰角
+        private float _crtYaw; //当前旋转角
+        private float _crtRoll; //当前翻滚角
 
         protected EventSystem _crtEventSystem;
         protected InputHub _input;
 
         protected MobileInputHub _mobileInput;
 
-        private Vector3 _startPos;      //初始视点位置
-        private Quaternion _startRot;   //初始视点旋转
-        private Vector3 _startPos2;     //初始相机位置
-        private Quaternion _startRot2;  //初始相机旋转
+        private Vector3 _startPos; //初始视点位置
+        private Quaternion _startRot; //初始视点旋转
+        private Vector3 _startPos2; //初始相机位置
+        private Quaternion _startRot2; //初始相机旋转
 
         private bool _needMove = false;
         private bool _needRotate = false;
@@ -163,6 +175,8 @@ namespace NonsensicalKit.Tools.CameraTool
                     Init();
                 }
             }
+
+            IOCC.Set(this);
         }
 
         protected virtual void Start()
@@ -208,7 +222,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     if (_MouseNotInUI)
                     {
                         var v = -_input.CrtZoom;
-                        if (v > 0)  //统一在不同平台中差异较大的滚动值
+                        if (v > 0) //统一在不同平台中差异较大的滚动值
                         {
                             v = 1f;
                         }
@@ -216,11 +230,13 @@ namespace NonsensicalKit.Tools.CameraTool
                         {
                             v = -1f;
                         }
+
                         if (v != 0)
                         {
                             AdjustZoom(v);
                         }
                     }
+
                     if (_needMove)
                     {
                         AdjustPositionWithFixedInterval(_input.CrtMouseMove);
@@ -235,6 +251,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     {
                         AdjustRoll(_input.CrtMouseMove.x);
                     }
+
                     if (_needDragZoom)
                     {
                         AdjustDragZoom(_input.CrtMouseMove);
@@ -251,6 +268,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     {
                         return;
                     }
+
                     if (_needMove)
                     {
                         AdjustPositionWithFixedInterval(_mobileInput.TheOneFingerMove);
@@ -264,7 +282,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     if (_needDragZoom)
                     {
                         var v = -_mobileInput.TwoFingerDistance;
-                        if (v > 0)  //统一在不同平台中差异较大的滚动值
+                        if (v > 0) //统一在不同平台中差异较大的滚动值
                         {
                             v = 1f;
                         }
@@ -272,6 +290,7 @@ namespace NonsensicalKit.Tools.CameraTool
                         {
                             v = -1f;
                         }
+
                         if (v != 0)
                         {
                             AdjustZoom(v);
@@ -325,6 +344,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 RemoveMouseEvent();
             }
+
             if (_fingerEventInitFlag)
             {
                 RemoveMobileInputEvent();
@@ -362,7 +382,6 @@ namespace NonsensicalKit.Tools.CameraTool
                     _targetPitch = m_maxPitch;
                 }
             }
-
         }
 
         /// <summary>
@@ -414,20 +433,41 @@ namespace NonsensicalKit.Tools.CameraTool
         /// 聚焦到某个点
         /// </summary>
         /// <param name="point"></param>
-        public virtual void Foucs(Vector3 point)
+        /// <param name="immediate"></param>
+        public virtual void Focus(Vector3 point, bool immediate = false)
         {
-            m_viewPoint.position = point;
             _targetPos = point;
             _targetRoll = 0;
+            if (immediate)
+            {
+                m_viewPoint.position = point;
+                _crtRoll = 0;
+            }
         }
 
         /// <summary>
         /// 聚焦到某个对象
         /// </summary>
         /// <param name="tsf"></param>
-        public virtual void Foucs(Transform tsf)
+        /// <param name="immediate"></param>
+        /// <param name="setDistance"></param>
+        public virtual void Focus(Transform tsf, bool immediate = false, bool setDistance = false)
         {
-            Foucs(tsf.position);
+            if (setDistance)
+            {
+                var result = tsf.GetFocus();
+                Focus(result.Item1, immediate);
+                _TargetDistance = result.Item2;
+                if (immediate)
+                {
+                    _crtZoom = _targetZoom;
+                }
+            }
+            else
+            {
+                var b = tsf.BoundingBoxGlobal();
+                Focus(tsf.position+b.center, immediate);
+            }
         }
 
         /// <summary>
@@ -481,10 +521,12 @@ namespace NonsensicalKit.Tools.CameraTool
                 _targetPos += direction * distance;
             }
         }
+
         /// <summary>
         /// 根据改变量进行位移(使用固定间隔时间)
         /// </summary>
         /// <param name="delta"></param>
+        /// <param name="interval"></param>
         protected void AdjustPositionWithFixedInterval(Vector2 delta, float interval = 0.02f)
         {
             Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
@@ -502,6 +544,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 return;
             }
+
             _mouseEventInitFlag = true;
             switch (m_moveControl)
             {
@@ -523,6 +566,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_rotateControl)
             {
                 case ControlMouseKey.LeftKeyControl:
@@ -543,6 +587,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_rollControl)
             {
                 case ControlMouseKey.LeftKeyControl:
@@ -563,6 +608,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_DragZoomControl)
             {
                 case ControlMouseKey.LeftKeyControl:
@@ -584,6 +630,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     break;
             }
         }
+
         private void AddMobileInputEvent()
         {
             if (_fingerEventInitFlag) return;
@@ -603,6 +650,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_fingerRotateControl)
             {
                 case ControlFinger.OneFinger:
@@ -616,6 +664,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_fingerDragZoomControl)
             {
                 case ControlFinger.OneFinger:
@@ -638,6 +687,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 return;
             }
+
             _mouseEventInitFlag = false;
             switch (m_moveControl)
             {
@@ -659,6 +709,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_rotateControl)
             {
                 case ControlMouseKey.LeftKeyControl:
@@ -679,6 +730,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_rollControl)
             {
                 case ControlMouseKey.LeftKeyControl:
@@ -699,6 +751,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_DragZoomControl)
             {
                 case ControlMouseKey.LeftKeyControl:
@@ -724,6 +777,7 @@ namespace NonsensicalKit.Tools.CameraTool
         private void RemoveMobileInputEvent()
         {
             if (!_fingerEventInitFlag) { return; }
+
             _fingerEventInitFlag = false;
 
             switch (m_fingerMoveControl)
@@ -739,6 +793,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
+
             switch (m_fingerRotateControl)
             {
                 case ControlFinger.OneFinger:
@@ -767,7 +822,6 @@ namespace NonsensicalKit.Tools.CameraTool
                 default:
                     break;
             }
-
         }
 
         private void StartMove()
@@ -777,6 +831,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 _needMove = true;
             }
         }
+
         private void StopMove()
         {
             _needMove = false;
@@ -789,6 +844,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 _needRotate = true;
             }
         }
+
         private void StopRotate()
         {
             _needRotate = false;
@@ -801,6 +857,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 _needRoll = true;
             }
         }
+
         private void StopRoll()
         {
             _needRoll = false;
@@ -813,6 +870,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 _needDragZoom = true;
             }
         }
+
         private void StopZoom()
         {
             _needDragZoom = false;
@@ -828,6 +886,5 @@ namespace NonsensicalKit.Tools.CameraTool
             }
         }
 #endif
-
     }
 }

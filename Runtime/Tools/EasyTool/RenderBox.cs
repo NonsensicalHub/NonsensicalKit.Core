@@ -66,7 +66,7 @@ namespace NonsensicalKit.Tools.EasyTool
         public void CalculateBox()
         {
             Quaternion qn = transform.rotation;
-            transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+            transform.rotation = Quaternion.identity;
 
             bool hasBounds = false;
 
@@ -87,10 +87,12 @@ namespace NonsensicalKit.Tools.EasyTool
                 }
             }
 
-            transform.rotation = qn;
             bounds.center -= transform.position;
+            
             m_center = bounds.center;
             m_extent = bounds.extents;
+            
+            transform.rotation = qn;
         }
 
         public bool Contains(Vector3 point)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NonsensicalKit.Tools;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// <summary>
     /// 添加或修改成自适应大小的盒子碰撞体
     /// </summary>
-    public class AutoFixedBoxCOllider : EditorWindow
+    public class AutoFixedBoxCollider : EditorWindow
     {
         private static string _showText; //显示给用户的文本
 
@@ -46,6 +47,7 @@ namespace NonsensicalKit.Core.Editor.Tools
                 Debug.Log("盒子碰撞器自适应完成");
             }
         }
+
         [MenuItem("NonsensicalKit/批量修改/自动添加自适应大小盒子碰撞器")]
         private static void AddComponentToCrtTarget()
         {
@@ -59,8 +61,8 @@ namespace NonsensicalKit.Core.Editor.Tools
                 {
                     FitToChildren(Selection.gameObjects[i]);
                 }
-
             }
+
             Debug.Log("盒子碰撞器自适应完成");
         }
 
@@ -120,20 +122,22 @@ namespace NonsensicalKit.Core.Editor.Tools
             {
                 return;
             }
+
             BoxCollider bc;
             if ((bc = go.GetComponent<BoxCollider>()) == null)
             {
                 bc = go.AddComponent<BoxCollider>();
-            }
 
-            bc.isTrigger = true;
+                bc.isTrigger = true;
+            }
 
             Quaternion qn = go.transform.rotation;
             go.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
             Bounds bounds = Renderer.bounds;
             go.transform.rotation = qn;
 
-            bc.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y, bounds.size.z / go.transform.lossyScale.z);
+            bc.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y,
+                bounds.size.z / go.transform.lossyScale.z);
         }
 
 
@@ -144,7 +148,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         private static void FitToChildren(GameObject go)
         {
             Quaternion qn = go.transform.rotation;
-            go.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+            go.transform.rotation = Quaternion.identity;
 
             bool hasBounds = false;
             Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
@@ -162,23 +166,21 @@ namespace NonsensicalKit.Core.Editor.Tools
                     bounds = item.bounds;
                     hasBounds = true;
                 }
-
             }
 
             BoxCollider collider;
             if ((collider = go.GetComponent<BoxCollider>()) == null)
             {
                 collider = go.AddComponent<BoxCollider>();
+                collider.isTrigger = true;
             }
 
+            collider.center = go.transform.InverseTransformPoint(bounds.center);
 
-            collider.isTrigger = true;
-            collider.center = bounds.center - go.transform.position;
-
-            collider.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y, bounds.size.z / go.transform.lossyScale.z);
+            collider.size = bounds.size.Division(go.transform.lossyScale);
 
             EditorUtility.SetDirty(collider);
-            go.transform.rotation = qn;
+            //go.transform.rotation = qn;
         }
     }
 }

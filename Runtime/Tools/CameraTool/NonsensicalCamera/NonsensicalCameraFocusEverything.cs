@@ -1,23 +1,29 @@
+using System;
+using NonsensicalKit.Core;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.CameraTool
 {
-    public class NonsensicalCameraFoucsEverything : MonoBehaviour
+    public class NonsensicalCameraFocusEverything : MonoBehaviour
     {
+        [SerializeField] private bool m_setDistance;
+        [SerializeField] private bool m_immediate;
+        
         private NonsensicalCamera _camera;
         private RaycastHit _hit;
         private InputHub _input;
 
-        private void Awake()
+        private void Start()
         {
-            _camera = GetComponent<NonsensicalCamera>();
+            if (_camera == null)
+            {
+                _camera = IOCC.Get<NonsensicalCamera>();
+            }
             if (_camera != null)
             {
-
                 _input = InputHub.Instance;
                 _input.OnMouseLeftButtonDown += OnLeftMouseButtonDown;
-
             }
         }
 
@@ -28,7 +34,7 @@ namespace NonsensicalKit.Tools.CameraTool
             Physics.Raycast(ray, out _hit, 100);
             if (_hit.transform != null)
             {
-                _camera.Foucs(_hit.transform);
+                _camera.Focus(_hit.transform,m_immediate,m_setDistance);
             }
         }
     }
