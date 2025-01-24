@@ -1,28 +1,25 @@
 using NonsensicalKit.Core;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.InputTool
 {
-    public partial class MobileInputHub : MonoSingleton<MobileInputHub>
+    public partial class MobileInputHub
     {
-
         private Vector2 _oneStartPosition;
         private Vector2 _twoStartPosition;
         private Vector2 _twoDistance;
         private float _distanceDelta;
         private float _startDistance;
+
         private void Update()
         {
-
             if (Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0);
                 switch (touch.phase)
                 {
                     case TouchPhase.Began:
-                        OnOneFingerDowm?.Invoke();
+                        OnOneFingerDown?.Invoke();
                         _oneStartPosition = touch.position;
 
                         break;
@@ -34,7 +31,7 @@ namespace NonsensicalKit.Tools.InputTool
                         break;
 
                     case TouchPhase.Stationary:
-                        ISOneFingerHold = true;
+                        IsOneFingerHold = true;
                         _oneStartPosition = touch.position;
                         TheOneFingerMove = Vector2.zero;
                         break;
@@ -42,6 +39,7 @@ namespace NonsensicalKit.Tools.InputTool
                         OnOneFingerUp?.Invoke();
                         break;
                 }
+
                 TheOneFingerPos = touch.position;
 
                 if (Input.touchCount > 1)
@@ -50,7 +48,7 @@ namespace NonsensicalKit.Tools.InputTool
                     switch (touch2.phase)
                     {
                         case TouchPhase.Began:
-                            OnTwoFingerDowm?.Invoke();
+                            OnTwoFingerDown?.Invoke();
                             _twoStartPosition = touch2.position;
 
                             break;
@@ -58,7 +56,7 @@ namespace NonsensicalKit.Tools.InputTool
                             _startDistance = Vector2.Distance(_twoStartPosition, touch.position);
                             _distanceDelta = Vector2.Distance(touch2.position, touch.position) - _startDistance;
 
-                            if (TwoFingerDistance != _distanceDelta)
+                            if (!Mathf.Approximately(TwoFingerDistance, _distanceDelta))
                             {
                                 OnTwoFingerDistanceChanged?.Invoke(_distanceDelta);
                                 TwoFingerDistance = _distanceDelta;
@@ -73,7 +71,7 @@ namespace NonsensicalKit.Tools.InputTool
 
                             break;
                         case TouchPhase.Stationary:
-                            ISTwoFingerHold = true;
+                            IsTwoFingerHold = true;
                             _twoStartPosition = touch2.position;
 
                             break;
@@ -86,11 +84,9 @@ namespace NonsensicalKit.Tools.InputTool
                 }
                 else
                 {
-                    ISTwoFingerHold = false;
+                    IsTwoFingerHold = false;
                 }
-
             }
-
         }
     }
 }

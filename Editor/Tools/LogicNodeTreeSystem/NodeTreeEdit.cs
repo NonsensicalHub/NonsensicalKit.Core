@@ -13,6 +13,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
     public class NodeTreeEdit<T> where T : TreeData<T>
     {
         public delegate string GetHeaderStringDelegate(T node);
+
         public GetHeaderStringDelegate GetHeadString;
         public Action<Rect, T> OnDrawElement;
         public Action<Rect, T> OnDrawFooter;
@@ -23,7 +24,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
         public float ElementHeight = 20;
         public float HeaderHeight = 20;
         public float FooterHeight = 20;
-        public float LevelIndent = 10;    //每级缩进
+        public float LevelIndent = 10; //每级缩进
 
         private T _root;
         private T _removeBuffer;
@@ -36,25 +37,22 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
         {
             get
             {
-                if (_defaults == null)
-                    _defaults = new Style();
-
-                return _defaults;
+                return _defaults ??= new Style();
             }
         }
 
         public class Style
         {
-            public GUIContent iconToolbarPlus = EditorGUIUtility.TrIconContent("Toolbar Plus", "Add to the list");
-            public GUIContent iconClose = EditorGUIUtility.TrIconContent("Toolbar Minus", "Remove self");
-            public GUIContent iconToolbarMinus = EditorGUIUtility.TrIconContent("Toolbar Minus", "Remove last from the list");
-            public readonly GUIStyle headerBackground = "RL Header";
-            public readonly GUIStyle footerBackground = "RL Footer";
-            public readonly GUIStyle boxBackground = "RL Background";
-            public readonly GUIStyle elementBackground = "RL Element";
-            public readonly GUIStyle preButton = "RL FooterButton";
+            public GUIContent IconToolbarPlus = EditorGUIUtility.TrIconContent("Toolbar Plus", "Add to the list");
+            public GUIContent IconClose = EditorGUIUtility.TrIconContent("Toolbar Minus", "Remove self");
+            public GUIContent IconToolbarMinus = EditorGUIUtility.TrIconContent("Toolbar Minus", "Remove last from the list");
+            public readonly GUIStyle HeaderBackground = "RL Header";
+            public readonly GUIStyle FooterBackground = "RL Footer";
+            public readonly GUIStyle BoxBackground = "RL Background";
+            public readonly GUIStyle ElementBackground = "RL Element";
+            public readonly GUIStyle PreButton = "RL FooterButton";
 
-            public readonly GUIStyle foldoutHeader = EditorStyles.foldout;
+            public readonly GUIStyle FoldoutHeader = EditorStyles.foldout;
         }
 
         public NodeTreeEdit(T root)
@@ -81,6 +79,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
             {
                 return totalHeiget;
             }
+
             totalHeiget += FooterHeight;
             var childs = node.GetChildren();
             if (childs.Count > 0)
@@ -90,6 +89,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
                     totalHeiget += GetHeight(item);
                 }
             }
+
             return totalHeiget;
         }
 
@@ -145,6 +145,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
                 DrawElement(elementRect, node);
                 rect.y += ElementHeight;
             }
+
             return rect;
         }
 
@@ -152,24 +153,19 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
         {
             if (Event.current.type == EventType.Repaint)
             {
-                Defaults.headerBackground.Draw(headerRect, false, false, false, false);
+                Defaults.HeaderBackground.Draw(headerRect, false, false, false, false);
             }
 
             int childCount = node.GetChildren().Count;
 
-            string headerString = string.Empty;
-            if (GetHeadString != null)
-                headerString = GetHeadString(node);
-            else
-                headerString = "Node";
+            var headerString = GetHeadString != null ? GetHeadString(node) : "Node";
             if (childCount > 0)
             {
-
                 var toggleRect = headerRect;
                 toggleRect.xMax -= 20;
                 EditorGUI.BeginChangeCheck();
 
-                node.IsFoldout = GUI.Toggle(toggleRect, node.IsFoldout, headerString, Defaults.foldoutHeader);
+                node.IsFoldout = GUI.Toggle(toggleRect, node.IsFoldout, headerString, Defaults.FoldoutHeader);
                 if (EditorGUI.EndChangeCheck())
                 {
                     _changed = true;
@@ -185,7 +181,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
 
             headerRect.x += 90;
             headerRect.width = headerRect.height;
-            if (GUI.Button(headerRect, Defaults.iconClose, Defaults.preButton))
+            if (GUI.Button(headerRect, Defaults.IconClose, Defaults.PreButton))
             {
                 _removeBuffer = node;
                 _changed = true;
@@ -194,11 +190,9 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
 
         private void DrawElement(Rect elementRect, T node)
         {
-            bool isSelect = true;
-            //bool isSelect = selectdObject == node;
             // draw the background in repaint
             if (Event.current.type == EventType.Repaint)
-                Defaults.boxBackground.Draw(elementRect, false, isSelect, isSelect, isSelect);
+                Defaults.BoxBackground.Draw(elementRect, false, true, true, true);
 
             elementRect.height = ElementHeight;
             elementRect.x += 2;
@@ -242,10 +236,10 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
                 Rect addRect = new Rect(leftEdge + 4, footerRect.y, 25, 16);
                 if (Event.current.type == EventType.Repaint)
                 {
-                    Defaults.footerBackground.Draw(footerRect, false, false, false, false);
+                    Defaults.FooterBackground.Draw(footerRect, false, false, false, false);
                 }
 
-                if (GUI.Button(addRect, Defaults.iconToolbarPlus, Defaults.preButton))
+                if (GUI.Button(addRect, Defaults.IconToolbarPlus, Defaults.PreButton))
                 {
                     OnAddElement?.Invoke(node);
                     _changed = true;

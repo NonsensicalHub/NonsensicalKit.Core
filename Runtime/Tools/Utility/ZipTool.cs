@@ -1,74 +1,61 @@
 using System;
 using System.IO;
+using System.Linq;
 using NonsensicalKit.SharpZipLib.Zip;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools
 {
+    public interface IZipCallback
+    {
+        /// <summary>
+        /// 压缩单个文件或文件夹前执行的回调
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns>如果返回true，则压缩文件或文件夹，反之则不压缩文件或文件夹</returns>
+        public bool OnPreZip(ZipEntry entry);
+
+        /// <summary>
+        /// 压缩单个文件或文件夹后执行的回调
+        /// </summary>
+        /// <param name="entry"></param>
+        public void OnPostZip(ZipEntry entry);
+
+        /// <summary>
+        /// 压缩执行完毕后的回调
+        /// </summary>
+        /// <param name="result">true表示压缩成功，false表示压缩失败</param>
+        public void OnFinished(bool result);
+    }
+
+    public interface IUnzipCallback
+    {
+        /// <summary>
+        /// 解压单个文件或文件夹前执行的回调
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns>如果返回true，则压缩文件或文件夹，反之则不压缩文件或文件夹</returns>
+        public bool OnPreUnzip(ZipEntry entry);
+
+        /// <summary>
+        /// 解压单个文件或文件夹后执行的回调
+        /// </summary>
+        /// <param name="entry"></param>
+        public void OnPostUnzip(ZipEntry entry);
+
+        /// <summary>
+        /// 解压执行完毕后的回调
+        /// </summary>
+        /// <param name="result">true表示解压成功，false表示解压失败</param>
+        public void OnFinished(bool result);
+    }
+
     /// <summary>
     /// https://blog.csdn.net/u014361280/article/details/109677502
     /// 待整改
     /// </summary>
     public class ZipTool : MonoBehaviour
     {
-        #region ZipCallback
-
-        public abstract class ZipCallback
-        {
-            /// <summary>
-            /// 压缩单个文件或文件夹前执行的回调
-            /// </summary>
-            /// <param name="entry"></param>
-            /// <returns>如果返回true，则压缩文件或文件夹，反之则不压缩文件或文件夹</returns>
-            public virtual bool OnPreZip(ZipEntry entry)
-            {
-                return true;
-            }
-
-            /// <summary>
-            /// 压缩单个文件或文件夹后执行的回调
-            /// </summary>
-            /// <param name="entry"></param>
-            public abstract void OnPostZip(ZipEntry entry);
-
-            /// <summary>
-            /// 压缩执行完毕后的回调
-            /// </summary>
-            /// <param name="result">true表示压缩成功，false表示压缩失败</param>
-            public abstract void OnFinished(bool result) ;
-        }
-
-        #endregion
-
-        #region UnzipCallback
-
-        public abstract class UnzipCallback
-        {
-            /// <summary>
-            /// 解压单个文件或文件夹前执行的回调
-            /// </summary>
-            /// <param name="entry"></param>
-            /// <returns>如果返回true，则压缩文件或文件夹，反之则不压缩文件或文件夹</returns>
-            public virtual bool OnPreUnzip(ZipEntry entry)
-            {
-                return true;
-            }
-
-            /// <summary>
-            /// 解压单个文件或文件夹后执行的回调
-            /// </summary>
-            /// <param name="entry"></param>
-            public abstract void OnPostUnzip(ZipEntry entry);
-
-            /// <summary>
-            /// 解压执行完毕后的回调
-            /// </summary>
-            /// <param name="result">true表示解压成功，false表示解压失败</param>
-            public abstract void OnFinished(bool result) ;
-        }
-
-        #endregion
-
         /// <summary>
         /// 压缩文件和文件夹
         /// </summary>
@@ -77,7 +64,7 @@ namespace NonsensicalKit.Tools
         /// <param name="password">压缩密码</param>
         /// <param name="zipCallback">ZipCallback对象，负责回调</param>
         /// <returns></returns>
-        public static bool Zip(string[] fileOrDirectoryArray, string outputPathName, string password = null, ZipCallback zipCallback = null)
+        public static bool Zip(string[] fileOrDirectoryArray, string outputPathName, string password = null, IZipCallback zipCallback = null)
         {
             if ((null == fileOrDirectoryArray) || string.IsNullOrEmpty(outputPathName))
             {
@@ -127,12 +114,11 @@ namespace NonsensicalKit.Tools
         /// <param name="password">解压密码</param>
         /// <param name="unzipCallback">UnzipCallback对象，负责回调</param>
         /// <returns></returns>
-        public static bool UnzipFile(string filePathName, string outputPath, string password = null, UnzipCallback unzipCallback = null)
+        public static bool UnzipFile(string filePathName, string outputPath, string password = null, IUnzipCallback unzipCallback = null)
         {
             if (string.IsNullOrEmpty(filePathName) || string.IsNullOrEmpty(outputPath))
             {
-                if (null != unzipCallback)
-                    unzipCallback.OnFinished(false);
+                unzipCallback?.OnFinished(false);
 
                 return false;
             }
@@ -143,7 +129,7 @@ namespace NonsensicalKit.Tools
             }
             catch (Exception e)
             {
-                Debug.LogError("[ZipUtility.UnzipFile]: " + e.ToString());
+                Debug.LogError("[ZipUtility.UnzipFile]: " + e);
 
                 if (null != unzipCallback)
                     unzipCallback.OnFinished(false);
@@ -160,7 +146,7 @@ namespace NonsensicalKit.Tools
         /// <param name="password">解压密码</param>
         /// <param name="unzipCallback">UnzipCallback对象，负责回调</param>
         /// <returns></returns>
-        public static bool UnzipFile(byte[] fileBytes, string outputPath, string password = null, UnzipCallback unzipCallback = null)
+        public static bool UnzipFile(byte[] fileBytes, string outputPath, string password = null, IUnzipCallback unzipCallback = null)
         {
             if ((null == fileBytes) || string.IsNullOrEmpty(outputPath))
             {
@@ -186,12 +172,11 @@ namespace NonsensicalKit.Tools
         /// <param name="password">解压密码</param>
         /// <param name="unzipCallback">UnzipCallback对象，负责回调</param>
         /// <returns></returns>
-        public static bool UnzipFile(Stream inputStream, string outputPath, string password = null, UnzipCallback unzipCallback = null)
+        public static bool UnzipFile(Stream inputStream, string outputPath, string password = null, IUnzipCallback unzipCallback = null)
         {
             if ((null == inputStream) || string.IsNullOrEmpty(outputPath))
             {
-                if (null != unzipCallback)
-                    unzipCallback.OnFinished(false);
+                unzipCallback?.OnFinished(false);
 
                 return false;
             }
@@ -201,13 +186,12 @@ namespace NonsensicalKit.Tools
                 Directory.CreateDirectory(outputPath);
 
             // 解压Zip包
-            ZipEntry entry = null;
             using (ZipInputStream zipInputStream = new ZipInputStream(inputStream))
             {
                 if (!string.IsNullOrEmpty(password))
                     zipInputStream.Password = password;
 
-                while (null != (entry = zipInputStream.GetNextEntry()))
+                while (zipInputStream.GetNextEntry() is { } entry)
                 {
                     if (string.IsNullOrEmpty(entry.Name))
                         continue;
@@ -227,30 +211,26 @@ namespace NonsensicalKit.Tools
                     // 写入文件
                     try
                     {
-                        using (FileStream fileStream = File.Create(filePathName))
+                        using FileStream fileStream = File.Create(filePathName);
+                        byte[] bytes = new byte[1024];
+                        while (true)
                         {
-                            byte[] bytes = new byte[1024];
-                            while (true)
+                            int count = zipInputStream.Read(bytes, 0, bytes.Length);
+                            if (count > 0)
+                                fileStream.Write(bytes, 0, count);
+                            else
                             {
-                                int count = zipInputStream.Read(bytes, 0, bytes.Length);
-                                if (count > 0)
-                                    fileStream.Write(bytes, 0, count);
-                                else
-                                {
-                                    if (null != unzipCallback)
-                                        unzipCallback.OnPostUnzip(entry);
+                                unzipCallback?.OnPostUnzip(entry);
 
-                                    break;
-                                }
+                                break;
                             }
                         }
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError("[ZipUtility.UnzipFile]: " + e.ToString());
+                        Debug.LogError("[ZipUtility.UnzipFile]: " + e);
 
-                        if (null != unzipCallback)
-                            unzipCallback.OnFinished(false);
+                        unzipCallback?.OnFinished(false);
 
                         return false;
                     }
@@ -270,11 +250,10 @@ namespace NonsensicalKit.Tools
         /// <param name="zipOutputStream">压缩输出流</param>
         /// <param name="zipCallback">ZipCallback对象，负责回调</param>
         /// <returns></returns>
-        private static bool ZipFile(string filePathName, string parentRelPath, ZipOutputStream zipOutputStream, ZipCallback zipCallback = null)
+        private static bool ZipFile(string filePathName, string parentRelPath, ZipOutputStream zipOutputStream, IZipCallback zipCallback = null)
         {
             //Crc32 crc32 = new Crc32();
-            ZipEntry entry = null;
-            FileStream fileStream = null;
+            ZipEntry entry;
             try
             {
                 string entryName = parentRelPath + '/' + Path.GetFileName(filePathName);
@@ -284,10 +263,7 @@ namespace NonsensicalKit.Tools
                 if ((null != zipCallback) && !zipCallback.OnPreZip(entry))
                     return true; // 过滤
 
-                fileStream = File.OpenRead(filePathName);
-                byte[] buffer = new byte[fileStream.Length];
-                fileStream.Read(buffer, 0, buffer.Length);
-                fileStream.Close();
+                byte[] buffer = File.ReadAllBytes(filePathName);
 
                 entry.Size = buffer.Length;
 
@@ -300,16 +276,8 @@ namespace NonsensicalKit.Tools
             }
             catch (Exception e)
             {
-                Debug.LogError("[ZipUtility.ZipFile]: " + e.ToString());
+                Debug.LogError("[ZipUtility.ZipFile]: " + e);
                 return false;
-            }
-            finally
-            {
-                if (null != fileStream)
-                {
-                    fileStream.Close();
-                    fileStream.Dispose();
-                }
             }
 
             zipCallback?.OnPostZip(entry);
@@ -325,15 +293,17 @@ namespace NonsensicalKit.Tools
         /// <param name="zipOutputStream">压缩输出流</param>
         /// <param name="zipCallback">ZipCallback对象，负责回调</param>
         /// <returns></returns>
-        private static bool ZipDirectory(string path, string parentRelPath, ZipOutputStream zipOutputStream, ZipCallback zipCallback = null)
+        private static bool ZipDirectory(string path, string parentRelPath, ZipOutputStream zipOutputStream, IZipCallback zipCallback = null)
         {
-            ZipEntry entry = null;
+            ZipEntry entry;
             try
             {
                 string entryName = Path.Combine(parentRelPath, Path.GetFileName(path) + '/');
-                entry = new ZipEntry(entryName);
-                entry.DateTime = DateTime.Now;
-                entry.Size = 0;
+                entry = new ZipEntry(entryName)
+                {
+                    DateTime = DateTime.Now,
+                    Size = 0
+                };
 
                 if ((null != zipCallback) && !zipCallback.OnPreZip(entry))
                     return true; // 过滤
@@ -345,7 +315,7 @@ namespace NonsensicalKit.Tools
                 foreach (var t in files)
                 {
                     // 排除Unity中可能的 .meta 文件
-                    if (t.EndsWith(".meta") == true)
+                    if (t.EndsWith(".meta"))
                     {
                         Debug.LogWarning(t + " not to zip");
                         continue;
@@ -356,17 +326,14 @@ namespace NonsensicalKit.Tools
             }
             catch (Exception e)
             {
-                Debug.LogError("[ZipUtility.ZipDirectory]: " + e.ToString());
+                Debug.LogError("[ZipUtility.ZipDirectory]: " + e);
                 return false;
             }
 
             string[] directories = Directory.GetDirectories(path);
-            for (int index = 0; index < directories.Length; ++index)
+            if (directories.Any(t => !ZipDirectory(t, Path.Combine(parentRelPath, Path.GetFileName(path)), zipOutputStream, zipCallback)))
             {
-                if (!ZipDirectory(directories[index], Path.Combine(parentRelPath, Path.GetFileName(path)), zipOutputStream, zipCallback))
-                {
-                    return false;
-                }
+                return false;
             }
 
             zipCallback?.OnPostZip(entry);

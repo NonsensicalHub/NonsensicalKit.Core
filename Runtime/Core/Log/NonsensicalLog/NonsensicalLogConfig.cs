@@ -1,31 +1,33 @@
+using System;
 using NonsensicalKit.Core.Service.Config;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
     [CreateAssetMenu(fileName = "New NonsensicalLogConfig", menuName = "ScriptableObjects/NonsensicalLogConfig")]
     public class NonsensicalLogConfig : ConfigObject
     {
-        public NonsensicalLogConfigData data;
+        [FormerlySerializedAs("data")] public NonsensicalLogConfigData m_Data;
 
         public override ConfigData GetData()
         {
-            return data;
+            return m_Data;
         }
 
         public override void SetData(ConfigData cd)
         {
-            data = cd as NonsensicalLogConfigData;
+            m_Data = cd as NonsensicalLogConfigData;
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public class NonsensicalLogConfigData : ConfigData
     {
-        public NonsensicalLogStrategyConfig[] Strategys;
+        [FormerlySerializedAs("Strategys")] public NonsensicalLogStrategyConfig[] m_Strategies;
     }
 
-    [System.Serializable]
+    [Serializable]
     public class NonsensicalLogStrategyConfig
     {
         public bool WorkInEditor;

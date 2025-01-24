@@ -5,9 +5,9 @@ namespace NonsensicalKit.Tools.GUITool
 {
     public class GUIFloatTips : NonsensicalMono
     {
-        [SerializeField][Range(0, 1)] private float m_x = 0.5f;
-        [SerializeField][Range(0, 1)] private float m_y = 0.2f;
-        [SerializeField][Range(0, 10)] private float m_showTime = 1;
+        [SerializeField] [Range(0, 1)] private float m_x = 0.5f;
+        [SerializeField] [Range(0, 1)] private float m_y = 0.2f;
+        [SerializeField] [Range(0, 10)] private float m_showTime = 1;
         private bool _showTips;
         private float _timer;
         private string _tipsString;
@@ -42,8 +42,8 @@ namespace NonsensicalKit.Tools.GUITool
             {
                 int width = Screen.width;
                 int height = Screen.height;
-                UnityEngine.GUI.Box(new Rect(width * m_x - _width * 0.5f - 10, height * m_y - _height * 0.5f - 10, _width + 20, _height + 20), "");
-                UnityEngine.GUI.TextArea(new Rect(width * m_x - _width * 0.5f, height * m_y - _height * 0.5f, _width, _height), _tipsString, _guiStyle);
+                GUI.Box(new Rect(width * m_x - _width * 0.5f - 10, height * m_y - _height * 0.5f - 10, _width + 20, _height + 20), "");
+                GUI.TextArea(new Rect(width * m_x - _width * 0.5f, height * m_y - _height * 0.5f, _width, _height), _tipsString, _guiStyle);
                 _timer += Time.deltaTime;
                 if (_timer > m_showTime)
                 {

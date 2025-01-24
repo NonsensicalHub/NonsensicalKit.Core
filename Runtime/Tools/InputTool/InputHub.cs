@@ -1,5 +1,5 @@
-using NonsensicalKit.Core;
 using System;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.InputTool

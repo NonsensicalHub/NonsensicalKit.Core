@@ -9,7 +9,7 @@ namespace NonsensicalKit.Core.Log
 {
     public static class LogCore
     {
-        public static ILog Logger;
+        private static ILog _logger;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         private static void CreateLog()
@@ -28,79 +28,76 @@ namespace NonsensicalKit.Core.Log
             {
                 if (runningLog.Equals(type.Name))
                 {
-                    Logger = Activator.CreateInstance(type) as ILog;
+                    _logger = Activator.CreateInstance(type) as ILog;
                     break;
                 }
             }
 
-            if (Logger == null)
-            {
-                Logger = new DefaultLog();
-            }
+            _logger ??= new DefaultLog();
         }
 
         public static void Debug(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (Logger == null)
+            if (_logger == null)
             {
                 UnityEngine.Debug.Log(obj, context);
             }
             else
             {
-                Logger.Debug(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
+                _logger.Debug(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
             }
         }
 
         public static void Info(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (Logger == null)
+            if (_logger == null)
             {
                 UnityEngine.Debug.Log(obj, context);
             }
             else
             {
-                Logger.Info(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
+                _logger.Info(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
             }
         }
 
         public static void Warning(object obj, Object context = null, string[] tags = null,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (Logger == null)
+            if (_logger == null)
             {
                 UnityEngine.Debug.LogWarning(obj, context);
             }
             else
             {
-                Logger.Warning(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
+                _logger.Warning(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
             }
         }
 
         public static void Error(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (Logger == null)
+            if (_logger == null)
             {
                 UnityEngine.Debug.LogError(obj, context);
             }
             else
             {
-                Logger.Error(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
+                _logger.Error(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
             }
         }
 
         public static void Fatal(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
-            if (Logger == null)
+            if (_logger == null)
             {
                 UnityEngine.Debug.LogError(obj, context);
             }
             else
             {
-                Logger.Fatal(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
+                _logger.Fatal(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
             }
         }
     }

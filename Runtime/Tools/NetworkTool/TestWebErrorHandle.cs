@@ -1,5 +1,5 @@
-using NonsensicalKit.Core.Log;
 using System;
+using NonsensicalKit.Core.Log;
 using UnityEngine.Networking;
 
 namespace NonsensicalKit.Tools.NetworkTool

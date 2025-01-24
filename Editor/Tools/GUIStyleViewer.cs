@@ -10,15 +10,13 @@ namespace NonsensicalKit.Core.Editor.Tools
     public class GUIStyleViewer : EditorWindow
     {
         private Vector2 _scrollPosition = new Vector2(0, 0);
-        private string _search = "";
+        private string _search = string.Empty;
         private GUIStyle _textStyle;
-
-        private static GUIStyleViewer _window;
 
         [MenuItem("NonsensicalKit/GUIStyleViewer", false, 10)]
         private static void OpenStyleViewer()
         {
-            _window = GetWindow<GUIStyleViewer>(false, "内置GUIStyle");
+            GetWindow<GUIStyleViewer>(false, "内置GUIStyle");
         }
 
         private void OnGUI()
@@ -40,7 +38,6 @@ namespace NonsensicalKit.Core.Editor.Tools
             GUILayout.Label("名字", _textStyle, GUILayout.Width(300));
             GUILayout.EndHorizontal();
 
-
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
 
             foreach (var style in GUI.skin.customStyles)
@@ -54,6 +51,7 @@ namespace NonsensicalKit.Core.Editor.Tools
                         EditorGUIUtility.systemCopyBuffer = style.name;
                         Debug.LogError(style.name);
                     }
+
                     EditorGUILayout.SelectableLabel(style.name, GUILayout.Width(300));
                     GUILayout.EndHorizontal();
                 }

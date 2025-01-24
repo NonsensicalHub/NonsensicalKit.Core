@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Tools
 {
@@ -11,22 +12,22 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class GameObjectTool
     {
-        public static void SetChilds(this Transform t, IEnumerable<GameObject> childs)
+        public static void SetChildren(this Transform t, IEnumerable<GameObject> children)
         {
-            if (childs != null)
+            if (children != null)
             {
-                foreach (var item in childs)
+                foreach (var item in children)
                 {
                     item.transform.SetParent(t);
                 }
             }
         }
 
-        public static void SetChilds(this Transform t, IEnumerable<Transform> childs)
+        public static void SetChildren(this Transform t, IEnumerable<Transform> children)
         {
-            if (childs != null)
+            if (children != null)
             {
-                foreach (var item in childs)
+                foreach (var item in children)
                 {
                     item.SetParent(t);
                 }
@@ -64,10 +65,10 @@ namespace NonsensicalKit.Tools
 
             List<string> types = new List<string>();
 
-            for (int i = 0; i < coms.Length; i++)
+            foreach (var t1 in coms)
             {
-                if (coms[i] == null) continue;
-                types.Add(coms[i].GetType().Name);
+                if (t1 == null) continue;
+                types.Add(t1.GetType().Name);
             }
 
             string[] otherComponent = types.ToArray();
@@ -79,7 +80,7 @@ namespace NonsensicalKit.Tools
         /// 销毁未激活部分
         /// </summary>
         /// <param name="tsf"></param>
-        public static void DestroyUnactivePart(Transform tsf)
+        public static void DestroyInactivePart(Transform tsf)
         {
             Queue<Transform> nodes = new Queue<Transform>();
             nodes.Enqueue(tsf);
@@ -89,7 +90,7 @@ namespace NonsensicalKit.Tools
                 Transform crtNode = nodes.Dequeue();
                 if (crtNode.gameObject.activeSelf == false)
                 {
-                    GameObject.Destroy(crtNode.gameObject);
+                    Object.Destroy(crtNode.gameObject);
                 }
                 else
                 {
@@ -134,11 +135,13 @@ namespace NonsensicalKit.Tools
             {
                 return root;
             }
+
             string[] index = path.Split('|', StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < index.Length; i++)
+            foreach (var t in index)
             {
-                root = root.GetChild(int.Parse(index[i]));
+                root = root.GetChild(int.Parse(t));
             }
+
             return root;
         }
 
@@ -179,7 +182,8 @@ namespace NonsensicalKit.Tools
             collider.isTrigger = true;
             collider.center = bounds.center - go.transform.position;
 
-            collider.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y, bounds.size.z / go.transform.lossyScale.z);
+            collider.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y,
+                bounds.size.z / go.transform.lossyScale.z);
 
             go.transform.rotation = qn;
         }

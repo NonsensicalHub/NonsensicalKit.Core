@@ -1,9 +1,8 @@
-using NonsensicalKit.Core;
-using NonsensicalKit.Tools;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using NonsensicalKit.Tools;
+using NUnit.Framework;
 
 namespace NonsensicalKit.Core.Editor.Tests
 {
@@ -22,10 +21,10 @@ namespace NonsensicalKit.Core.Editor.Tests
                 foreach (var value in values)
                 {
                     var intValue = (int)value;
-                    if (keyValuePairs.ContainsKey(intValue))
+                    if (keyValuePairs.TryGetValue(intValue, out var pair))
                     {
                         errorCount++;
-                        sb.AppendLine($"枚举{item.Name}与枚举{keyValuePairs[intValue]}存在相同的值索引{intValue}");
+                        sb.AppendLine($"枚举{item.Name}与枚举{pair}存在相同的值索引{intValue}");
                     }
                     else
                     {
@@ -33,10 +32,12 @@ namespace NonsensicalKit.Core.Editor.Tests
                     }
                 }
             }
+
             if (errorCount > 0)
             {
                 sb.Insert(0, $"枚举值重复检测完毕,共发现{errorCount}个重复");
             }
+
             Assert.That(errorCount == 0, sb.ToString());
         }
     }

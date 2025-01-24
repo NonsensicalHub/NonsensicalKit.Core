@@ -1,7 +1,7 @@
-using NonsensicalKit.Tools;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NonsensicalKit.Tools;
 using UnityEngine;
 
 namespace NonsensicalKit.Core
@@ -18,10 +18,11 @@ namespace NonsensicalKit.Core
                 if (_instance == null)
                 {
                     Application.quitting += OnQuitting;
-                    GameObject instanceGameobject = new GameObject("Nonsensical Instance");
-                    DontDestroyOnLoad(instanceGameobject);
-                    _instance = instanceGameobject.AddComponent<NonsensicalInstance>();
+                    GameObject instanceGameObject = new GameObject("Nonsensical Instance");
+                    DontDestroyOnLoad(instanceGameObject);
+                    _instance = instanceGameObject.AddComponent<NonsensicalInstance>();
                 }
+
                 return _instance;
             }
         }
@@ -35,14 +36,14 @@ namespace NonsensicalKit.Core
             ApplicationIsQuitting = true;
         }
 
-        public Queue<string> Messages;
+        private Queue<string> _messages;
 
-        public List<Tweenner> Tweenners;
+        public List<Tweener> Tweenners;
 
         private void Awake()
         {
-            Messages = new Queue<string>();
-            Tweenners = new List<Tweenner>();
+            _messages = new Queue<string>();
+            Tweenners = new List<Tweener>();
 
 #if UNITY_EDITOR
             int errorCount = 0;
@@ -54,10 +55,10 @@ namespace NonsensicalKit.Core
                 foreach (var value in values)
                 {
                     var intValue = (int)value;
-                    if (keyValuePairs.ContainsKey(intValue))
+                    if (keyValuePairs.TryGetValue(intValue, out var pair))
                     {
                         errorCount++;
-                        Debug.Log($"枚举{item.Name}与枚举{keyValuePairs[intValue]}存在相同的值索引{intValue}");
+                        Debug.Log($"枚举{item.Name}与枚举{pair}存在相同的值索引{intValue}");
                     }
                     else
                     {
@@ -65,6 +66,7 @@ namespace NonsensicalKit.Core
                     }
                 }
             }
+
             if (errorCount > 0)
             {
                 Debug.Log($"枚举值检测到重复,共发现{errorCount}个重复");
@@ -74,9 +76,9 @@ namespace NonsensicalKit.Core
 
         private void Update()
         {
-            while (Messages.Count > 0)
+            while (_messages.Count > 0)
             {
-                Debug.Log(Messages.Dequeue());
+                Debug.Log(_messages.Dequeue());
             }
 
             for (int i = 0; i < Tweenners.Count; i++)
@@ -86,7 +88,7 @@ namespace NonsensicalKit.Core
                     Tweenners.RemoveAt(i);
                     i--;
                 }
-                else if (Tweenners[i].DoIt(Time.deltaTime) == true)
+                else if (Tweenners[i].DoIt(Time.deltaTime))
                 {
                     Tweenners.RemoveAt(i);
                     i--;
@@ -102,6 +104,11 @@ namespace NonsensicalKit.Core
         public void AddComponent<T>() where T : MonoBehaviour
         {
             gameObject.AddComponent<T>();
+        }
+
+        public void Log(string msg)
+        {
+            _messages.Enqueue(msg);
         }
 
         private IEnumerator DelayDoItCoroutine(float delayTime, Action action)

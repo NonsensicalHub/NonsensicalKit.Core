@@ -1,11 +1,10 @@
+using System.Collections.Generic;
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Service;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.LogicNodeTreeSystem
 {
-
     /// <summary>
     /// 逻辑节点控制物体激活,挂载在需要控制的GameObject对象上
     /// </summary>

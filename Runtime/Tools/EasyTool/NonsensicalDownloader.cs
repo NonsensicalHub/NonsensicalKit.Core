@@ -29,7 +29,7 @@ namespace NonsensicalKit.Tools.EasyTool
                 return;
             }
 
-            Register<NonsensicalDownloader>(GetDownloader);
+            Register(GetDownloader);
         }
 
         private NonsensicalDownloader GetDownloader()
@@ -84,7 +84,7 @@ namespace NonsensicalKit.Tools.EasyTool
     {
         protected abstract string FolderPath { get; }
 
-        internal readonly Dictionary<string, Context<TResourceType>> Resources = new Dictionary<string, Context<TResourceType>>();
+        internal readonly Dictionary<string, Context<TResourceType>> Resources = new();
         private readonly string _basePath;
         private readonly NonsensicalDownloader _downloader;
 
@@ -92,18 +92,13 @@ namespace NonsensicalKit.Tools.EasyTool
         {
             get
             {
-                if (_instance == null)
-                {
-                    _instance = new TClass();
-                }
-
-                return _instance;
+                return _instance ??= new TClass();
             }
         }
 
         private static TClass _instance;
 
-        public DownloaderBase()
+        internal DownloaderBase()
         {
             _basePath = Path.Combine(Application.persistentDataPath, FolderPath);
             Directory.CreateDirectory(_basePath);
@@ -302,14 +297,9 @@ namespace NonsensicalKit.Tools.EasyTool
         {
             yield return null;
             var texture2D = DownloadHandlerTexture.GetContent(request);
-            if (texture2D != null)
-            {
-                context.Resource = Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), Vector2.one * 0.5f);
-            }
-            else
-            {
-                context.Resource = null;
-            }
+            context.Resource = texture2D != null
+                ? Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), Vector2.one * 0.5f)
+                : null;
         }
 
         internal override void DoClear()
@@ -348,8 +338,6 @@ namespace NonsensicalKit.Tools.EasyTool
                     dh = dhau;
                 }
                     break;
-                case ".mp2":
-                case ".mp3":
                 default:
                 {
                     var dhau = new DownloadHandlerAudioClip(url, AudioType.MPEG);
@@ -368,14 +356,7 @@ namespace NonsensicalKit.Tools.EasyTool
             yield return null;
 
             var clip = DownloadHandlerAudioClip.GetContent(request);
-            if (clip != null)
-            {
-                context.Resource = clip;
-            }
-            else
-            {
-                context.Resource = null;
-            }
+            context.Resource = clip != null ? clip : null;
         }
 
         internal override void DoClear()

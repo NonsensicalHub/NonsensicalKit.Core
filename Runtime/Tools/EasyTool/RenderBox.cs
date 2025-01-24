@@ -1,6 +1,5 @@
-using UnityEngine;
 using NonsensicalKit.Tools.MeshTool;
-
+using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -15,47 +14,26 @@ namespace NonsensicalKit.Tools.EasyTool
 
         public Vector3 Center
         {
-            get
-            {
-                return m_center;
-            }
-            set
-            {
-                m_center = value;
-            }
+            get => m_center;
+            set => m_center = value;
         }
+
         public Vector3 Rotation
         {
-            get
-            {
-                return m_rotation;
-            }
-            set
-            {
-                m_rotation = value;
-            }
+            get => m_rotation;
+            set => m_rotation = value;
         }
+
         public Vector3 Extent
         {
-            get
-            {
-                return m_extent;
-            }
-            set
-            {
-                m_extent = value;
-            }
+            get => m_extent;
+            set => m_extent = value;
         }
+
         public Vector3 Size
         {
-            get
-            {
-                return m_extent * 2f;
-            }
-            set
-            {
-                m_extent = value * 0.5f;
-            }
+            get => m_extent * 2f;
+            set => m_extent = value * 0.5f;
         }
 
         private void Reset()
@@ -88,10 +66,10 @@ namespace NonsensicalKit.Tools.EasyTool
             }
 
             bounds.center -= transform.position;
-            
+
             m_center = bounds.center;
             m_extent = bounds.extents;
-            
+
             transform.rotation = qn;
         }
 
@@ -106,11 +84,18 @@ namespace NonsensicalKit.Tools.EasyTool
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(RenderBox))]
-    public class RenderBoxEditor : UnityEditor.Editor
+    public class RenderBoxEditor : Editor
     {
-        private Color _RealHandleColor { get { return Handles.color * new Color(1, 1, 1, .5f) + (Handles.lighting ? new Color(0, 0, 0, .5f) : new Color(0, 0, 0, 0)); } }
+        private static readonly int HandleColor = Shader.PropertyToID("_HandleColor");
+        private static readonly int HandleSize = Shader.PropertyToID("_HandleSize");
+        private static readonly int ObjectToWorld = Shader.PropertyToID("_ObjectToWorld");
+        private static readonly int HandleZTest = Shader.PropertyToID("_HandleZTest");
+
+        private Color RealHandleColor =>
+            Handles.color * new Color(1, 1, 1, .5f) + (Handles.lighting ? new Color(0, 0, 0, .5f) : new Color(0, 0, 0, 0));
+
         private Quaternion _crtRotation;
-        private bool editBox = false;
+        private bool _editBox;
         private RenderBox _crtRenderBox;
 
         public void OnSceneGUI()
@@ -149,7 +134,7 @@ namespace NonsensicalKit.Tools.EasyTool
             Handles.DrawLine(p3, p7);
             Handles.DrawLine(p4, p8);
 
-            if (editBox)
+            if (_editBox)
             {
                 Vector3 p9 = boundsCenter + _crtRotation * new Vector3(boundsExtent.x, 0, 0);
                 Vector3 p10 = boundsCenter + _crtRotation * new Vector3(-boundsExtent.x, 0, 0);
@@ -172,7 +157,8 @@ namespace NonsensicalKit.Tools.EasyTool
         {
             EditorGUI.BeginChangeCheck();
 
-            Vector3 newHoldPoint = Handles.FreeMoveHandle(holdPoint, Quaternion.identity, HandleUtility.GetHandleSize(holdPoint) * 0.03f, Vector3.one * 0.5f, Handles.DotHandleCap);
+            Vector3 newHoldPoint = Handles.FreeMoveHandle(holdPoint, Quaternion.identity, HandleUtility.GetHandleSize(holdPoint) * 0.03f,
+                Vector3.one * 0.5f, Handles.DotHandleCap);
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -186,8 +172,9 @@ namespace NonsensicalKit.Tools.EasyTool
                 }
 
                 _crtRenderBox.Size += Vector3.Scale(Vector3.Scale(Vector3.one * v2, dir), dir);
-                _crtRenderBox.Center += Vector3.Scale(Vector3.one * v2 * 0.5f, dir);
+                _crtRenderBox.Center += Vector3.Scale(Vector3.one * (v2 * 0.5f), dir);
             }
+
             EditorGUI.BeginChangeCheck();
         }
 
@@ -196,12 +183,11 @@ namespace NonsensicalKit.Tools.EasyTool
             switch (eventType)
             {
                 case EventType.Repaint:
-                    {
-                        Vector3 cubeSize = Vector3.one * 0.5f;
+                {
+                    Vector3 cubeSize = Vector3.one * 0.5f;
 
-                        Graphics.DrawMeshNow(ModelHelper.CreateCube(Vector3.zero, cubeSize), StartCapDraw(position, _crtRotation, size));
-
-                    }
+                    Graphics.DrawMeshNow(ModelHelper.CreateCube(Vector3.zero, cubeSize), StartCapDraw(position, _crtRotation, size));
+                }
                     break;
                 case EventType.Layout:
                 case EventType.MouseMove:
@@ -212,11 +198,11 @@ namespace NonsensicalKit.Tools.EasyTool
 
         private Matrix4x4 StartCapDraw(Vector3 position, Quaternion rotation, float size)
         {
-            Shader.SetGlobalColor("_HandleColor", _RealHandleColor);
-            Shader.SetGlobalFloat("_HandleSize", size);
+            Shader.SetGlobalColor(HandleColor, RealHandleColor);
+            Shader.SetGlobalFloat(HandleSize, size);
             Matrix4x4 mat = Handles.matrix * Matrix4x4.TRS(position, rotation, Vector3.one);
-            Shader.SetGlobalMatrix("_ObjectToWorld", mat);
-            HandleUtility.handleMaterial.SetInt("_HandleZTest", (int)Handles.zTest);
+            Shader.SetGlobalMatrix(ObjectToWorld, mat);
+            HandleUtility.handleMaterial.SetInt(HandleZTest, (int)Handles.zTest);
             HandleUtility.handleMaterial.SetPass(0);
             return mat;
         }
@@ -227,7 +213,7 @@ namespace NonsensicalKit.Tools.EasyTool
 
             RenderBox rb = (RenderBox)target;
 
-            editBox = GUILayout.Toggle(editBox, "Edit Box");
+            _editBox = GUILayout.Toggle(_editBox, "Edit Box");
 
             if (GUILayout.Button("ResetBox"))
             {

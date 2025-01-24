@@ -25,12 +25,7 @@ namespace NonsensicalKit.Core
             Step0 = length1;
         }
 
-        public void Reset()
-        {
-            Reset(default);
-        }
-
-        public void Reset(T state)
+        public void Reset(T state = default)
         {
             for (int i = 0; i < m_Array.Length; i++)
             {
@@ -40,14 +35,14 @@ namespace NonsensicalKit.Core
 
         public T this[int index0, int index1]
         {
-            get { return m_Array[index0 * Step0 + index1]; }
-            set { m_Array[index0 * Step0 + index1] = value; }
+            get => m_Array[index0 * Step0 + index1];
+            set => m_Array[index0 * Step0 + index1] = value;
         }
 
         public T this[int index]
         {
-            get { return m_Array[index]; }
-            set { m_Array[index] = value; }
+            get => m_Array[index];
+            set => m_Array[index] = value;
         }
 
         public Tuple<int, int> GetIndexTuple(int index)

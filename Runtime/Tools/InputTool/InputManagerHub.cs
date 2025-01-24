@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NonsensicalKit.Tools.InputTool
 {
-    public partial class InputHub : MonoSingleton<InputHub>
+    public partial class InputHub
     {
         private Vector2 _lastMousePos;
         private Vector2 _lastMouseMove;
@@ -19,12 +19,14 @@ namespace NonsensicalKit.Tools.InputTool
                 OnZoomChanged?.Invoke(CrtZoom);
                 _lastZoom = CrtZoom;
             }
+
             CrtMouseMove = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
             if (CrtMouseMove != _lastMouseMove)
             {
                 OnMouseMoveChanged?.Invoke(CrtMouseMove);
                 _lastMouseMove = CrtMouseMove;
             }
+
             CrtMousePos = Input.mousePosition;
             if (_lastMousePos != CrtMousePos)
             {
@@ -37,26 +39,31 @@ namespace NonsensicalKit.Tools.InputTool
                 IsMouseLeftButtonHold = true;
                 OnMouseLeftButtonDown?.Invoke();
             }
+
             if (Input.GetMouseButtonUp(0))
             {
                 IsMouseLeftButtonHold = false;
                 OnMouseLeftButtonUp?.Invoke();
             }
+
             if (Input.GetMouseButtonDown(1))
             {
                 IsMouseRightButtonHold = true;
                 OnMouseRightButtonDown?.Invoke();
             }
+
             if (Input.GetMouseButtonUp(1))
             {
                 IsMouseRightButtonHold = false;
                 OnMouseRightButtonUp?.Invoke();
             }
+
             if (Input.GetMouseButtonDown(2))
             {
                 IsMouseMiddleButtonHold = true;
                 OnMouseMiddleButtonDown?.Invoke();
             }
+
             if (Input.GetMouseButtonUp(2))
             {
                 IsMouseMiddleButtonHold = false;
@@ -69,26 +76,31 @@ namespace NonsensicalKit.Tools.InputTool
                 OnMoveChanged?.Invoke(CrtMove);
                 _lastMove = CrtMove;
             }
+
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
                 IsLeftShiftKeyHold = true;
                 OnLeftShiftKeyChanged?.Invoke(true);
             }
+
             if (Input.GetKeyUp(KeyCode.LeftShift))
             {
                 IsLeftShiftKeyHold = false;
                 OnLeftShiftKeyChanged?.Invoke(false);
             }
+
             if (Input.GetKeyDown(KeyCode.LeftAlt))
             {
                 IsLeftAltKeyHold = true;
                 OnLeftAltKeyChanged?.Invoke(true);
             }
+
             if (Input.GetKeyUp(KeyCode.LeftAlt))
             {
                 IsLeftAltKeyHold = false;
                 OnLeftAltKeyChanged?.Invoke(false);
             }
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 OnSpaceKeyEnter?.Invoke();

@@ -1,9 +1,9 @@
-using NonsensicalKit.Core;
 using System;
 using System.Collections;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.NetworkTool
@@ -20,30 +20,30 @@ namespace NonsensicalKit.Tools.NetworkTool
         /// </summary>
         public Action<string> ReceiveMessage { get; set; }
 
-        private WebSocketWrap _ws;                  //websocket实例
-        private bool _ReConnect = false;            //线程重连用
-        private bool _isQuitting = false;           //是否正在退出应用，用于防止在退出时尝试实例化新物体
+        private WebSocketWrap _ws; //websocket实例
+        private bool _reConnect; //线程重连用
+        private bool _isQuitting; //是否正在退出应用，用于防止在退出时尝试实例化新物体
 
-        private Thread _HeartbeatThread;            //心跳线程
+        private Thread _heartbeatThread; //心跳线程
 
-        private float _ReconnectionInterval;        //重连间隔
-        private float _HeartbeatInterval;           //心跳间隔
+        private float _reconnectionInterval; //重连间隔
+        private float _heartbeatInterval; //心跳间隔
 
         private string _uri;
 
         protected override void Awake()
         {
             base.Awake();
-            _ReconnectionInterval = 2f;
-            _HeartbeatInterval = 29f;
+            _reconnectionInterval = 2f;
+            _heartbeatInterval = 29f;
         }
 
         protected void Update()
         {
-            if (_ReConnect)
+            if (_reConnect)
             {
                 StartCoroutine(ReConnect());
-                _ReConnect = false;
+                _reConnect = false;
             }
         }
 
@@ -52,15 +52,15 @@ namespace NonsensicalKit.Tools.NetworkTool
             base.OnDestroy();
             _isQuitting = true;
 
-            if (_HeartbeatThread != null)
+            if (_heartbeatThread != null)
             {
-                _HeartbeatThread.Abort();
+                _heartbeatThread.Abort();
             }
 
             if (_ws != null)
             {
                 _ws.Abort();
-                _ReConnect = false;
+                _reConnect = false;
             }
         }
 
@@ -69,15 +69,15 @@ namespace NonsensicalKit.Tools.NetworkTool
         /// </summary>
         public void Abort()
         {
-            if (_HeartbeatThread != null)
+            if (_heartbeatThread != null)
             {
-                _HeartbeatThread.Abort();
+                _heartbeatThread.Abort();
             }
 
             if (_ws != null)
             {
                 _ws.Abort();
-                _ReConnect = false;
+                _reConnect = false;
             }
         }
 
@@ -95,10 +95,11 @@ namespace NonsensicalKit.Tools.NetworkTool
 
             _ws.OnWebSocketState += OnWebSocketState;
             _ws.Connect(uri);
-            if (_HeartbeatThread != null)
+            if (_heartbeatThread != null)
             {
-                _HeartbeatThread.Abort();
+                _heartbeatThread.Abort();
             }
+
             StartCoroutine(StartHeartbeat());
         }
 
@@ -117,7 +118,7 @@ namespace NonsensicalKit.Tools.NetworkTool
         /// <returns></returns>
         private IEnumerator ReConnect()
         {
-            yield return new WaitForSeconds(_ReconnectionInterval);
+            yield return new WaitForSeconds(_reconnectionInterval);
             WebsocketConnect(_uri);
         }
 
@@ -131,8 +132,9 @@ namespace NonsensicalKit.Tools.NetworkTool
             {
                 yield return new WaitForSeconds(0.5f);
             }
-            _HeartbeatThread = new Thread(new ThreadStart(Heartbeat));
-            _HeartbeatThread.Start();
+
+            _heartbeatThread = new Thread(Heartbeat);
+            _heartbeatThread.Start();
         }
 
         /// <summary>
@@ -143,13 +145,14 @@ namespace NonsensicalKit.Tools.NetworkTool
             while (_ws != null)
             {
                 SendMessageToServer("");
-                Thread.Sleep((int)(_HeartbeatInterval * 1000));
+                Thread.Sleep((int)(_heartbeatInterval * 1000));
             }
         }
 
         private void OnMessage(string msg)
         {
-            Debug.Log("收到消息：" + msg); ReceiveMessage?.Invoke(msg);
+            Debug.Log("收到消息：" + msg);
+            ReceiveMessage?.Invoke(msg);
         }
 
         private void OnWebSocketState(WebSocketState state)
@@ -162,8 +165,9 @@ namespace NonsensicalKit.Tools.NetworkTool
                 case WebSocketState.Closed:
                     if (!_isQuitting)
                     {
-                        _ReConnect = true;
+                        _reConnect = true;
                     }
+
                     break;
                 case WebSocketState.CloseReceived:
                     break;
@@ -174,8 +178,6 @@ namespace NonsensicalKit.Tools.NetworkTool
                 case WebSocketState.None:
                     break;
                 case WebSocketState.Open:
-                    break;
-                default:
                     break;
             }
         }
@@ -188,18 +190,14 @@ namespace NonsensicalKit.Tools.NetworkTool
     {
         //连接状态改变
         public Action<WebSocketState> OnWebSocketState { get; set; }
+
         //连接失败
         public Action OnConnectError { get; set; }
+
         //数据返回
         public Action<string> OnMessage { get; set; }
 
-        public bool IsConnected
-        {
-            get
-            {
-                return _ws.State == WebSocketState.Open;
-            }
-        }
+        public bool IsConnected => _ws.State == WebSocketState.Open;
 
         private ClientWebSocket _ws;
 
@@ -221,16 +219,17 @@ namespace NonsensicalKit.Tools.NetworkTool
                 while (true)
                 {
                     var result = new byte[1024];
-                    await _ws.ReceiveAsync(new ArraySegment<byte>(result), new CancellationToken());//接受数据
+                    await _ws.ReceiveAsync(new ArraySegment<byte>(result), new CancellationToken()); //接受数据
                     var str = Encoding.UTF8.GetString(result, 0, result.Length);
-                    str = str.Replace("\0", "");//去掉尾部空字符
+                    str = str.Replace("\0", ""); //去掉尾部空字符
 
                     OnMessage?.Invoke(str);
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogErrorFormat("[WebSocket] {0}\nCloseStatus: {1}\nCloseStatusDescription: {2}", ex.Message, _ws.CloseStatus, _ws.CloseStatusDescription);
+                Debug.LogErrorFormat("[WebSocket] {0}\nCloseStatus: {1}\nCloseStatusDescription: {2}", ex.Message, _ws.CloseStatus,
+                    _ws.CloseStatusDescription);
                 if (OnConnectError != null)
                     OnConnectError();
             }
@@ -259,6 +258,7 @@ namespace NonsensicalKit.Tools.NetworkTool
                 Debug.LogErrorFormat("[WebSocket] 发送数据失败，未连接上服务器。");
                 return;
             }
+
             _ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(data)), WebSocketMessageType.Text, true, _ct);
         }
 

@@ -7,12 +7,12 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// <summary>
     /// 快速命名工具，可以将一个节点树的所有名称复制到另一个相同结构的节点树上
     /// </summary>
-    public class NameCopyer : EditorWindow
+    public class NameCopier : EditorWindow
     {
         [MenuItem("NonsensicalKit/快速命名工具")]
         private static void ShowWindow()
         {
-            EditorWindow.GetWindow(typeof(NameCopyer));
+            GetWindow(typeof(NameCopier));
         }
 
         private NameTree _copyBuffer;
@@ -30,6 +30,12 @@ namespace NonsensicalKit.Core.Editor.Tools
 
             if (GUILayout.Button("粘贴"))
             {
+                if (_copyBuffer == null)
+                {
+                    Debug.LogError("未复制名称");
+                    return;
+                }
+
                 Paste(NonsensicalEditorManager.SelectTransform, _copyBuffer);
                 Undo.RecordObject(NonsensicalEditorManager.SelectTransform, "PasteName");
                 Debug.Log("粘贴成功");

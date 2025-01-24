@@ -44,7 +44,7 @@ namespace NonsensicalKit.Tools.EasyTool
 
         public static Quaternion Diff(Quaternion q1, Quaternion q2)
         {
-            Quat dif = Quat.Diff(new Quat(q1), new Quat(q2));
+            Quat dif = Diff(new Quat(q1), new Quat(q2));
             return dif.ToQuaternion();
         }
 
@@ -57,7 +57,7 @@ namespace NonsensicalKit.Tools.EasyTool
         {
             Quat q = this;
             q = q.Conjugate();
-            return q / Quat.Dot(this, this);
+            return q / Dot(this, this);
         }
 
         public Quat Conjugate()

@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools
@@ -7,13 +8,14 @@ namespace NonsensicalKit.Tools
         public static void SetDirty(this GameObject go)
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(go);
+            EditorUtility.SetDirty(go);
 #endif
         }
+
         public static void Destroy(this GameObject go)
         {
 #if UNITY_EDITOR
-            if (UnityEditor.EditorApplication.isPlaying)
+            if (EditorApplication.isPlaying)
             {
                 Object.Destroy(go);
             }
@@ -25,12 +27,13 @@ namespace NonsensicalKit.Tools
             Object.Destroy(go);
 #endif
         }
+
         public static bool IsPlaying
         {
             get
             {
 #if UNITY_EDITOR
-                return UnityEditor.EditorApplication.isPlaying;
+                return EditorApplication.isPlaying;
 #else
                 return true;
 #endif

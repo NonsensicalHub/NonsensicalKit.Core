@@ -10,7 +10,7 @@ namespace NonsensicalKit.Tools.CameraTool
 {
     public enum ControlMouseKey
     {
-        Uncontrol,
+        Uncontrolled,
         LeftKeyControl,
         RightKeyControl,
         MiddleKeyControl,
@@ -19,7 +19,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
     public enum ControlFinger
     {
-        Uncontrol,
+        Uncontrolled,
         OneFinger,
         TwoFinger,
     }
@@ -48,11 +48,14 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] protected ControlMouseKey m_moveControl = ControlMouseKey.LeftKeyControl;
         [SerializeField] protected ControlMouseKey m_rotateControl = ControlMouseKey.RightKeyControl;
         [SerializeField] protected ControlMouseKey m_rollControl = ControlMouseKey.MiddleKeyControl;
-        [SerializeField] protected ControlMouseKey m_DragZoomControl = ControlMouseKey.Uncontrol;
-        [SerializeField] protected bool m_enableMobileInput = false;
+
+        [FormerlySerializedAs("m_DragZoomControl")] [SerializeField]
+        protected ControlMouseKey m_dragZoomControl = ControlMouseKey.Uncontrolled;
+
+        [SerializeField] protected bool m_enableMobileInput;
 
         [ShowIf("m_enableMobileInput"), SerializeField]
-        protected ControlFinger m_fingerMoveControl = ControlFinger.Uncontrol;
+        protected ControlFinger m_fingerMoveControl = ControlFinger.Uncontrolled;
 
         [ShowIf("m_enableMobileInput"), SerializeField]
         protected ControlFinger m_fingerRotateControl = ControlFinger.OneFinger;
@@ -60,7 +63,8 @@ namespace NonsensicalKit.Tools.CameraTool
         [ShowIf("m_enableMobileInput"), SerializeField]
         protected ControlFinger m_fingerDragZoomControl = ControlFinger.TwoFinger;
 
-        [SerializeField] protected bool m_UseKeyBoardControlMove = false;
+        [FormerlySerializedAs("m_UseKeyBoardControlMove")] [SerializeField]
+        protected bool m_useKeyBoardControlMove;
 
         [SerializeField] protected bool m_lerpMove = true; //插值移动
         [SerializeField] protected bool m_autoInit = true; //自动初始化
@@ -152,12 +156,12 @@ namespace NonsensicalKit.Tools.CameraTool
         private Vector3 _startPos2; //初始相机位置
         private Quaternion _startRot2; //初始相机旋转
 
-        private bool _needMove = false;
-        private bool _needRotate = false;
-        private bool _needRoll = false;
-        private bool _needDragZoom = false;
-        private bool _mouseEventInitFlag = false;
-        private bool _fingerEventInitFlag = false;
+        private bool _needMove;
+        private bool _needRotate;
+        private bool _needRoll;
+        private bool _needDragZoom;
+        private bool _mouseEventInitFlag;
+        private bool _fingerEventInitFlag;
 
         protected virtual void Awake()
         {
@@ -257,7 +261,7 @@ namespace NonsensicalKit.Tools.CameraTool
                         AdjustDragZoom(_input.CrtMouseMove);
                     }
 
-                    if (m_UseKeyBoardControlMove)
+                    if (m_useKeyBoardControlMove)
                     {
                         AdjustPosition(-_input.CrtMove);
                     }
@@ -413,7 +417,8 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             //Debug.Log(pitch + " " + yaw);
 
-            if (_targetPitch.NatureAngle() == pitch.NatureAngle() && _targetYaw.NatureAngle() == yaw.NatureAngle())
+            if (Mathf.Approximately(_targetPitch.NatureAngle(), pitch.NatureAngle()) &&
+                Mathf.Approximately(_targetYaw.NatureAngle(), yaw.NatureAngle()))
             {
                 _targetRoll = 0;
             }
@@ -466,7 +471,7 @@ namespace NonsensicalKit.Tools.CameraTool
             else
             {
                 var b = tsf.BoundingBoxGlobal();
-                Focus(tsf.position+b.center, immediate);
+                Focus(tsf.position + b.center, immediate);
             }
         }
 
@@ -487,7 +492,7 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             _targetYaw += delta.x * m_rotationSpeed * 0.3f;
             _targetPitch += delta.y * m_rotationSpeed * 0.3f;
-            if (m_isLimitPith == true)
+            if (m_isLimitPith)
             {
                 _targetPitch = Mathf.Clamp(_targetPitch, m_minPitch, m_maxPitch);
             }
@@ -563,8 +568,6 @@ namespace NonsensicalKit.Tools.CameraTool
                 case ControlMouseKey.AlwaysControl:
                     _needMove = true;
                     break;
-                default:
-                    break;
             }
 
             switch (m_rotateControl)
@@ -583,8 +586,6 @@ namespace NonsensicalKit.Tools.CameraTool
                     break;
                 case ControlMouseKey.AlwaysControl:
                     _needRotate = true;
-                    break;
-                default:
                     break;
             }
 
@@ -605,11 +606,9 @@ namespace NonsensicalKit.Tools.CameraTool
                 case ControlMouseKey.AlwaysControl:
                     _needRoll = true;
                     break;
-                default:
-                    break;
             }
 
-            switch (m_DragZoomControl)
+            switch (m_dragZoomControl)
             {
                 case ControlMouseKey.LeftKeyControl:
                     _input.OnMouseLeftButtonDown += StartZoom;
@@ -626,8 +625,6 @@ namespace NonsensicalKit.Tools.CameraTool
                 case ControlMouseKey.AlwaysControl:
                     _needDragZoom = true;
                     break;
-                default:
-                    break;
             }
         }
 
@@ -640,43 +637,36 @@ namespace NonsensicalKit.Tools.CameraTool
             switch (m_fingerMoveControl)
             {
                 case ControlFinger.OneFinger:
-                    _mobileInput.OnOneFingerDowm += StartMove;
+                    _mobileInput.OnOneFingerDown += StartMove;
                     _mobileInput.OnOneFingerUp += StopMove;
                     break;
                 case ControlFinger.TwoFinger:
-                    _mobileInput.OnTwoFingerDowm += StartMove;
+                    _mobileInput.OnTwoFingerDown += StartMove;
                     _mobileInput.OnTwoFingerUp += StopMove;
-                    break;
-                default:
                     break;
             }
 
             switch (m_fingerRotateControl)
             {
                 case ControlFinger.OneFinger:
-                    _mobileInput.OnOneFingerDowm += StartRotate;
+                    _mobileInput.OnOneFingerDown += StartRotate;
                     _mobileInput.OnOneFingerUp += StopRotate;
                     break;
                 case ControlFinger.TwoFinger:
-                    _mobileInput.OnTwoFingerDowm += StartRotate;
+                    _mobileInput.OnTwoFingerDown += StartRotate;
                     _mobileInput.OnTwoFingerUp += StopRotate;
-                    break;
-                default:
                     break;
             }
 
             switch (m_fingerDragZoomControl)
             {
                 case ControlFinger.OneFinger:
-                    _mobileInput.OnOneFingerDowm += StartZoom;
+                    _mobileInput.OnOneFingerDown += StartZoom;
                     _mobileInput.OnOneFingerUp += StopZoom;
                     break;
                 case ControlFinger.TwoFinger:
-                    _mobileInput.OnTwoFingerDowm += StartZoom;
+                    _mobileInput.OnTwoFingerDown += StartZoom;
                     _mobileInput.OnTwoFingerUp += StopZoom;
-                    break;
-
-                default:
                     break;
             }
         }
@@ -706,8 +696,6 @@ namespace NonsensicalKit.Tools.CameraTool
                 case ControlMouseKey.AlwaysControl:
                     _needMove = false;
                     break;
-                default:
-                    break;
             }
 
             switch (m_rotateControl)
@@ -726,8 +714,6 @@ namespace NonsensicalKit.Tools.CameraTool
                     break;
                 case ControlMouseKey.AlwaysControl:
                     _needRotate = false;
-                    break;
-                default:
                     break;
             }
 
@@ -748,11 +734,9 @@ namespace NonsensicalKit.Tools.CameraTool
                 case ControlMouseKey.AlwaysControl:
                     _needRoll = false;
                     break;
-                default:
-                    break;
             }
 
-            switch (m_DragZoomControl)
+            switch (m_dragZoomControl)
             {
                 case ControlMouseKey.LeftKeyControl:
                     _input.OnMouseLeftButtonDown -= StartZoom;
@@ -769,8 +753,6 @@ namespace NonsensicalKit.Tools.CameraTool
                 case ControlMouseKey.AlwaysControl:
                     _needDragZoom = false;
                     break;
-                default:
-                    break;
             }
         }
 
@@ -783,43 +765,36 @@ namespace NonsensicalKit.Tools.CameraTool
             switch (m_fingerMoveControl)
             {
                 case ControlFinger.OneFinger:
-                    _mobileInput.OnOneFingerDowm -= StartMove;
+                    _mobileInput.OnOneFingerDown -= StartMove;
                     _mobileInput.OnOneFingerUp -= StopMove;
                     break;
                 case ControlFinger.TwoFinger:
-                    _mobileInput.OnTwoFingerDowm -= StartMove;
+                    _mobileInput.OnTwoFingerDown -= StartMove;
                     _mobileInput.OnTwoFingerUp -= StopMove;
-                    break;
-                default:
                     break;
             }
 
             switch (m_fingerRotateControl)
             {
                 case ControlFinger.OneFinger:
-                    _mobileInput.OnOneFingerDowm -= StartRotate;
+                    _mobileInput.OnOneFingerDown -= StartRotate;
                     _mobileInput.OnOneFingerUp -= StopRotate;
                     break;
                 case ControlFinger.TwoFinger:
-                    _mobileInput.OnOneFingerDowm -= StartRotate;
+                    _mobileInput.OnOneFingerDown -= StartRotate;
                     _mobileInput.OnOneFingerUp -= StopRotate;
-                    break;
-                default:
                     break;
             }
 
             switch (m_fingerDragZoomControl)
             {
                 case ControlFinger.OneFinger:
-                    _mobileInput.OnOneFingerDowm -= StartZoom;
+                    _mobileInput.OnOneFingerDown -= StartZoom;
                     _mobileInput.OnOneFingerUp -= StopZoom;
                     break;
                 case ControlFinger.TwoFinger:
-                    _mobileInput.OnTwoFingerDowm -= StartZoom;
+                    _mobileInput.OnTwoFingerDown -= StartZoom;
                     _mobileInput.OnTwoFingerUp -= StopZoom;
-                    break;
-
-                default:
                     break;
             }
         }

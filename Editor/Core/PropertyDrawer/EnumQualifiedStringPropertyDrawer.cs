@@ -22,6 +22,7 @@ namespace NonsensicalKit.Core.Editor
                     Debug.Log($"{property.name} is not enum");
                     return;
                 }
+
                 _cachedTypes = Enum.GetNames(type).ToList();
                 _needRefresh = false;
             }

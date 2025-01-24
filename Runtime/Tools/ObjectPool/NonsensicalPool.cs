@@ -3,33 +3,35 @@ using System.Collections.Generic;
 
 namespace NonsensicalKit.Tools.ObjectPool
 {
-    public class NonsensicalPool<Obj> where Obj : IPoolObject
+    public class NonsensicalPool<TObj> where TObj : IPoolObject
     {
-        private Queue<Obj> _queue;    //待使用的对象
-        private Func<Obj> _getNewObj;    //获取新对象的方法
+        private readonly Queue<TObj> _queue; //待使用的对象
+        private readonly Func<TObj> _getNewObj; //获取新对象的方法
 
-        public NonsensicalPool(Func<Obj> getNewObj)
+        public NonsensicalPool(Func<TObj> getNewObj)
         {
-            this._getNewObj = getNewObj;
+            _getNewObj = getNewObj;
 
-            _queue = new Queue<Obj>();
+            _queue = new Queue<TObj>();
         }
+
+        public NonsensicalPool(Queue<TObj> queue) { _queue = queue; }
 
         /// <summary>
         /// 取出对象
         /// </summary>
         /// <returns></returns>
-        public Obj New()
+        public TObj New()
         {
             if (_queue.Count > 0)
             {
-                Obj t = _queue.Dequeue();
+                TObj t = _queue.Dequeue();
                 t.Out();
                 return t;
             }
             else
             {
-                Obj t = _getNewObj();
+                TObj t = _getNewObj();
                 t.Init();
                 t.Out();
 
@@ -41,7 +43,7 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// 放回对象
         /// </summary>
         /// <param name="obj"></param>
-        public void Store(Obj obj)
+        public void Store(TObj obj)
         {
             if (_queue.Contains(obj) == false)
             {
@@ -56,14 +58,16 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// <summary>
         /// 初始化
         /// </summary>
-        public abstract void Init();
+        public void Init();
+
         /// <summary>
         /// 出池
         /// </summary>
-        public abstract void Out();
+        public void Out();
+
         /// <summary>
         /// 入池
         /// </summary>
-        public abstract void In();
+        public void In();
     }
 }

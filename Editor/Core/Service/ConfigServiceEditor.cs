@@ -1,6 +1,6 @@
+using System.IO;
 using NonsensicalKit.Core.Service.Config;
 using NonsensicalKit.Tools;
-using System.IO;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -11,6 +11,7 @@ namespace NonsensicalKit.Core.Editor.Service.Config
     public class ConfigServiceEditor : IPreprocessBuildWithReport
     {
         public int callbackOrder => 0;
+
         [InitializeOnLoadMethod]
         private static void Init()
         {

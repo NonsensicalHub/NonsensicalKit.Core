@@ -8,12 +8,11 @@ namespace NonsensicalKit.Core.Service
     [AttributeUsage(AttributeTargets.Class)]
     public class ServicePrefabAttribute : Attribute
     {
-        public string PrefabPath => _prefabPath;
-        private string _prefabPath;
+        public string PrefabPath { get; }
 
         public ServicePrefabAttribute(string prefabPath)
         {
-            _prefabPath = prefabPath;
+            PrefabPath = prefabPath;
         }
     }
 }

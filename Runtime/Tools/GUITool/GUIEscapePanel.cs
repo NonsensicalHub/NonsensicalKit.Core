@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -47,6 +48,7 @@ namespace NonsensicalKit.Tools.GUITool
                 {
                     _keyboard = Keyboard.current;
                 }
+
                 if (_keyboard != null)
                 {
                     if (_keyboard.escapeKey.wasPressedThisFrame)
@@ -70,18 +72,19 @@ namespace NonsensicalKit.Tools.GUITool
             {
                 int width = Screen.width;
                 int height = Screen.height;
-                UnityEngine.GUI.Box(new Rect(width * 0.5f - 175, height * 0.5f - 112.5f, 350, 225), "");
+                GUI.Box(new Rect(width * 0.5f - 175, height * 0.5f - 112.5f, 350, 225), "");
 
-                UnityEngine.GUI.Label(new Rect(width * 0.5f - 50, height * 0.5f - 100, 100, 50), "是否退出程序", _labelStyle);
-                if (UnityEngine.GUI.Button(new Rect(width * 0.5f - 130, height * 0.5f + 50, 60, 30), "确定"))
+                GUI.Label(new Rect(width * 0.5f - 50, height * 0.5f - 100, 100, 50), "是否退出程序", _labelStyle);
+                if (GUI.Button(new Rect(width * 0.5f - 130, height * 0.5f + 50, 60, 30), "确定"))
                 {
 #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.isPlaying = false;
+                    EditorApplication.isPlaying = false;
 #else
                     Application.Quit();
 #endif
                 }
-                if (UnityEngine.GUI.Button(new Rect(width * 0.5f + 70, height * 0.5f + 50, 60, 30), "取消"))
+
+                if (GUI.Button(new Rect(width * 0.5f + 70, height * 0.5f + 50, 60, 30), "取消"))
                 {
                     _showEscapePanel = false;
                 }

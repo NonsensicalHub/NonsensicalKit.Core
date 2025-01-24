@@ -1,6 +1,5 @@
-using NonsensicalKit.Core;
-using System;
 using System.Collections.Generic;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.EasyTool
@@ -10,17 +9,19 @@ namespace NonsensicalKit.Tools.EasyTool
     /// </summary>
     public class NonsensicalExplodedView : NonsensicalMono
     {
-        [SerializeField][Tooltip("爆炸速度")][Range(0, 1)] private float m_explosionSpeed = 0.1f;
+        [SerializeField] [Tooltip("爆炸速度")] [Range(0, 1)]
+        private float m_explosionSpeed = 0.1f;
 
-        [SerializeField][Tooltip("爆炸范围")][Range(1, 10)] private float m_explosionRange = 2f;
+        [SerializeField] [Tooltip("爆炸范围")] [Range(1, 10)]
+        private float m_explosionRange = 2f;
 
-        [SerializeField][Tooltip("自定义id")] private string m_customID;
+        [SerializeField] [Tooltip("自定义id")] private string m_customID;
 
         private List<ExplosionInfo> _targets;
 
-        private bool _isExplosion = false;
+        private bool _isExplosion;
 
-        private float _percentage = 0;
+        private float _percentage;
 
         private void Awake()
         {
@@ -74,12 +75,12 @@ namespace NonsensicalKit.Tools.EasyTool
             _targets = new List<ExplosionInfo>();
 
             Queue<Transform> nodes = new Queue<Transform>();
-            Queue<Vector3> offsets = new Queue<Vector3>();  //父节点位置与根节点的偏移量
+            Queue<Vector3> offsets = new Queue<Vector3>(); //父节点位置与根节点的偏移量
 
 
             foreach (Transform child in this.transform)
             {
-                if (child.gameObject.activeSelf == true)
+                if (child.gameObject.activeSelf)
                 {
                     nodes.Enqueue(child);
                     offsets.Enqueue(Vector3.zero);
@@ -94,11 +95,11 @@ namespace NonsensicalKit.Tools.EasyTool
 
                 if (crtNode.TryGetComponent<MeshRenderer>(out var item))
                 {
-                    ExplosionInfo info = new ExplosionInfo();
-
-                    info.Target = crtNode;
-
-                    info.OriginalPosition = crtNode.localPosition;
+                    ExplosionInfo info = new ExplosionInfo
+                    {
+                        Target = crtNode,
+                        OriginalPosition = crtNode.localPosition
+                    };
 
                     //Vector3 centerOffset = item.transform.position - item.bounds.center;      //渲染中心到节点位置的偏移
                     //Vector3 rootOffsetPos = item.bounds.center - this.transform.position;       //渲染中心与根节点的偏移
@@ -115,13 +116,14 @@ namespace NonsensicalKit.Tools.EasyTool
 
                 foreach (Transform child in crtNode)
                 {
-                    if (child.gameObject.activeSelf == true)
+                    if (child.gameObject.activeSelf)
                     {
                         nodes.Enqueue(child);
                         offsets.Enqueue(newOffset);
                     }
                 }
             }
+
             enabled = false;
         }
 

@@ -15,16 +15,12 @@ namespace NonsensicalKit.Core
         {
             _message = "待处理";
         }
+
         public TODOException(string message)
         {
             _message = message;
         }
-        public override string Message
-        {
-            get
-            {
-                return "TODO:" + _message;
-            }
-        }
+
+        public override string Message => "TODO:" + _message;
     }
 }

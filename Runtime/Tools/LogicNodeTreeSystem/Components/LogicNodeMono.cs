@@ -1,6 +1,5 @@
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Service;
-using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -12,20 +11,24 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
         [FormerlySerializedAs("m_nodeName")]
         [SerializeField] private string m_nodeID;
 
-        [SerializeField] private UnityEvent m_NodeEnter = new UnityEvent();
-        [SerializeField] private UnityEvent m_NodeExit = new UnityEvent();
+        [FormerlySerializedAs("m_NodeEnter")] [SerializeField]
+        private UnityEvent m_nodeEnter = new UnityEvent();
+
+        [FormerlySerializedAs("m_NodeExit")] [SerializeField]
+        private UnityEvent m_nodeExit = new UnityEvent();
 
         public string NodeID => m_nodeID;
 
         public UnityEvent OnNodeEnter
         {
-            get { return m_NodeEnter; }
-            set { m_NodeEnter = value; }
+            get => m_nodeEnter;
+            set => m_nodeEnter = value;
         }
+
         public UnityEvent OnNodeExit
         {
-            get { return m_NodeExit; }
-            set { m_NodeExit = value; }
+            get => m_nodeExit;
+            set => m_nodeExit = value;
         }
 
         private LogicNodeManager _manager;
@@ -38,7 +41,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
         private void OnGetService(LogicNodeManager service)
         {
             _manager = service;
-            if (service.CrtSelectNode.NodeID==NodeID)
+            if (service.CrtSelectNode.NodeID == NodeID)
             {
                 OnSwitchEnter();
             }
@@ -46,19 +49,19 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
             {
                 OnSwitchExit();
             }
+
             Subscribe((int)LogicNodeEnum.NodeEnter, m_nodeID, OnSwitchEnter);
             Subscribe((int)LogicNodeEnum.NodeExit, m_nodeID, OnSwitchExit);
-
         }
 
         private void OnSwitchEnter()
         {
-            m_NodeEnter.Invoke();
-
+            m_nodeEnter.Invoke();
         }
+
         private void OnSwitchExit()
         {
-            m_NodeExit.Invoke();
+            m_nodeExit.Invoke();
         }
 
 #if UNITY_EDITOR

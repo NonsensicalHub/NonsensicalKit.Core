@@ -10,8 +10,8 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// </summary>
     public class SetDefaultFont : EditorWindow
     {
-        private static Font font;
-        private static EditorWindow window;
+        private static Font _font;
+        private static EditorWindow _window;
 
         [InitializeOnLoadMethod]
         private static void Init()
@@ -22,9 +22,9 @@ namespace NonsensicalKit.Core.Editor.Tools
         [MenuItem("NonsensicalKit/设置默认字体")]
         public static void OpenWindow()
         {
-            window = GetWindow(typeof(SetDefaultFont));
-            window.minSize = new Vector2(500, 300);
-            font = GetFont();
+            _window = GetWindow(typeof(SetDefaultFont));
+            _window.minSize = new Vector2(500, 300);
+            _font = GetFont();
         }
 
         private void OnGUI()
@@ -32,12 +32,12 @@ namespace NonsensicalKit.Core.Editor.Tools
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("选择默认字体");
             EditorGUILayout.Space();
-            font = (Font)EditorGUILayout.ObjectField(font, typeof(Font), true);
+            _font = (Font)EditorGUILayout.ObjectField(_font, typeof(Font), true);
             EditorGUILayout.Space();
             if (GUILayout.Button("确定"))
             {
-                SetFont(font);
-                window.Close();
+                SetFont(_font);
+                _window.Close();
             }
         }
 

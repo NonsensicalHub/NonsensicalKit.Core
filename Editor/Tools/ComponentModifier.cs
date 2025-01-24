@@ -13,59 +13,63 @@ namespace NonsensicalKit.Core.Editor.Tools
         [MenuItem("NonsensicalKit/批量修改/组件内容修改器")]
         public static void ShowWindow()
         {
-            EditorWindow.GetWindow(typeof(ComponentModifier));
+            GetWindow(typeof(ComponentModifier));
         }
 
-        private static class CompontentModifierPanel
+        private static class ComponentModifierPanel
         {
-            public static readonly string[] components = new string[] { "Transform", "Button", "Text" };
+            public static readonly string[] Components = { "Transform", "Button", "Text" };
 
-            public static Vector3 scale;
-            public static Navigation.Mode navMode;
-            public static int choiceComponent;
-            public static Font toChange;
-            public static FontStyle toFontStyle;
+            public static Vector3 Scale;
+            public static Navigation.Mode NavMode;
+            public static int ChoiceComponent;
+            public static Font ToChange;
+            public static FontStyle ToFontStyle;
         }
 
         private void OnGUI()
         {
-
-            CompontentModifierPanel.choiceComponent = EditorGUILayout.Popup("选择组件", CompontentModifierPanel.choiceComponent, new string[] { "Transform", "Button", "Text" });
+            ComponentModifierPanel.ChoiceComponent = EditorGUILayout.Popup("选择组件", ComponentModifierPanel.ChoiceComponent,
+                new[] { "Transform", "Button", "Text" });
 
             EditorGUILayout.Space();
 
-            switch (CompontentModifierPanel.components[CompontentModifierPanel.choiceComponent])
+            switch (ComponentModifierPanel.Components[ComponentModifierPanel.ChoiceComponent])
             {
                 case "Transform":
+                {
+                    ComponentModifierPanel.Scale =
+                        EditorGUILayout.Vector3Field("Scale", ComponentModifierPanel.Scale, GUILayout.MinWidth(100f));
+                    if (GUILayout.Button("修改"))
                     {
-                        CompontentModifierPanel.scale = (Vector3)EditorGUILayout.Vector3Field("Scale", CompontentModifierPanel.scale, GUILayout.MinWidth(100f));
-                        if (GUILayout.Button("修改"))
-                        {
-                            TransformModify();
-                        }
+                        TransformModify();
                     }
+                }
                     break;
                 case "Button":
+                {
+                    ComponentModifierPanel.NavMode =
+                        (Navigation.Mode)EditorGUILayout.EnumPopup("Navigation", ComponentModifierPanel.NavMode, GUILayout.MinWidth(100f));
+                    if (GUILayout.Button("修改"))
                     {
-                        CompontentModifierPanel.navMode = (Navigation.Mode)EditorGUILayout.EnumPopup("Navigation", CompontentModifierPanel.navMode, GUILayout.MinWidth(100f));
-                        if (GUILayout.Button("修改"))
-                        {
-                            ButtonModify();
-                        }
+                        ButtonModify();
                     }
+                }
                     break;
                 case "Text":
+                {
+                    ComponentModifierPanel.ToChange = (Font)EditorGUILayout.ObjectField("Font", ComponentModifierPanel.ToChange, typeof(Font), true,
+                        GUILayout.MinWidth(100f));
+                    ComponentModifierPanel.ToFontStyle =
+                        (FontStyle)EditorGUILayout.EnumPopup("FontStyle", ComponentModifierPanel.ToFontStyle, GUILayout.MinWidth(100f));
+                    if (GUILayout.Button("修改"))
                     {
-                        CompontentModifierPanel.toChange = (Font)EditorGUILayout.ObjectField("Font", CompontentModifierPanel.toChange, typeof(Font), true, GUILayout.MinWidth(100f));
-                        CompontentModifierPanel.toFontStyle = (FontStyle)EditorGUILayout.EnumPopup("FontStyle", CompontentModifierPanel.toFontStyle, GUILayout.MinWidth(100f));
-                        if (GUILayout.Button("修改"))
-                        {
-                            FontModify();
-                        }
+                        FontModify();
                     }
+                }
                     break;
                 default:
-                    Debug.LogError($"未判断的组件{CompontentModifierPanel.components[CompontentModifierPanel.choiceComponent]}");
+                    Debug.LogError($"未判断的组件{ComponentModifierPanel.Components[ComponentModifierPanel.ChoiceComponent]}");
                     break;
             }
         }
@@ -73,58 +77,58 @@ namespace NonsensicalKit.Core.Editor.Tools
         private void ButtonModify()
         {
             var tArray = GetSelectComponent<Button>();
-            for (int i = 0; i < tArray.Count; i++)
+            foreach (var button in tArray)
             {
-                Button button = tArray[i];
-
                 Undo.RecordObject(button, button.gameObject.name);
 
-                Navigation nav = new Navigation();
-                nav.mode = CompontentModifierPanel.navMode;
+                Navigation nav = new Navigation
+                {
+                    mode = ComponentModifierPanel.NavMode
+                };
                 button.navigation = nav;
             }
-            Debug.Log($"{CompontentModifierPanel.components[CompontentModifierPanel.choiceComponent]} 组件修改成功");
+
+            Debug.Log($"{ComponentModifierPanel.Components[ComponentModifierPanel.ChoiceComponent]} 组件修改成功");
         }
 
         private void FontModify()
         {
             var tArray = GetSelectComponent<Text>();
-            for (int i = 0; i < tArray.Count; i++)
+            foreach (var t in tArray)
             {
-                Text t = tArray[i];
-
                 Undo.RecordObject(t, t.gameObject.name);
 
-                t.font = CompontentModifierPanel.toChange;
-                t.fontStyle = CompontentModifierPanel.toFontStyle;
+                t.font = ComponentModifierPanel.ToChange;
+                t.fontStyle = ComponentModifierPanel.ToFontStyle;
             }
-            Debug.Log($"{CompontentModifierPanel.components[CompontentModifierPanel.choiceComponent]} 组件修改成功");
+
+            Debug.Log($"{ComponentModifierPanel.Components[ComponentModifierPanel.ChoiceComponent]} 组件修改成功");
         }
 
 
         private void TransformModify()
         {
             var tArray = GetSelectComponent<Transform>();
-            for (int i = 0; i < tArray.Count; i++)
+            foreach (var temp in tArray)
             {
-                Transform temp = tArray[i];
-
                 Undo.RecordObject(temp, temp.gameObject.name);
 
-                temp.localScale = CompontentModifierPanel.scale;
+                temp.localScale = ComponentModifierPanel.Scale;
             }
-            Debug.Log($"{CompontentModifierPanel.components[CompontentModifierPanel.choiceComponent]} 组件修改成功");
+
+            Debug.Log($"{ComponentModifierPanel.Components[ComponentModifierPanel.ChoiceComponent]} 组件修改成功");
         }
 
         private List<T> GetSelectComponent<T>()
         {
-            var v = NonsensicalEditorManager.SelectGameobjects;
+            var v = NonsensicalEditorManager.SelectGameObjects;
             List<T> components = new List<T>();
 
             foreach (var item in v)
             {
                 components.AddRange(item.GetComponentsInChildren<T>());
             }
+
             return components;
         }
     }

@@ -532,7 +532,8 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index && func == (_subscribeInfos[i].Func as Action))
+                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
+                    func == (_subscribeInfos[i].Func as Action))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
@@ -676,7 +677,8 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action<T>))
+                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action<T>))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;
@@ -690,7 +692,8 @@ namespace NonsensicalKit.Core
 
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str && func == (_subscribeInfos[i].Func as Action))
+                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
+                    func == (_subscribeInfos[i].Func as Action))
                 {
                     _subscribeInfos.RemoveAt(i);
                     return;

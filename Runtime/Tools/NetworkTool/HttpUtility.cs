@@ -364,16 +364,9 @@ namespace NonsensicalKit.Tools.NetworkTool
 
             foreach (var item in fileFullNames)
             {
-                using FileStream fs = new FileStream(item, FileMode.Open, FileAccess.Read);
-                try
+                if (File.Exists(item))
                 {
-                    byte[] buffur = new byte[fs.Length];
-                    fs.Read(buffur, 0, (int)fs.Length);
-                    formData.Add(new MultipartFormFileSection(Path.GetFileName(item), buffur));
-                }
-                catch (Exception )
-                {
-                    
+                    formData.Add(new MultipartFormFileSection(Path.GetFileName(item), File.ReadAllBytes(item)));
                 }
             }
 
@@ -406,8 +399,7 @@ namespace NonsensicalKit.Tools.NetworkTool
 
         public static Dictionary<string, string> GetJsonHeader()
         {
-            Dictionary<string, string> jsonHeader = new Dictionary<string, string>();
-            jsonHeader.Add("Content-Type", "application/json;charset=utf-8");
+            Dictionary<string, string> jsonHeader = new Dictionary<string, string> { { "Content-Type", "application/json;charset=utf-8" } };
             return jsonHeader;
         }
 
@@ -480,16 +472,16 @@ namespace NonsensicalKit.Tools.NetworkTool
                         callback?.Invoke(unityWebRequest);
                         break;
                     case UnityWebRequest.Result.ProtocolError:
-                        iHandleWebError?.OnProtocolError(unityWebRequest);
+                        iHandleWebError.OnProtocolError(unityWebRequest);
                         break;
                     case UnityWebRequest.Result.ConnectionError:
-                        iHandleWebError?.OnConnectionError(unityWebRequest);
+                        iHandleWebError.OnConnectionError(unityWebRequest);
                         break;
                     case UnityWebRequest.Result.DataProcessingError:
-                        iHandleWebError?.OnDataProcessingError(unityWebRequest);
+                        iHandleWebError.OnDataProcessingError(unityWebRequest);
                         break;
                     default:
-                        iHandleWebError?.OnUnknowError(unityWebRequest);
+                        iHandleWebError.OnUnknowError(unityWebRequest);
                         break;
                 }
             }

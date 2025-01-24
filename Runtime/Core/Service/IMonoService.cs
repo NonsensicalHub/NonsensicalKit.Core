@@ -6,6 +6,5 @@ namespace NonsensicalKit.Core.Service
     /// </summary>
     public interface IMonoService : IService
     {
-
     }
 }

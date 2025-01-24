@@ -13,23 +13,27 @@ namespace NonsensicalKit.Tools.CameraTool
     {
         [SerializeField] private Texture2D m_handTexture;
 
-        [SerializeField] private float m_mouseWheelRollSpeed = 1f;   //鼠标滚轮滚动速度
-        [SerializeField] private float m_mouseWheelDownSpeed = 5f;   //鼠标滚轮按下速度
-        [SerializeField] private float m_rotateSpeed = 5f;           //自转速度
-        [SerializeField] private float m_moveSpeed = 0.1f;           //移动速度
-        [SerializeField] private float m_shiftMagnification = 3f;    //shift加速倍率
+        [SerializeField] private float m_mouseWheelRollSpeed = 1f; //鼠标滚轮滚动速度
+        [SerializeField] private float m_mouseWheelDownSpeed = 5f; //鼠标滚轮按下速度
+        [SerializeField] private float m_rotateSpeed = 5f; //自转速度
+        [SerializeField] private float m_moveSpeed = 0.1f; //移动速度
+        [SerializeField] private float m_shiftMagnification = 3f; //shift加速倍率
 
-        protected bool _canOperation = true;   //是否可以操作
+        protected  bool CanOperation = true; //是否可以操作
 
         private void Update()
         {
-            if (_canOperation)
+            if (CanOperation)
             {
 #if ENABLE_INPUT_SYSTEM
-                Keyboard keyboard = Keyboard.current; if (keyboard == null) { return; }
-                Mouse mouse = Mouse.current; if (mouse == null) { return; }
+                Keyboard keyboard = Keyboard.current;
+                if (keyboard == null) { return; }
 
-                var move = new Vector2(keyboard.dKey.isPressed ? 1 : (keyboard.aKey.isPressed ? -1 : 0), keyboard.wKey.isPressed ? 1 : (keyboard.sKey.isPressed ? -1 : 0));
+                Mouse mouse = Mouse.current;
+                if (mouse == null) { return; }
+
+                var move = new Vector2(keyboard.dKey.isPressed ? 1 : (keyboard.aKey.isPressed ? -1 : 0),
+                    keyboard.wKey.isPressed ? 1 : (keyboard.sKey.isPressed ? -1 : 0));
                 var shiftKey = keyboard.leftShiftKey.isPressed;
                 var altKey = keyboard.leftAltKey.isPressed;
                 var mouseMove = mouse.delta.ReadValue() * 0.1f;
@@ -94,10 +98,12 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 Cursor.SetCursor(m_handTexture, Vector2.zero, CursorMode.ForceSoftware);
 
-                var offset = (transform.right * -axis.x + transform.up * -axis.y) * m_mouseWheelDownSpeed * Time.deltaTime; if (leftShift)
+                var offset = (transform.right * -axis.x + transform.up * -axis.y) * (m_mouseWheelDownSpeed * Time.deltaTime);
+                if (leftShift)
                 {
                     offset *= m_shiftMagnification;
                 }
+
                 transform.position += offset;
             }
             else
@@ -110,11 +116,12 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             if (CheckMousePosition(axis))
             {
-                var offset = transform.forward * mouseScrollWheel * m_mouseWheelRollSpeed;
+                var offset = transform.forward * (mouseScrollWheel * m_mouseWheelRollSpeed);
                 if (leftShift)
                 {
                     offset *= m_shiftMagnification;
                 }
+
                 transform.position += offset;
             }
         }

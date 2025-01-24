@@ -20,6 +20,7 @@ namespace NonsensicalKit.Core
                         instance.AddComponent<T>();
                     }
                 }
+
                 return _instance;
             }
         }

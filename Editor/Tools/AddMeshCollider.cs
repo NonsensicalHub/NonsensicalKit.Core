@@ -22,18 +22,20 @@ namespace NonsensicalKit.Core.Editor.Tools
                     }
                 }
             }
+
             Debug.Log($"MeshCollider组件添加完成");
         }
 
         private static List<T> GetSelectComponent<T>()
         {
-            var v = NonsensicalEditorManager.SelectGameobjects;
+            var v = NonsensicalEditorManager.SelectGameObjects;
             List<T> components = new List<T>();
 
             foreach (var item in v)
             {
                 components.AddRange(item.GetComponentsInChildren<T>());
             }
+
             return components;
         }
     }

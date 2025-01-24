@@ -1,4 +1,3 @@
-using NonsensicalKit.Tools;
 using System;
 using System.Text;
 
@@ -22,15 +21,17 @@ namespace NonsensicalKit.Tools.EasyTool
         /// <summary>
         /// 当前容量
         /// </summary>
-        public int Size { get { return _size; } }
+        public int Size => _size;
+
         /// <summary>
         /// 判断队列是否为空
         /// </summary>
-        public bool IsEmpty { get { return _number == 0; } }
+        public bool IsEmpty => _number == 0;
+
         /// <summary>
         /// 返回队列元素个数
         /// </summary>
-        public int Count { get { return _number; } }
+        public int Count => _number;
 
         /// <summary>
         /// 
@@ -56,12 +57,14 @@ namespace NonsensicalKit.Tools.EasyTool
         public void Push(T val)
         {
             if (_number + 1 > _size)
-            {   //容量不够时翻倍
+            {
+                //容量不够时翻倍
                 T[] newqueue = new T[_size * 2 + 1];
                 _queue.CopyTo(newqueue, 0);
                 _queue = newqueue;
                 _size *= 2;
             }
+
             _queue[++_number] = val;
             //将队尾元素上浮到合适位置
             Swim(_number);
@@ -131,6 +134,7 @@ namespace NonsensicalKit.Tools.EasyTool
                     }
                 }
             }
+
             return values;
         }
 
@@ -141,6 +145,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 sb.Append(_queue[i]).Append(" ");
             }
+
             return sb.ToString();
         }
 
@@ -186,7 +191,6 @@ namespace NonsensicalKit.Tools.EasyTool
             //当前节点大于父节点，则交换，直至堆恢复有序
             while (k > 1 && CompareValue(k, k / 2))
             {
-
                 Swap(k, k / 2);
                 k = k / 2;
             }
@@ -195,9 +199,7 @@ namespace NonsensicalKit.Tools.EasyTool
         //交换元素
         private void Swap(int i1, int i2)
         {
-            T tmp = _queue[i1];
-            _queue[i1] = _queue[i2];
-            _queue[i2] = tmp;
+            (_queue[i1], _queue[i2]) = (_queue[i2], _queue[i1]);
         }
     }
 
@@ -210,15 +212,17 @@ namespace NonsensicalKit.Tools.EasyTool
         /// <summary>
         /// 当前容量
         /// </summary>
-        public int Size { get { return _size; } }
+        public int Size => _size;
+
         /// <summary>
         /// 判断队列是否为空
         /// </summary>
-        public bool isEmpty { get { return _count == 0; } }
+        public bool IsEmpty => _count == 0;
+
         /// <summary>
         /// 返回队列元素个数
         /// </summary>
-        public int Count { get { return _count; } }
+        public int Count => _count;
 
         private int _count;
         private T[] _queue;
@@ -244,6 +248,7 @@ namespace NonsensicalKit.Tools.EasyTool
                 _queue = newqueue;
                 _size *= 2;
             }
+
             _queue[++_count] = val;
             Swim(_count);
         }
@@ -276,6 +281,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 sb.Append(_queue[i]).Append(" ");
             }
+
             return sb.ToString();
         }
 
@@ -313,7 +319,6 @@ namespace NonsensicalKit.Tools.EasyTool
         {
             while (k > 1 && Less(k / 2, k))
             {
-
                 Swap(k, k / 2);
                 k = k / 2;
             }
@@ -337,15 +342,17 @@ namespace NonsensicalKit.Tools.EasyTool
         /// <summary>
         /// 当前容量
         /// </summary>
-        public int Size { get { return _size; } }
+        public int Size => _size;
+
         /// <summary>
         /// 判断队列是否为空
         /// </summary>
-        public bool isEmpty { get { return _count == 0; } }
+        public bool IsEmpty => _count == 0;
+
         /// <summary>
         /// 返回队列元素个数
         /// </summary>
-        public int Count { get { return _count; } }
+        public int Count => _count;
 
         private int _count;
         private T[] _queue;
@@ -370,6 +377,7 @@ namespace NonsensicalKit.Tools.EasyTool
                 _queue = newqueue;
                 _size *= 2;
             }
+
             _queue[++_count] = val;
             Swim(_count);
         }
@@ -403,6 +411,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 sb.Append(_queue[i]).Append(" ");
             }
+
             return sb.ToString();
         }
 

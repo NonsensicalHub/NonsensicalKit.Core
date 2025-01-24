@@ -1,8 +1,11 @@
+using System;
+using UnityEngine.Serialization;
+
 namespace NonsensicalKit.Core
 {
-    [System.Serializable]
+    [Serializable]
     public class SerializableArray<T>
     {
-        public T[] Array;
+        [FormerlySerializedAs("Array")] public T[] m_Array;
     }
 }

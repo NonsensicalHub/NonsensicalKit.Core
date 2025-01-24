@@ -8,7 +8,8 @@ namespace NonsensicalKit.Core
     /// </summary>
     public class EnumQualifiedStringAttribute : PropertyAttribute
     {
-        public Type EnumType;
+        public readonly Type EnumType;
+
         public EnumQualifiedStringAttribute(Type type)
         {
             EnumType = type;

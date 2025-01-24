@@ -1,5 +1,5 @@
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace NonsensicalKit.Core
@@ -10,14 +10,14 @@ namespace NonsensicalKit.Core
     [Serializable]
     public struct Float2
     {
-        public readonly static Float2 Zero = new Float2(0, 0);
-        public readonly static Float2 One = new Float2(1, 1);
+        public static readonly Float2 Zero = new Float2(0, 0);
+        public static readonly Float2 One = new Float2(1, 1);
 
         [SerializeField] private float m_f1;
         [SerializeField] private float m_f2;
 
-        public float F1 { get { return m_f1; } set { m_f1 = value; } }
-        public float F2 { get { return m_f2; } set { m_f2 = value; } }
+        public float F1 { get => m_f1; set => m_f1 = value; }
+        public float F2 { get => m_f2; set => m_f2 = value; }
 
         [JsonIgnore] public float X => F1;
         [JsonIgnore] public float Y => F2;
@@ -124,5 +124,4 @@ namespace NonsensicalKit.Core
             return temp;
         }
     }
-
 }

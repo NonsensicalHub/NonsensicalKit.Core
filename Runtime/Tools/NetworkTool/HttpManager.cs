@@ -1,6 +1,6 @@
-using NonsensicalKit.Core;
 using System;
 using System.Collections.Generic;
+using NonsensicalKit.Core;
 using UnityEngine.Networking;
 
 namespace NonsensicalKit.Tools.NetworkTool
@@ -13,6 +13,7 @@ namespace NonsensicalKit.Tools.NetworkTool
         public IHandleWebError HttpErrorProcess { get; set; }
 
         #region GET
+
         public void Get(string url, Dictionary<string, string> header, Action<UnityWebRequest> callback)
         {
             StartCoroutine(HttpUtility.Get(url, header, callback, HttpErrorProcess));
@@ -22,9 +23,11 @@ namespace NonsensicalKit.Tools.NetworkTool
         {
             StartCoroutine(HttpUtility.GetWithArgs(url, bodys, callback));
         }
+
         #endregion
 
         #region Post
+
         public void Post(string url, string json, Dictionary<string, string> header, Action<UnityWebRequest> callback)
         {
             StartCoroutine(HttpUtility.Post(url, json, header, callback, HttpErrorProcess));
@@ -42,18 +45,17 @@ namespace NonsensicalKit.Tools.NetworkTool
 
         public void UploadPng(string url, byte[] imageByte, Dictionary<string, string> header, Action<UnityWebRequest> callback)
         {
-            List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
-
-            formData.Add(new MultipartFormFileSection("preview", imageByte, "preview", "image/png"));
+            List<IMultipartFormSection> formData = new List<IMultipartFormSection>
+                { new MultipartFormFileSection("preview", imageByte, "preview", "image/png") };
 
             StartCoroutine(HttpUtility.Post(url, formData, header, callback, HttpErrorProcess));
         }
 
-        public void UploadPngWithDatas(string url, byte[] imageByte, Dictionary<string, string> datas, Dictionary<string, string> header, Action<UnityWebRequest> callback)
+        public void UploadPngWithDatas(string url, byte[] imageByte, Dictionary<string, string> datas, Dictionary<string, string> header,
+            Action<UnityWebRequest> callback)
         {
-            List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
-
-            formData.Add(new MultipartFormFileSection("preview", imageByte, "preview", "image/png"));
+            List<IMultipartFormSection> formData = new List<IMultipartFormSection>
+                { new MultipartFormFileSection("preview", imageByte, "preview", "image/png") };
 
             foreach (var item in datas)
             {
@@ -62,6 +64,7 @@ namespace NonsensicalKit.Tools.NetworkTool
 
             StartCoroutine(HttpUtility.Post(url, formData, header, callback, HttpErrorProcess));
         }
+
         #endregion
     }
 }

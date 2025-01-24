@@ -8,6 +8,7 @@ namespace NonsensicalKit.Tools.EasyTool
         Include,
         Exclude,
     }
+
     public class PlatformLimit : MonoBehaviour
     {
         [SerializeField] private PlatformLimitMode m_limitMode;
@@ -22,12 +23,14 @@ namespace NonsensicalKit.Tools.EasyTool
                     {
                         gameObject.SetActive(false);
                     }
+
                     break;
                 case PlatformLimitMode.Exclude:
                     if (m_platforms.Contains(Application.platform))
                     {
                         gameObject.SetActive(false);
                     }
+
                     break;
             }
         }

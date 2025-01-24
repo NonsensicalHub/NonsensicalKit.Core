@@ -12,7 +12,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         [MenuItem("NonsensicalKit/批量修改/组件挂载修改器")]
         public static void ShowWindow()
         {
-            EditorWindow.GetWindow(typeof(ComponentMountModifier));
+            GetWindow(typeof(ComponentMountModifier));
         }
 
         private static class ComponentMountModifierPanel
@@ -28,8 +28,8 @@ namespace NonsensicalKit.Core.Editor.Tools
 
         private void OnGUI()
         {
-
-            ComponentMountModifierPanel.ComponentCount = EditorGUILayout.IntField("组件数量", ComponentMountModifierPanel.ComponentCount, GUILayout.MinWidth(100f));
+            ComponentMountModifierPanel.ComponentCount =
+                EditorGUILayout.IntField("组件数量", ComponentMountModifierPanel.ComponentCount, GUILayout.MinWidth(100f));
 
             if (GUILayout.Button("应用数量"))
             {
@@ -40,8 +40,10 @@ namespace NonsensicalKit.Core.Editor.Tools
 
             for (int i = 0; i < ComponentMountModifierPanel.ApplyCount; i++)
             {
-                ComponentMountModifierPanel.Components[i] = (MonoScript)EditorGUILayout.ObjectField("组件", ComponentMountModifierPanel.Components[i], typeof(MonoScript), false, GUILayout.MinWidth(100f));
-                ComponentMountModifierPanel.IsMount[i] = EditorGUILayout.Toggle("是否挂载", ComponentMountModifierPanel.IsMount[i], GUILayout.MinWidth(100f));
+                ComponentMountModifierPanel.Components[i] = (MonoScript)EditorGUILayout.ObjectField("组件", ComponentMountModifierPanel.Components[i],
+                    typeof(MonoScript), false, GUILayout.MinWidth(100f));
+                ComponentMountModifierPanel.IsMount[i] =
+                    EditorGUILayout.Toggle("是否挂载", ComponentMountModifierPanel.IsMount[i], GUILayout.MinWidth(100f));
             }
 
             if (GUILayout.Button("应用"))
@@ -71,15 +73,17 @@ namespace NonsensicalKit.Core.Editor.Tools
                 }
             }
         }
+
         private List<T> GetSelectComponent<T>()
         {
-            var v = NonsensicalEditorManager.SelectGameobjects;
+            var v = NonsensicalEditorManager.SelectGameObjects;
             List<T> components = new List<T>();
 
             foreach (var item in v)
             {
                 components.AddRange(item.GetComponentsInChildren<T>());
             }
+
             return components;
         }
     }

@@ -17,11 +17,12 @@ namespace NonsensicalKit.Core
         private static void Init()
         {
             Platform = Application.platform;
-            IsEditor = Platform == RuntimePlatform.OSXEditor || Platform == RuntimePlatform.WindowsEditor || Platform == RuntimePlatform.LinuxEditor;
-            IsWindow = Platform == RuntimePlatform.WindowsEditor || Platform == RuntimePlatform.WindowsPlayer;
+            IsEditor = Platform is RuntimePlatform.OSXEditor or RuntimePlatform.WindowsEditor or RuntimePlatform.LinuxEditor;
+            IsWindow = Platform is RuntimePlatform.WindowsEditor or RuntimePlatform.WindowsPlayer;
             IsWebGL = Platform == RuntimePlatform.WebGLPlayer;
             IsMobile = Application.isMobilePlatform;
         }
+
         public static string GetPlaformFolderName()
         {
             switch (Platform)

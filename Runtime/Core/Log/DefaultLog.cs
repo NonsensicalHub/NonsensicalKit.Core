@@ -2,12 +2,13 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Log
 {
     public class DefaultLog : ILog
     {
-        private StringBuilder _sb;
+        private readonly StringBuilder _sb;
 
         public DefaultLog()
         {
@@ -15,14 +16,15 @@ namespace NonsensicalKit.Core.Log
             {
                 _sb = new StringBuilder();
                 UnityEngine.Debug.Log($"StartDefaultLog\r\n" +
-                    $"DateTime:{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}\r\n" +
-                    $"Device Model:{SystemInfo.deviceModel}\r\n" +
-                    $"Device Name:{SystemInfo.deviceName}\r\n" +
-                    $"Operating System:{SystemInfo.operatingSystem}");
+                                      $"DateTime:{DateTime.Now:yyyy-MM-dd HH:mm:ss}\r\n" +
+                                      $"Device Model:{SystemInfo.deviceModel}\r\n" +
+                                      $"Device Name:{SystemInfo.deviceName}\r\n" +
+                                      $"Operating System:{SystemInfo.operatingSystem}");
             }
         }
 
-        public void Debug(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Debug(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor)
             {
@@ -33,7 +35,8 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Info(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Info(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor)
             {
@@ -44,7 +47,8 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Warning(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Warning(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor)
             {
@@ -55,7 +59,8 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Error(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Error(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor)
             {
@@ -66,7 +71,8 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Fatal(object obj, UnityEngine.Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Fatal(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor)
             {
@@ -77,27 +83,23 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        private void BuildString(object obj, string[] tags, string callerMemberName, string callerFilePath , int callerLineNumber)
+        private void BuildString(object obj, string[] tags, string callerMemberName, string callerFilePath, int callerLineNumber)
         {
-            if (obj != null)
-            {
-                _sb.AppendLine(obj.ToString());
-            }
-            else
-            {
-                _sb.AppendLine("null");
-            }
-            if (tags != null && tags.Length > 0)
+            _sb.AppendLine(obj != null ? obj.ToString() : "null");
+
+            if (tags is { Length: > 0 })
             {
                 _sb.Append("Tags:[");
                 foreach (var tag in tags)
                 {
                     _sb.Append($"{tag},");
                 }
-                _sb.Remove(_sb.Length - 1, 1);  //去掉最后一个逗号
+
+                _sb.Remove(_sb.Length - 1, 1); //去掉最后一个逗号
                 _sb.AppendLine("]");
             }
-            _sb.AppendLine($"DateTime:{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
+
+            _sb.AppendLine($"DateTime:{DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             _sb.Append($"{callerMemberName}(at {callerFilePath} :{callerLineNumber})");
         }
     }

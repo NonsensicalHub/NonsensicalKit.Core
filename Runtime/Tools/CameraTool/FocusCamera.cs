@@ -63,6 +63,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 _targetPostion = m_target.position;
             }
+
             _crtPostion = _targetPostion;
 
             Vector3 offset = transform.position - _crtPostion;
@@ -89,6 +90,7 @@ namespace NonsensicalKit.Tools.CameraTool
                     _targetDistance -= m_zoomSpeed * deltaTime;
                 }
             }
+
             if (_input.IsMouseRightButtonHold)
             {
                 var mouseMove = _input.CrtMouseMove;

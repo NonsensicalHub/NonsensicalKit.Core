@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace NonsensicalKit.Tools
 {
@@ -22,7 +21,7 @@ namespace NonsensicalKit.Tools
         }
 
         public static string FormatTips =
-@"yy 年份后两位
+            @"yy 年份后两位
 yyyy 年份
 MM 月份
 dd 日数
@@ -33,6 +32,7 @@ mm 分钟数
 ss 秒数
 ff 毫秒数(最多四位)
 分隔符可使用 - 或 / 或 :";
+
         public static string FormatTipsShort = "yy 年份后两位 yyyy 年份 MM 月份 dd 日数 ddd 周几 dddd 星期几 HH 小时数 mm 分钟数 ss 秒数 ff 毫秒数(最多四位) 分隔符可使用 - 或 / 或 :";
 
         public enum TimeZones

@@ -15,6 +15,6 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
         public string[] LimitedTags;
 
         public FileStream FileStream;
-        public StreamWriter _sw;
+        public StreamWriter Writer;
     }
 }

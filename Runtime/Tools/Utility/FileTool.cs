@@ -1,10 +1,12 @@
-using NonsensicalKit.Core.Log;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using NonsensicalKit.Core.Log;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace NonsensicalKit.Tools
 {
@@ -13,7 +15,6 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class FileTool
     {
-
         public static void WriteVector2(this BinaryWriter writer, Vector2 v2)
         {
             writer.Write(v2.x);
@@ -61,15 +62,14 @@ namespace NonsensicalKit.Tools
             string directoryPath = "null";
             try
             {
-                IntPtr pidlRet = IntPtr.Zero;
                 int publicOptions = (int)Win32API.BffStyles.RestrictToFilesystem |
-                (int)Win32API.BffStyles.RestrictToDomain;
+                                    (int)Win32API.BffStyles.RestrictToDomain;
                 int privateOptions = (int)Win32API.BffStyles.NewDialogStyle;
 
                 // Construct a BROWSEINFO.
                 Win32API.BROWSEINFO bi = new Win32API.BROWSEINFO();
                 IntPtr buffer = Marshal.AllocHGlobal(1024);
-                int mergedOptions = (int)publicOptions | (int)privateOptions;
+                int mergedOptions = publicOptions | privateOptions;
                 bi.pidlRoot = IntPtr.Zero;
                 bi.pszDisplayName = buffer;
                 bi.lpszTitle = "文件夹";
@@ -77,13 +77,13 @@ namespace NonsensicalKit.Tools
 
                 Win32Instance w = new Win32Instance();
                 bool bSuccess = false;
-                IntPtr P = w.GetHandle(ref bSuccess);
-                if (true == bSuccess)
+                IntPtr p = w.GetHandle(ref bSuccess);
+                if (bSuccess)
                 {
-                    bi.hwndOwner = P;
+                    bi.hwndOwner = p;
                 }
 
-                pidlRet = Win32API.Shell32.SHBrowseForFolder(ref bi);
+                var pidlRet = Win32API.Shell32.SHBrowseForFolder(ref bi);
                 Marshal.FreeHGlobal(buffer);
 
                 if (pidlRet == IntPtr.Zero)
@@ -109,7 +109,6 @@ namespace NonsensicalKit.Tools
                     {
                         break;
                     }
-
                 }
 
                 if (0 == nSize)
@@ -126,7 +125,6 @@ namespace NonsensicalKit.Tools
                 string utf8String = utf8.GetString(utf8Bytes);
                 utf8String = utf8String.Replace("\0", "");
                 directoryPath = utf8String.Replace("\\", "/") + "/";
-
             }
             catch (Exception e)
             {
@@ -135,6 +133,7 @@ namespace NonsensicalKit.Tools
 
             return directoryPath;
         }
+
         public static string FileSelectorWithMultiFilter(params string[][] filter)
         {
             var openFileName = new Win32API.OpenFileName();
@@ -148,28 +147,28 @@ namespace NonsensicalKit.Tools
                 StringBuilder sb = new StringBuilder();
                 StringBuilder typeStr1 = new StringBuilder();
                 StringBuilder typeStr2 = new StringBuilder();
-                for (int i = 0; i < filter.Length; i++)
+                foreach (var t in filter)
                 {
                     if (filter.Length < 2)
                     {
                         sb.Append("所有文件(*.*)\0*.*\0");
                     }
 
-                    sb.Append(filter[i][0]);
+                    sb.Append(t[0]);
                     typeStr1.Clear();
                     typeStr2.Clear();
 
                     typeStr1.Append("*.");
-                    typeStr1.Append(filter[i][1]);
+                    typeStr1.Append(t[1]);
                     typeStr2.Append("*.");
-                    typeStr2.Append(filter[i][1]);
+                    typeStr2.Append(t[1]);
 
-                    for (int j = 2; j < filter[i].Length; j++)
+                    for (int j = 2; j < t.Length; j++)
                     {
                         typeStr1.Append(",*.");
-                        typeStr1.Append(filter[i][j]);
+                        typeStr1.Append(t[j]);
                         typeStr2.Append(";*.");
-                        typeStr2.Append(filter[i][j]);
+                        typeStr2.Append(t[j]);
                     }
 
                     sb.Append("(");
@@ -178,11 +177,13 @@ namespace NonsensicalKit.Tools
                     sb.Append(typeStr2.ToString());
                     sb.Append("\0");
                 }
+
                 openFileName.filter = sb.ToString();
             }
+
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = Application.dataPath.Replace('/', '\\'); //默认路径
             openFileName.title = "选择文件";
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008;
 
@@ -213,11 +214,8 @@ namespace NonsensicalKit.Tools
             }
             else
             {
-                string typeStr1 = string.Empty;
-                string typeStr2 = string.Empty;
-
-                typeStr1 = "*." + filter[0];
-                typeStr2 = "*." + filter[0];
+                var typeStr1 = "*." + filter[0];
+                var typeStr2 = "*." + filter[0];
 
                 for (int i = 1; i < filter.Length; i++)
                 {
@@ -227,9 +225,10 @@ namespace NonsensicalKit.Tools
 
                 openFileName.filter = $"{typeName}({typeStr1})\0{typeStr2}\0";
             }
+
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = Application.dataPath.Replace('/', '\\'); //默认路径
             openFileName.title = "选择文件";
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008;
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
@@ -262,8 +261,8 @@ namespace NonsensicalKit.Tools
             }
             else
             {
-                string typeStr1 = string.Empty;
-                string typeStr2 = string.Empty;
+                string typeStr1;
+                string typeStr2;
 
                 typeStr1 = "*." + filter[0];
                 typeStr2 = "*." + filter[0];
@@ -276,15 +275,16 @@ namespace NonsensicalKit.Tools
 
                 openFileName.filter = $"{typeName}({typeStr1})\0{typeStr2}\0";
             }
+
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = Application.dataPath.Replace('/', '\\');//默认路径
+            openFileName.initialDir = Application.dataPath.Replace('/', '\\'); //默认路径
             openFileName.title = "选择文件";
             openFileName.flags = 0x00000004 | 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008 | 0x00000200;
             openFileName.dlgOwner = Win32API.GetForegroundWindow();
 
             // Create buffer for file names
-            string fileNames = new String(new char[ 8192]);
+            string fileNames = new String(new char[8192]);
             openFileName.file = Marshal.StringToBSTR(fileNames);
             openFileName.maxFile = fileNames.Length;
 
@@ -303,6 +303,7 @@ namespace NonsensicalKit.Tools
                     openFileName.file = (IntPtr)pointer;
                     file = Marshal.PtrToStringAuto(openFileName.file);
                 }
+
                 if (selectedFilesList.Count == 1)
                 {
                     fileFullNames = selectedFilesList;
@@ -315,6 +316,7 @@ namespace NonsensicalKit.Tools
                     {
                         selectedFiles[i] = selectedFilesList[0] + "\\" + selectedFilesList[i + 1];
                     }
+
                     fileFullNames = new List<string>(selectedFiles);
                 }
             }
@@ -328,9 +330,10 @@ namespace NonsensicalKit.Tools
                 return null;
             }
         }
+
         public static string FileSaveSelector(string typeName, params string[] filter)
         {
-          return   FileSaveSelector(typeName, Application.dataPath.Replace('/', '\\'), filter);
+            return FileSaveSelector(typeName, Application.dataPath.Replace('/', '\\'), filter);
         }
 
         public static string FileSaveSelector(string typeName, string initialDir, params string[] filter)
@@ -345,11 +348,8 @@ namespace NonsensicalKit.Tools
             }
             else
             {
-                string typeStr1 = string.Empty;
-                string typeStr2 = string.Empty;
-
-                typeStr1 = "*." + filter[0];
-                typeStr2 = "*." + filter[0];
+                var typeStr1 = "*." + filter[0];
+                var typeStr2 = "*." + filter[0];
 
                 for (int i = 1; i < filter.Length; i++)
                 {
@@ -359,9 +359,10 @@ namespace NonsensicalKit.Tools
 
                 openFileName.filter = $"{typeName}({typeStr1})\0{typeStr2}\0";
             }
+
             openFileName.fileTitle = new string(new char[64]);
             openFileName.maxFileTitle = openFileName.fileTitle.Length;
-            openFileName.initialDir = initialDir;//默认路径
+            openFileName.initialDir = initialDir; //默认路径
             openFileName.title = "保存项目";
             openFileName.defExt = "dat";
             openFileName.flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000200 | 0x00000008;
@@ -384,35 +385,32 @@ namespace NonsensicalKit.Tools
 
         public static void FileSave(byte[] data, string fullpath)
         {
-            string dirpath = StringTool.GetDirpathByPath(fullpath);
+            string dirpath = StringTool.GetDirPathByPath(fullpath);
 
             EnsureDir(dirpath);
 
-            using (FileStream fs = new FileStream(fullpath, FileMode.Create))
-            {
-                fs.Write(data, 0, data.Length);
-            }
+            using FileStream fs = new FileStream(fullpath, FileMode.Create);
+            fs.Write(data, 0, data.Length);
         }
 
         public static bool TransferData(string filepath1, string filepath2)
         {
-            if (!System.IO.File.Exists(filepath1) || !System.IO.File.Exists(filepath1))
+            if (!File.Exists(filepath1) || !File.Exists(filepath1))
             {
                 return false;
             }
 
             try
             {
-                using (var f1 = new FileStream(filepath1,FileMode.Open))
-                using (var f2 = new FileStream(filepath2,FileMode.OpenOrCreate))
+                using var f1 = new FileStream(filepath1, FileMode.Open);
+                using var f2 = new FileStream(filepath2, FileMode.OpenOrCreate);
+                byte[] buffer = new byte[1024];
+                int realRead;
+                while ((realRead = f1.Read(buffer, 0, 1024)) > 0)
                 {
-                    byte[] buffer=new byte[1024];
-                    int realRead;
-                    while ((realRead= f1.Read(buffer,0,1024))>0)
-                    {
-                        f2.Write(buffer,0,realRead);
-                    }
+                    f2.Write(buffer, 0, realRead);
                 }
+
                 return true;
             }
             catch (Exception)
@@ -428,8 +426,8 @@ namespace NonsensicalKit.Tools
         /// <param name="text">写入的文本</param>
         public static void WriteTxt(string path, string text)
         {
-            string dirpath = StringTool.GetDirpathByPath(path);
-            EnsureDir(dirpath);
+            string dirPath = StringTool.GetDirPathByPath(path);
+            EnsureDir(dirPath);
             File.WriteAllText(path, text);
         }
 
@@ -441,9 +439,9 @@ namespace NonsensicalKit.Tools
             Debug.Log("文件已写入：" + path);
         }
 
-        public static bool FileAppendWrite(string fullpath, string text)
+        public static bool FileAppendWrite(string fullPath, string text)
         {
-            return FileAppendWrite(Path.GetDirectoryName(fullpath), Path.GetFileName(fullpath), text);
+            return FileAppendWrite(Path.GetDirectoryName(fullPath), Path.GetFileName(fullPath), text);
         }
 
         public static bool FileAppendWrite(string path, string name, string text)
@@ -452,18 +450,16 @@ namespace NonsensicalKit.Tools
             {
                 Directory.CreateDirectory(path);
             }
+
             string pathStr = Path.Combine(path, name);
             try
             {
-                using (FileStream fs = new FileStream(pathStr, FileMode.Append, FileAccess.Write, FileShare.Write))
-                {
-                    using (StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8))
-                    {
-                        sw.Write(text);
-                        sw.Flush();
-                        sw.Close();
-                    }
-                }
+                using FileStream fs = new FileStream(pathStr, FileMode.Append, FileAccess.Write, FileShare.Write);
+                using StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
+                sw.Write(text);
+                sw.Flush();
+                sw.Close();
+
                 return true;
             }
             catch (Exception)
@@ -479,8 +475,8 @@ namespace NonsensicalKit.Tools
         /// <returns>当前工作目录的完全限定路径</returns>
         public static string GetCurrentPath()
         {
-            string path = null;
-            if (System.Environment.CurrentDirectory == AppDomain.CurrentDomain.BaseDirectory)//Windows应用程序则相等  
+            string path;
+            if (Environment.CurrentDirectory == AppDomain.CurrentDomain.BaseDirectory) //Windows应用程序则相等  
             {
                 path = AppDomain.CurrentDomain.BaseDirectory;
             }
@@ -488,6 +484,7 @@ namespace NonsensicalKit.Tools
             {
                 path = AppDomain.CurrentDomain.BaseDirectory + "Bin\\";
             }
+
             return path;
         }
 
@@ -498,7 +495,7 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static string GetFileString(string path)
         {
-            if (!System.IO.File.Exists(path))
+            if (!File.Exists(path))
             {
                 return null;
             }
@@ -531,10 +528,10 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 确保文件夹路径存在
         /// </summary>
-        /// <param name="dirPath"></param>
+        /// <param name="filePath"></param>
         public static void EnsureFileDir(string filePath)
         {
-            var dirPath=Path.GetDirectoryName(filePath);
+            var dirPath = Path.GetDirectoryName(filePath);
             if (Directory.Exists(dirPath) == false)
             {
                 Directory.CreateDirectory(dirPath);
@@ -559,6 +556,7 @@ namespace NonsensicalKit.Tools
             {
                 return null;
             }
+
             string data = File.ReadAllText(fullPath);
             return data;
         }
@@ -567,19 +565,24 @@ namespace NonsensicalKit.Tools
         {
             // C# representation of the IMalloc interface.
             [InterfaceType(ComInterfaceType.InterfaceIsIUnknown),
-               Guid("00000002-0000-0000-C000-000000000046")]
+             Guid("00000002-0000-0000-C000-000000000046")]
             public interface IMalloc
             {
                 [PreserveSig]
                 IntPtr Alloc([In] int cb);
+
                 [PreserveSig]
                 IntPtr Realloc([In] IntPtr pv, [In] int cb);
+
                 [PreserveSig]
                 void Free([In] IntPtr pv);
+
                 [PreserveSig]
                 int GetSize([In] IntPtr pv);
+
                 [PreserveSig]
                 int DidAlloc(IntPtr pv);
+
                 [PreserveSig]
                 void HeapMinimize();
             }
@@ -590,11 +593,15 @@ namespace NonsensicalKit.Tools
                 public IntPtr hwndOwner;
                 public IntPtr pidlRoot;
                 public IntPtr pszDisplayName;
+
                 [MarshalAs(UnmanagedType.LPTStr)]
                 public string lpszTitle;
+
                 public int ulFlags;
+
                 [MarshalAs(UnmanagedType.FunctionPtr)]
                 public Shell32.BFFCALLBACK lpfn;
+
                 public IntPtr lParam;
                 public int iImage;
             }
@@ -640,6 +647,7 @@ namespace NonsensicalKit.Tools
                 public int reservedInt = 0;
                 public int flagsEx = 0;
             }
+
             [DllImport("user32.dll", CharSet = CharSet.Auto)]
             public static extern IntPtr GetForegroundWindow();
 
@@ -652,11 +660,11 @@ namespace NonsensicalKit.Tools
 
                 [DllImport("Shell32.DLL", CharSet = CharSet.Auto)]
                 public static extern int SHGetSpecialFolderLocation(
-                            IntPtr hwndOwner, int nFolder, out IntPtr ppidl);
+                    IntPtr hwndOwner, int nFolder, out IntPtr ppidl);
 
                 [DllImport("Shell32.DLL", CharSet = CharSet.Auto)]
                 public static extern int SHGetPathFromIDList(
-                            IntPtr pidl, byte[] pszPath);
+                    IntPtr pidl, byte[] pszPath);
 
                 [DllImport("Shell32.DLL", CharSet = CharSet.Auto)]
                 public static extern IntPtr SHBrowseForFolder(ref BROWSEINFO bi);
@@ -677,19 +685,20 @@ namespace NonsensicalKit.Tools
             {
                 [DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
                 public static extern bool GetSaveFileName([In, Out] OpenFileName ofd);
+
                 //链接指定系统函数       打开文件对话框
                 [DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
                 public static extern bool GetOpenFileName([In, Out] OpenFileName ofn);
-
             }
-
         }
 
         private class Win32Instance
         {
             //-------------------------------------------------------------------------
             private HandleRef unityWindowHandle;
+
             private bool bUnityHandleSet;
+
             //-------------------------------------------------------------------------
             public IntPtr GetHandle(ref bool bSuccess)
             {
@@ -698,6 +707,7 @@ namespace NonsensicalKit.Tools
                 bSuccess = bUnityHandleSet;
                 return unityWindowHandle.Handle;
             }
+
             //-------------------------------------------------------------------------
             private bool __EnumWindowsCallBack(IntPtr hWnd, IntPtr lParam)
             {
@@ -706,11 +716,11 @@ namespace NonsensicalKit.Tools
                 int returnVal =
                     Win32API.User32.GetWindowThreadProcessId(new HandleRef(this, hWnd), out procid);
 
-                int currentPID = System.Diagnostics.Process.GetCurrentProcess().Id;
+                int currentPID = Process.GetCurrentProcess().Id;
 
                 HandleRef handle =
                     new HandleRef(this,
-                    System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle);
+                        Process.GetCurrentProcess().MainWindowHandle);
 
                 if (procid == currentPID)
                 {

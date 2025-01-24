@@ -8,8 +8,8 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
     /// </summary>
     public class AutoJumpNode : MonoBehaviour
     {
-        [SerializeField] private string m_jumpNode;     //执行跳转的节点
-        [SerializeField] private string m_jumpTarget;   //跳转的目标对象，为空时跳转到上一级
+        [SerializeField] private string m_jumpNode; //执行跳转的节点
+        [SerializeField] private string m_jumpTarget; //跳转的目标对象，为空时跳转到上一级
 
         protected virtual void Awake()
         {

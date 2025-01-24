@@ -12,14 +12,12 @@ namespace NonsensicalKit.Core.Service.Config
 
         public virtual void BeforeSetData()
         {
-
         }
 
         public abstract void SetData(ConfigData cd);
 
         public virtual void AfterSetData()
         {
-
         }
 
         protected bool CheckType<T>(ConfigData cdb) where T : ConfigData
@@ -28,7 +26,7 @@ namespace NonsensicalKit.Core.Service.Config
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public abstract class ConfigData
     {
         public string ConfigID = "ID" + Guid.NewGuid().ToString().Substring(0, 8);

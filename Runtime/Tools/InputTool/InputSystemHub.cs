@@ -1,15 +1,16 @@
 #if ENABLE_INPUT_SYSTEM
-using NonsensicalKit.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NonsensicalKit.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Tools.InputTool
 {
-    public partial class InputHub : MonoSingleton<InputHub>
+    public partial class InputHub
     {
         private InputHubControls _controls;
 
@@ -18,6 +19,7 @@ namespace NonsensicalKit.Tools.InputTool
             base.Awake();
             InitInputSystem();
         }
+
         protected override void OnDestroy()
         {
             base.OnDestroy();
@@ -27,6 +29,7 @@ namespace NonsensicalKit.Tools.InputTool
                 _controls.Dispose();
             }
         }
+
         private void InitInputSystem()
         {
             _controls = new InputHubControls();
@@ -60,83 +63,99 @@ namespace NonsensicalKit.Tools.InputTool
             _controls.KeyAndMouse.leftAlt.started += LeftAltKeyEnter;
             _controls.KeyAndMouse.leftAlt.canceled += LeftAltKeyLeave;
         }
+
         private void MousePosChanged(InputAction.CallbackContext context)
         {
             Vector2 value = context.ReadValue<Vector2>();
             CrtMousePos = value;
             OnMousePosChanged?.Invoke(value);
         }
+
         private void MouseMoveChanged(InputAction.CallbackContext context)
         {
             Vector2 value = context.ReadValue<Vector2>();
             CrtMouseMove = value;
             OnMouseMoveChanged?.Invoke(value);
         }
+
         private void ZoomChanged(InputAction.CallbackContext context)
         {
             float value = context.ReadValue<float>();
             CrtZoom = value;
             OnZoomChanged?.Invoke(value);
         }
+
         private void MouseLeftButtonDown(InputAction.CallbackContext context)
         {
             IsMouseLeftButtonHold = true;
             OnMouseLeftButtonDown?.Invoke();
         }
+
         private void MouseLeftButtonUp(InputAction.CallbackContext context)
         {
             IsMouseLeftButtonHold = false;
             OnMouseLeftButtonUp?.Invoke();
         }
+
         private void MouseRightButtonDown(InputAction.CallbackContext context)
         {
             IsMouseRightButtonHold = true;
             OnMouseRightButtonDown?.Invoke();
         }
+
         private void MouseRightButtonUp(InputAction.CallbackContext context)
         {
             IsMouseRightButtonHold = false;
             OnMouseRightButtonUp?.Invoke();
         }
+
         private void MouseMiddleButtonDown(InputAction.CallbackContext context)
         {
             IsMouseMiddleButtonHold = true;
             OnMouseMiddleButtonDown?.Invoke();
         }
+
         private void MouseMiddleButtonUp(InputAction.CallbackContext context)
         {
             IsMouseMiddleButtonHold = false;
             OnMouseMiddleButtonUp?.Invoke();
         }
+
         private void MoveChanged(InputAction.CallbackContext context)
         {
             Vector2 value = context.ReadValue<Vector2>();
             CrtMove = value;
             OnMoveChanged?.Invoke(value);
         }
+
         private void SpaceKeyEnter(InputAction.CallbackContext context)
         {
             OnSpaceKeyEnter?.Invoke();
         }
+
         private void FKeyEnter(InputAction.CallbackContext context)
         {
             OnFKeyEnter?.Invoke();
         }
+
         private void LeftShiftKeyEnter(InputAction.CallbackContext context)
         {
             OnLeftShiftKeyChanged?.Invoke(true);
             IsLeftShiftKeyHold = true;
         }
+
         private void LeftShiftKeyLeave(InputAction.CallbackContext context)
         {
             OnLeftShiftKeyChanged?.Invoke(false);
             IsLeftShiftKeyHold = false;
         }
+
         private void LeftAltKeyEnter(InputAction.CallbackContext context)
         {
             OnLeftAltKeyChanged?.Invoke(true);
             IsLeftAltKeyHold = true;
         }
+
         private void LeftAltKeyLeave(InputAction.CallbackContext context)
         {
             OnLeftAltKeyChanged?.Invoke(false);
@@ -146,8 +165,8 @@ namespace NonsensicalKit.Tools.InputTool
 
     public partial class @InputHubControls : IInputActionCollection2, IDisposable
     {
-
         public InputActionAsset asset { get; }
+
         public @InputHubControls()
         {
             asset = InputActionAsset.FromJson(@"{
@@ -445,7 +464,7 @@ namespace NonsensicalKit.Tools.InputTool
 
         public void Dispose()
         {
-            UnityEngine.Object.Destroy(asset);
+            Object.Destroy(asset);
         }
 
         public InputBinding? bindingMask
@@ -486,12 +505,14 @@ namespace NonsensicalKit.Tools.InputTool
         {
             asset.Disable();
         }
+
         public IEnumerable<InputBinding> bindings => asset.bindings;
 
         public InputAction FindAction(string actionNameOrId, bool throwIfNotFound = false)
         {
             return asset.FindAction(actionNameOrId, throwIfNotFound);
         }
+
         public int FindBinding(InputBinding bindingMask, out InputAction action)
         {
             return asset.FindBinding(bindingMask, out action);
@@ -511,6 +532,7 @@ namespace NonsensicalKit.Tools.InputTool
         private readonly InputAction m_KeyAndMouse_spaceKey;
         private readonly InputAction m_KeyAndMouse_fKey;
         private readonly InputAction m_KeyAndMouse_leftAlt;
+
         public struct KeyAndMouseActions
         {
             private @InputHubControls m_Wrapper;
@@ -531,6 +553,7 @@ namespace NonsensicalKit.Tools.InputTool
             public void Disable() { Get().Disable(); }
             public bool enabled => Get().enabled;
             public static implicit operator InputActionMap(KeyAndMouseActions set) { return set.Get(); }
+
             public void SetCallbacks(IKeyAndMouseActions instance)
             {
                 if (m_Wrapper.m_KeyAndMouseActionsCallbackInterface != null)
@@ -569,6 +592,7 @@ namespace NonsensicalKit.Tools.InputTool
                     @leftAlt.performed -= m_Wrapper.m_KeyAndMouseActionsCallbackInterface.OnLeftAlt;
                     @leftAlt.canceled -= m_Wrapper.m_KeyAndMouseActionsCallbackInterface.OnLeftAlt;
                 }
+
                 m_Wrapper.m_KeyAndMouseActionsCallbackInterface = instance;
                 if (instance != null)
                 {
@@ -608,7 +632,9 @@ namespace NonsensicalKit.Tools.InputTool
                 }
             }
         }
+
         public KeyAndMouseActions @KeyAndMouse => new KeyAndMouseActions(this);
+
         public interface IKeyAndMouseActions
         {
             void OnMove(InputAction.CallbackContext context);

@@ -1,10 +1,13 @@
-using NonsensicalKit.Tools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using NonsensicalKit.Tools;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Editor.Tools
 {
@@ -13,7 +16,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// </summary>
     public static class NonsensicalEditorManager
     {
-        public static GameObject[] SelectGameobjects;
+        public static GameObject[] SelectGameObjects;
         public static Transform SelectTransform;
         public static Action OnSelectChanged;
         public static Action OnEditorUpdate;
@@ -35,13 +38,13 @@ namespace NonsensicalKit.Core.Editor.Tools
         {
             if (Selection.gameObjects.Length < 1)
             {
-                SelectGameobjects = new GameObject[0];
+                SelectGameObjects = Array.Empty<GameObject>();
                 SelectTransform = null;
             }
             else
             {
-                SelectGameobjects = Selection.gameObjects;
-                SelectTransform = SelectGameobjects[0].transform;
+                SelectGameObjects = Selection.gameObjects;
+                SelectTransform = SelectGameObjects[0].transform;
             }
 
             OnSelectChanged?.Invoke();
@@ -52,7 +55,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         /// </summary>
         /// <returns></returns>
         [MenuItem("NonsensicalKit/Items/检测资源重名")]
-        private static bool CheckResoureDuplicateName()
+        private static void CheckResourceDuplicateName()
         {
             List<string> duplicateNameInfo = new List<string>();
 
@@ -94,10 +97,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             if (duplicateNameInfo.Count == 0)
             {
                 Debug.Log("无资源重名");
-                return false;
             }
-
-            return true;
         }
 
         [MenuItem("NonsensicalKit/Items/刷新项目文件")]
@@ -111,7 +111,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         private static void OpenPersistentDataPath()
         {
             string path = Application.persistentDataPath;
-            System.Diagnostics.Process.Start(path);
+            Process.Start(path);
         }
 
         /// <summary>
@@ -120,17 +120,15 @@ namespace NonsensicalKit.Core.Editor.Tools
         [MenuItem("NonsensicalKit/Items/根据名称排序")]
         private static void NameSort()
         {
-            GameObject[] roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
 
             for (int i = 0; i < roots.Length - 1; i++)
             {
                 for (int j = i + 1; j < roots.Length; j++)
                 {
-                    if (string.Compare(roots[i].name, roots[j].name) > 0)
+                    if (String.CompareOrdinal(roots[i].name, roots[j].name) > 0)
                     {
-                        GameObject temp = roots[i];
-                        roots[i] = roots[j];
-                        roots[j] = temp;
+                        (roots[i], roots[j]) = (roots[j], roots[i]);
                     }
                 }
             }
@@ -156,10 +154,10 @@ namespace NonsensicalKit.Core.Editor.Tools
                 foreach (var value in values)
                 {
                     var intValue = (int)value;
-                    if (keyValuePairs.ContainsKey(intValue))
+                    if (keyValuePairs.TryGetValue(intValue, out var pair))
                     {
                         errorCount++;
-                        Debug.Log($"枚举{item.Name}与枚举{keyValuePairs[intValue]}存在相同的值索引{intValue}");
+                        Debug.Log($"枚举{item.Name}与枚举{pair}存在相同的值索引{intValue}");
                     }
                     else
                     {
@@ -167,35 +165,34 @@ namespace NonsensicalKit.Core.Editor.Tools
                     }
                 }
             }
+
             Debug.Log($"枚举值重复检测完毕,共发现{errorCount}个重复");
         }
 
 
         [MenuItem("NonsensicalKit/Items/查找场景中的丢失脚本")]
-        static void SelectGameObjects()
+        private static void FindLost()
         {
             //Get the current scene and all top-level GameObjects in the scene hierarchy
             Scene currentScene = SceneManager.GetActiveScene();
             GameObject[] rootObjects = currentScene.GetRootGameObjects();
 
-            List<UnityEngine.Object> objectsWithDeadLinks = new List<UnityEngine.Object>();
+            List<Object> objectsWithDeadLinks = new List<Object>();
             foreach (GameObject g in rootObjects)
             {
                 var trans = g.GetComponentsInChildren<Transform>(true);
                 foreach (Transform tsf in trans)
                 {
                     Component[] components = tsf.GetComponents<Component>();
-                    for (int i = 0; i < components.Length; i++)
+                    foreach (var currentComponent in components)
                     {
-                        Component currentComponent = components[i];
-
                         //If the component is null, that means it's a missing script!
                         if (currentComponent == null)
                         {
                             //Add the sinner to our naughty-list
                             objectsWithDeadLinks.Add(tsf.gameObject);
                             Selection.activeGameObject = tsf.gameObject;
-                            Debug.Log(tsf.gameObject + " has a missing script!",tsf.gameObject); 
+                            Debug.Log(tsf.gameObject + " has a missing script!", tsf.gameObject);
                             break;
                         }
                     }

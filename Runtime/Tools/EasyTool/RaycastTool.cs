@@ -16,8 +16,8 @@ namespace NonsensicalKit.Tools.EasyTool
 
         private Dictionary<string, RaycastHitsInfo> _hitsInfo;
         private Dictionary<string, RaycastHitInfo> _hitInfo;
-        private RaycastHitsInfo _raycastHitsInfo = new RaycastHitsInfo();
-        private RaycastHitInfo _raycastHitInfo = new RaycastHitInfo();
+        private RaycastHitsInfo _raycastHitsInfo = new();
+        private RaycastHitInfo _raycastHitInfo = new();
 
         private void Awake()
         {
@@ -26,6 +26,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 m_raycastCamera = Camera.main;
             }
+
             _hitsInfo = new Dictionary<string, RaycastHitsInfo>();
             _hitInfo = new Dictionary<string, RaycastHitInfo>();
         }
@@ -43,6 +44,7 @@ namespace NonsensicalKit.Tools.EasyTool
                 {
                     _hitsInfo.Add(mask, null);
                 }
+
                 _hitsInfo[mask] = CheckAll(mask);
                 return _hitsInfo[mask].RaycastHits;
             }
@@ -61,6 +63,7 @@ namespace NonsensicalKit.Tools.EasyTool
                 {
                     _hitInfo.Add(mask, null);
                 }
+
                 _hitInfo[mask] = CheckFirst(mask);
                 return _hitInfo[mask].RaycastHit;
             }
@@ -79,6 +82,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 _raycastHitsInfo.RaycastHits = Physics.RaycastAll(ray, m_distance, LayerMask.GetMask(mask));
             }
+
             return _raycastHitsInfo;
         }
 
@@ -96,6 +100,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 Physics.Raycast(ray, out _raycastHitInfo.RaycastHit, m_distance, LayerMask.GetMask(mask));
             }
+
             return _raycastHitInfo;
         }
     }

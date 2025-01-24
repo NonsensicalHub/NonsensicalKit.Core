@@ -1,5 +1,5 @@
-using NonsensicalKit.Core;
 using System.Collections.Generic;
+using NonsensicalKit.Core;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -22,6 +22,7 @@ namespace NonsensicalKit.Tools.MeshTool
                 DefaultMaterial = primitive.GetComponent<MeshRenderer>().sharedMaterial;
                 primitive.Destroy();
             }
+
             return DefaultMaterial;
         }
 
@@ -44,9 +45,9 @@ namespace NonsensicalKit.Tools.MeshTool
             foreach (var item in components)
             {
                 MeshFilter[] meshFilters = item.GetComponentsInChildren<MeshFilter>();
-                for (int i = 0; i < meshFilters.Length; i++)
+                foreach (var t in meshFilters)
                 {
-                    MeshRenderer renderer = meshFilters[i].GetComponent<MeshRenderer>();
+                    MeshRenderer renderer = t.GetComponent<MeshRenderer>();
                     if (renderer == null) continue;
 
                     Material mat = renderer.sharedMaterial;
@@ -65,8 +66,9 @@ namespace NonsensicalKit.Tools.MeshTool
                     {
                         bounds.Encapsulate(renderer.bounds);
                     }
-                    combine.mesh = meshFilters[i].sharedMesh;
-                    combine.transform = meshFilters[i].transform.localToWorldMatrix;
+
+                    combine.mesh = t.sharedMesh;
+                    combine.transform = t.transform.localToWorldMatrix;
 
                     combinesDic.ListAdd(mat, combine);
                 }
@@ -131,20 +133,24 @@ namespace NonsensicalKit.Tools.MeshTool
                     {
                         bounds.Encapsulate(renderer.bounds);
                     }
+
                     combine.mesh = meshFilters[i].sharedMesh;
                     combine.transform = meshFilters[i].transform.localToWorldMatrix;
 
                     combinesDic.ListAdd(mat, combine);
                 }
             }
+
             mergeGo.transform.position = bounds.center - new Vector3(0, bounds.extents.y, 0);
 
             meshRenderer.sharedMaterials = materials.ToArray();
             List<CombineInstance> combines = new List<CombineInstance>();
             foreach (var item in materials)
             {
-                var crtMesh = new Mesh();
-                crtMesh.indexFormat = IndexFormat.UInt32;
+                var crtMesh = new Mesh
+                {
+                    indexFormat = IndexFormat.UInt32
+                };
                 CombineInstance combine = new CombineInstance();
                 crtMesh.CombineMeshes(combinesDic[item].ToArray(), true, true);
                 combine.mesh = crtMesh;
@@ -167,7 +173,7 @@ namespace NonsensicalKit.Tools.MeshTool
         {
             MeshBuilder crtMeshBuffer = new MeshBuilder();
 
-            Array4<bool> bool6s = new Array4<bool>(state.Length0, state.Length1, state.Length2, 6);
+            Array4<bool> bool6Side = new Array4<bool>(state.Length0, state.Length1, state.Length2, 6);
 
             for (int i = 0; i < state.Length0; i++)
             {
@@ -175,60 +181,60 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     for (int k = 0; k < state.Length2; k++)
                     {
-                        if (state[i, j, k] == true)
+                        if (state[i, j, k])
                         {
                             if (i == 0 || (i > 0 && state[i - 1, j, k] == false))
                             {
-                                if (bool6s[i, j, k, 0] == false)
+                                if (bool6Side[i, j, k, 0] == false)
                                 {
-                                    AddFace(crtMeshBuffer, state, 1, new Int3(i, j, k), bool6s, singleSize);
+                                    AddFace(crtMeshBuffer, state, 1, new Int3(i, j, k), bool6Side, singleSize);
                                 }
                             }
 
                             if (i == state.Length0 - 1 || (i < state.Length0 - 1 && state[i + 1, j, k] == false))
                             {
-                                if (bool6s[i, j, k, 1] == false)
+                                if (bool6Side[i, j, k, 1] == false)
                                 {
-                                    AddFace(crtMeshBuffer, state, 2, new Int3(i, j, k), bool6s, singleSize);
+                                    AddFace(crtMeshBuffer, state, 2, new Int3(i, j, k), bool6Side, singleSize);
                                 }
                             }
 
                             if (j == 0 || (j > 0 && state[i, j - 1, k] == false))
                             {
-                                if (bool6s[i, j, k, 2] == false)
+                                if (bool6Side[i, j, k, 2] == false)
                                 {
-                                    AddFace(crtMeshBuffer, state, 3, new Int3(i, j, k), bool6s, singleSize);
+                                    AddFace(crtMeshBuffer, state, 3, new Int3(i, j, k), bool6Side, singleSize);
                                 }
                             }
 
                             if (j == state.Length1 - 1 || (j < state.Length1 - 1 && state[i, j + 1, k] == false))
                             {
-                                if (bool6s[i, j, k, 3] == false)
+                                if (bool6Side[i, j, k, 3] == false)
                                 {
-                                    AddFace(crtMeshBuffer, state, 4, new Int3(i, j, k), bool6s, singleSize);
+                                    AddFace(crtMeshBuffer, state, 4, new Int3(i, j, k), bool6Side, singleSize);
                                 }
                             }
 
                             if (k == 0 || (k > 0 && state[i, j, k - 1] == false))
                             {
-                                if (bool6s[i, j, k, 4] == false)
+                                if (bool6Side[i, j, k, 4] == false)
                                 {
-                                    AddFace(crtMeshBuffer, state, 5, new Int3(i, j, k), bool6s, singleSize);
+                                    AddFace(crtMeshBuffer, state, 5, new Int3(i, j, k), bool6Side, singleSize);
                                 }
                             }
 
                             if (k == state.Length2 - 1 || (k < state.Length2 - 1 && state[i, j, k + 1] == false))
                             {
-                                if (bool6s[i, j, k, 5] == false)
+                                if (bool6Side[i, j, k, 5] == false)
                                 {
-                                    AddFace(crtMeshBuffer, state, 6, new Int3(i, j, k), bool6s, singleSize);
+                                    AddFace(crtMeshBuffer, state, 6, new Int3(i, j, k), bool6Side, singleSize);
                                 }
                             }
                         }
                     }
                 }
-
             }
+
             return crtMeshBuffer.ToMesh();
         }
 
@@ -239,8 +245,9 @@ namespace NonsensicalKit.Tools.MeshTool
         /// <param name="state"></param>
         /// <param name="dir">1到6分别为x负，x正，y负，y正，z负，z正</param>
         /// <param name="crtPoint"></param>
-        /// <param name="bool6s"></param>
-        private static void AddFace(MeshBuilder meshBuffer, Array3<bool> state, int dir, Int3 crtPoint, Array4<bool> bool6s, float singleSize)
+        /// <param name="bool6Side"></param>
+        /// <param name="singleSize"></param>
+        private static void AddFace(MeshBuilder meshBuffer, Array3<bool> state, int dir, Int3 crtPoint, Array4<bool> bool6Side, float singleSize)
         {
             Int3 dir1;
             Int3 dir2;
@@ -249,46 +256,46 @@ namespace NonsensicalKit.Tools.MeshTool
             switch (dir)
             {
                 case 1:
-                    {
-                        dir1 = new Int3(0, 1, 0);
-                        dir2 = new Int3(0, 0, 1);
-                        normal = new Int3(-1, 0, 0);
-                    }
+                {
+                    dir1 = new Int3(0, 1, 0);
+                    dir2 = new Int3(0, 0, 1);
+                    normal = new Int3(-1, 0, 0);
+                }
                     break;
                 case 2:
-                    {
-                        dir1 = new Int3(0, 1, 0);
-                        dir2 = new Int3(0, 0, 1);
-                        normal = new Int3(1, 0, 0);
-                    }
+                {
+                    dir1 = new Int3(0, 1, 0);
+                    dir2 = new Int3(0, 0, 1);
+                    normal = new Int3(1, 0, 0);
+                }
                     break;
                 case 3:
-                    {
-                        dir1 = new Int3(1, 0, 0);
-                        dir2 = new Int3(0, 0, 1);
-                        normal = new Int3(0, -1, 0);
-                    }
+                {
+                    dir1 = new Int3(1, 0, 0);
+                    dir2 = new Int3(0, 0, 1);
+                    normal = new Int3(0, -1, 0);
+                }
                     break;
                 case 4:
-                    {
-                        dir1 = new Int3(1, 0, 0);
-                        dir2 = new Int3(0, 0, 1);
-                        normal = new Int3(0, 1, 0);
-                    }
+                {
+                    dir1 = new Int3(1, 0, 0);
+                    dir2 = new Int3(0, 0, 1);
+                    normal = new Int3(0, 1, 0);
+                }
                     break;
                 case 5:
-                    {
-                        dir1 = new Int3(1, 0, 0);
-                        dir2 = new Int3(0, 1, 0);
-                        normal = new Int3(0, 0, -1);
-                    }
+                {
+                    dir1 = new Int3(1, 0, 0);
+                    dir2 = new Int3(0, 1, 0);
+                    normal = new Int3(0, 0, -1);
+                }
                     break;
                 case 6:
-                    {
-                        dir1 = new Int3(1, 0, 0);
-                        dir2 = new Int3(0, 1, 0);
-                        normal = new Int3(0, 0, 1);
-                    }
+                {
+                    dir1 = new Int3(1, 0, 0);
+                    dir2 = new Int3(0, 1, 0);
+                    normal = new Int3(0, 0, 1);
+                }
                     break;
                 default:
                     return;
@@ -316,11 +323,12 @@ namespace NonsensicalKit.Tools.MeshTool
                 int dir2Value = point.GetValue(dir2);
 
                 if (dir1Value < minDir1Limit || dir1Value > maxDir1Limit
-                    || dir2Value < minDir2Limit || dir2Value > maxDir2Limit)
+                                             || dir2Value < minDir2Limit || dir2Value > maxDir2Limit)
                 {
                     continue;
                 }
-                bool6s[point.I1, point.I2, point.I3, dir - 1] = true;
+
+                bool6Side[point.I1, point.I2, point.I3, dir - 1] = true;
                 buffer[point.I1, point.I2, point.I3] = true;
 
                 Int3 dir1Negative = point + (-dir1);
@@ -332,12 +340,12 @@ namespace NonsensicalKit.Tools.MeshTool
                 Int3 dir2NegativeFace = dir2Negative + normal;
                 Int3 dir2PositiveFace = dir2Positive + normal;
 
-                if (dir1Negative.CheckBound(arrMax1, arrMax2, arrMax3) == true)
+                if (dir1Negative.CheckBound(arrMax1, arrMax2, arrMax3))
                 {
-                    if (state[dir1Negative] == true
-                     && bool6s[dir1Negative, dir - 1] == false)
+                    if (state[dir1Negative]
+                        && bool6Side[dir1Negative, dir - 1] == false)
                     {
-                        if (dir1NegativeFace.CheckBound(arrMax1, arrMax2, arrMax3) == true && state[dir1NegativeFace] == true)
+                        if (dir1NegativeFace.CheckBound(arrMax1, arrMax2, arrMax3) && state[dir1NegativeFace])
                         {
                             if (dir1Value > minDir1Limit)
                             {
@@ -362,12 +370,12 @@ namespace NonsensicalKit.Tools.MeshTool
                     }
                 }
 
-                if (dir1Positive.CheckBound(arrMax1, arrMax2, arrMax3) == true)
+                if (dir1Positive.CheckBound(arrMax1, arrMax2, arrMax3))
                 {
-                    if (state[dir1Positive] == true
-                     && bool6s[dir1Positive, dir - 1] == false)
+                    if (state[dir1Positive]
+                        && bool6Side[dir1Positive, dir - 1] == false)
                     {
-                        if (dir1PositiveFace.CheckBound(arrMax1, arrMax2, arrMax3) == true && state[dir1PositiveFace] == true)
+                        if (dir1PositiveFace.CheckBound(arrMax1, arrMax2, arrMax3) && state[dir1PositiveFace])
                         {
                             if (dir1Value < maxDir1Limit)
                             {
@@ -392,12 +400,12 @@ namespace NonsensicalKit.Tools.MeshTool
                     }
                 }
 
-                if (dir2Negative.CheckBound(arrMax1, arrMax2, arrMax3) == true)
+                if (dir2Negative.CheckBound(arrMax1, arrMax2, arrMax3))
                 {
-                    if (state[dir2Negative] == true
-                     && bool6s[dir2Negative, dir - 1] == false)
+                    if (state[dir2Negative]
+                        && bool6Side[dir2Negative, dir - 1] == false)
                     {
-                        if (dir2NegativeFace.CheckBound(arrMax1, arrMax2, arrMax3) == true && state[dir2NegativeFace] == true)
+                        if (dir2NegativeFace.CheckBound(arrMax1, arrMax2, arrMax3) && state[dir2NegativeFace])
                         {
                             if (dir2Value > minDir2Limit)
                             {
@@ -422,12 +430,12 @@ namespace NonsensicalKit.Tools.MeshTool
                     }
                 }
 
-                if (dir2Positive.CheckBound(arrMax1, arrMax2, arrMax3) == true)
+                if (dir2Positive.CheckBound(arrMax1, arrMax2, arrMax3))
                 {
-                    if (state[dir2Positive] == true
-                     && bool6s[dir2Positive, dir - 1] == false)
+                    if (state[dir2Positive]
+                        && bool6Side[dir2Positive, dir - 1] == false)
                     {
-                        if (dir2PositiveFace.CheckBound(arrMax1, arrMax2, arrMax3) == true && state[dir2PositiveFace] == true)
+                        if (dir2PositiveFace.CheckBound(arrMax1, arrMax2, arrMax3) && state[dir2PositiveFace])
                         {
                             if (dir2Value < maxDir2Limit)
                             {
@@ -443,7 +451,6 @@ namespace NonsensicalKit.Tools.MeshTool
                     {
                         maxDir2Limit = dir2Value;
                     }
-
                 }
                 else
                 {
@@ -460,16 +467,16 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     for (int k = 0; k < state.Length2; k++)
                     {
-                        if (buffer[i, j, k] == true)
+                        if (buffer[i, j, k])
                         {
                             Int3 point = new Int3(i, j, k);
                             int dir1Value = point.GetValue(dir1);
                             int dir2Value = point.GetValue(dir2);
 
                             if (dir1Value < minDir1Limit || dir1Value > maxDir1Limit
-                                || dir2Value < minDir2Limit || dir2Value > maxDir2Limit)
+                                                         || dir2Value < minDir2Limit || dir2Value > maxDir2Limit)
                             {
-                                bool6s[point.I1, point.I2, point.I3, dir - 1] = false;
+                                bool6Side[point.I1, point.I2, point.I3, dir - 1] = false;
                             }
                         }
                     }
@@ -503,13 +510,13 @@ namespace NonsensicalKit.Tools.MeshTool
             }
             else
             {
-                meshBuffer.AddQuad(new Vector3[] { point4[2], point4[1], point4[0], point4[3] }, normalVector3, Vector2.one * 0.5f);
+                meshBuffer.AddQuad(new[] { point4[2], point4[1], point4[0], point4[3] }, normalVector3, Vector2.one * 0.5f);
             }
         }
 
         public static Mesh CreateCustomCubeSimple(Array3<bool> state, float singleSize)
         {
-            MeshBuilder meshbuffer = new MeshBuilder();
+            MeshBuilder meshBuilder = new MeshBuilder();
             int width = state.Length0;
             int height = state.Length1;
             int thickness = state.Length2;
@@ -521,16 +528,15 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     for (int t = 0; t < thickness; t++)
                     {
-                        if (state[w, h, t] == true && temp[w, h, t] == false)
+                        if (state[w, h, t] && temp[w, h, t] == false)
                         {
-                            AddPartCube(meshbuffer, state, temp, w, h, t, singleSize);
+                            AddPartCube(meshBuilder, state, temp, w, h, t, singleSize);
                         }
                     }
-
                 }
             }
 
-            return meshbuffer.ToMesh();
+            return meshBuilder.ToMesh();
         }
 
         private static void AddPartCube(MeshBuilder meshbuffer, Array3<bool> state, Array3<bool> temp, int w, int h, int t, float singleSize)
@@ -568,6 +574,7 @@ namespace NonsensicalKit.Tools.MeshTool
                         }
                     }
                 }
+
                 if (!hFlag)
                 {
                     if (CheckHeight(left, right, front, back, up + 1, state, temp))
@@ -583,6 +590,7 @@ namespace NonsensicalKit.Tools.MeshTool
                         }
                     }
                 }
+
                 if (!tFlag)
                 {
                     if (CheckThickness(left, right, down, up, back + 1, state, temp))
@@ -598,6 +606,7 @@ namespace NonsensicalKit.Tools.MeshTool
                         }
                     }
                 }
+
                 if (wFlag && hFlag && tFlag)
                 {
                     break;
@@ -633,12 +642,13 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 for (int k = front; k <= back; k++)
                 {
-                    if (state[rightPlus, j, k] == false || temp[rightPlus, j, k] == true)
+                    if (state[rightPlus, j, k] == false || temp[rightPlus, j, k])
                     {
                         return true;
                     }
                 }
             }
+
             return false;
         }
 
@@ -648,12 +658,13 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 for (int k = front; k <= back; k++)
                 {
-                    if (state[j, upPlus, k] == false || temp[j, upPlus, k] == true)
+                    if (state[j, upPlus, k] == false || temp[j, upPlus, k])
                     {
                         return true;
                     }
                 }
             }
+
             return false;
         }
 
@@ -663,12 +674,13 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 for (int k = down; k <= up; k++)
                 {
-                    if (state[j, k, backPlus] == false || temp[j, k, backPlus] == true)
+                    if (state[j, k, backPlus] == false || temp[j, k, backPlus])
                     {
                         return true;
                     }
                 }
             }
+
             return false;
         }
 
@@ -699,10 +711,13 @@ namespace NonsensicalKit.Tools.MeshTool
             int all = count * count;
             for (int i = 0; i < all; i++)
             {
-                float x = row / count;
-                float y = column / count;
+                float x = (float)row / count;
+                float y =  (float)column / count;
                 meshbuffer.AddQuad(
-                    new Vector3[] { PerlinNoise(crtPos), PerlinNoise(crtPos + p1Offset), PerlinNoise(crtPos + p2Offset), PerlinNoise(crtPos + p3Offset) },
+                    new[]
+                    {
+                        PerlinNoise(crtPos), PerlinNoise(crtPos + p1Offset), PerlinNoise(crtPos + p2Offset), PerlinNoise(crtPos + p3Offset)
+                    },
                     new Vector3(0, 1, 0),
                     new Vector3(x, y));
                 column++;
@@ -727,9 +742,9 @@ namespace NonsensicalKit.Tools.MeshTool
 
         public static Mesh CreateCube(Vector3 size)
         {
-            MeshBuilder meshbuffer = new MeshBuilder();
-            meshbuffer.AddCube(size);
-            return meshbuffer.ToMesh();
+            MeshBuilder meshBuilder = new MeshBuilder();
+            meshBuilder.AddCube(size);
+            return meshBuilder.ToMesh();
         }
 
         public static Mesh CreateCube(Vector3 offset, Vector3 size)
@@ -793,11 +808,12 @@ namespace NonsensicalKit.Tools.MeshTool
         /// <param name="segmentNum"></param>
         /// <param name="smoothness"></param>
         /// <returns></returns>
-        public static Mesh CreateBezierCurve(Vector3 start, Vector3 p1, Vector3 p2, Vector3 end, float radius, int segmentNum = 16, int smoothness = 16)
+        public static Mesh CreateBezierCurve(Vector3 start, Vector3 p1, Vector3 p2, Vector3 end, float radius, int segmentNum = 16,
+            int smoothness = 16)
         {
             MeshBuilder meshbuffer = new MeshBuilder();
 
-            var v = BezierTool.GetThreePowerBeizerListWithSlope(start, p1, p2, end, segmentNum);
+            var v = BezierTool.GetThreePowerBezierListWithSlope(start, p1, p2, end, segmentNum);
 
             var point = v[0];
             var slopes = v[1];
@@ -817,6 +833,7 @@ namespace NonsensicalKit.Tools.MeshTool
         /// <summary>
         /// 更新贝塞尔曲线
         /// </summary>
+        /// <param name="mesh"></param>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="p1"></param>
@@ -825,25 +842,26 @@ namespace NonsensicalKit.Tools.MeshTool
         /// <param name="segmentNum"></param>
         /// <param name="smoothness"></param>
         /// <returns></returns>
-        public static void CreateBezierCurve(Mesh mesh, Vector3 start, Vector3 p1, Vector3 p2, Vector3 end, float radius, int segmentNum = 16, int smoothness = 16)
+        public static void CreateBezierCurve(Mesh mesh, Vector3 start, Vector3 p1, Vector3 p2, Vector3 end, float radius, int segmentNum = 16,
+            int smoothness = 16)
         {
-            MeshBuilder meshbuffer = new MeshBuilder();
+            MeshBuilder meshBuilder = new MeshBuilder();
 
-            var v = BezierTool.GetThreePowerBeizerListWithSlope(start, p1, p2, end, segmentNum);
+            var v = BezierTool.GetThreePowerBezierListWithSlope(start, p1, p2, end, segmentNum);
 
             var point = v[0];
             var slopes = v[1];
 
-            meshbuffer.AddRound(start, radius, slopes[0], smoothness);
+            meshBuilder.AddRound(start, radius, slopes[0], smoothness);
 
             for (int i = 0; i < point.Length - 1; i++)
             {
-                meshbuffer.AddRing3D(point[i], radius, slopes[i], point[i + 1], radius, slopes[i + 1], smoothness);
+                meshBuilder.AddRing3D(point[i], radius, slopes[i], point[i + 1], radius, slopes[i + 1], smoothness);
             }
 
-            meshbuffer.AddRound(end, radius, -slopes[segmentNum - 1], smoothness);
+            meshBuilder.AddRound(end, radius, -slopes[segmentNum - 1], smoothness);
 
-            meshbuffer.Apply(mesh);
+            meshBuilder.Apply(mesh);
         }
 
         /// <summary>
@@ -859,12 +877,13 @@ namespace NonsensicalKit.Tools.MeshTool
         /// <param name="segmentNum"></param>
         /// <param name="smoothness"></param>
         /// <returns></returns>
-        public static void CreateBezierCurve(Mesh mesh, Quaternion rotate, Vector3 start, Vector3 p1, Vector3 p2, Vector3 end, float radius, int segmentNum = 16, int smoothness = 16)
+        public static void CreateBezierCurve(Mesh mesh, Quaternion rotate, Vector3 start, Vector3 p1, Vector3 p2, Vector3 end, float radius,
+            int segmentNum = 16, int smoothness = 16)
         {
             MeshBuilder meshbuffer = new MeshBuilder();
 
             rotate = Quaternion.Inverse(rotate);
-            var v = BezierTool.GetThreePowerBeizerListWithSlope(rotate * start, rotate * p1, rotate * p2, rotate * end, segmentNum);
+            var v = BezierTool.GetThreePowerBezierListWithSlope(rotate * start, rotate * p1, rotate * p2, rotate * end, segmentNum);
 
             var point = v[0];
             var slopes = v[1];

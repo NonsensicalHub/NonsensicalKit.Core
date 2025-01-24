@@ -8,7 +8,8 @@ namespace NonsensicalKit.Core
     /// </summary>
     public class TypeQualifiedStringAttribute : PropertyAttribute
     {
-        public Type Type;
+        public readonly Type Type;
+
         public TypeQualifiedStringAttribute(Type type)
         {
             Type = type;

@@ -14,6 +14,7 @@ namespace NonsensicalKit.Tools.CameraTool
         /// 旋轴（与视点旋转）
         /// </summary>
         [SerializeField] protected Transform m_swivel;
+
         /// <summary>
         /// 旋杆（与视点距离）
         /// </summary>
@@ -30,18 +31,7 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] protected bool m_checkUI = true;
         [SerializeField] protected bool m_autoInit = true;
 
-        protected float _TargetZoom
-        {
-            get
-            {
-                return _targetZoom;
-            }
-            set
-            {
-                _targetZoom = Mathf.Clamp01(value);
-            }
-        }
-        protected bool _MouseNotInUI
+        protected bool MouseNotInUI
         {
             get
             {
@@ -50,23 +40,23 @@ namespace NonsensicalKit.Tools.CameraTool
                     return true;
                 }
 
-                if (_crtEventSystem == null)
+                if (CrtEventSystem == null)
                 {
                     return true;
                 }
 
-                return !_crtEventSystem.IsPointerOverGameObject();
+                return !CrtEventSystem.IsPointerOverGameObject();
             }
         }
 
-        protected Vector3 _tarPos;
-        protected float _zoom;
-        protected float _yAngle;
-        protected float _xAngle;
-        protected float _targetZoom;
-        protected EventSystem _crtEventSystem;
-        protected InputHub _input;
-        protected bool _isOn = true;
+        protected Vector3 TarPos;
+        protected float Zoom;
+        protected float YAngle;
+        protected float XAngle;
+        protected float TargetZoom;
+        protected EventSystem CrtEventSystem;
+        protected InputHub Input;
+        protected  bool IsOn = true;
 
         private Vector3 _startPos;
         private Vector3 _startRot;
@@ -88,20 +78,20 @@ namespace NonsensicalKit.Tools.CameraTool
 
         protected virtual void Start()
         {
-            _crtEventSystem = EventSystem.current;
-            _input = InputHub.Instance;
+            CrtEventSystem = EventSystem.current;
+            Input = InputHub.Instance;
         }
 
         protected virtual void Update()
         {
-            if (_crtEventSystem == null && EventSystem.current != null)
+            if (CrtEventSystem == null && EventSystem.current != null)
             {
-                _crtEventSystem = EventSystem.current;
+                CrtEventSystem = EventSystem.current;
             }
 
-            if (_isOn && _MouseNotInUI)
+            if (IsOn && MouseNotInUI)
             {
-                var v = -_input.CrtZoom;
+                var v = -Input.CrtZoom;
                 if (v > 0)
                 {
                     v = 120;
@@ -110,19 +100,22 @@ namespace NonsensicalKit.Tools.CameraTool
                 {
                     v = -120;
                 }
+
                 if (v != 0)
                 {
                     AdjustZoom(v);
                 }
-                if (_input.IsMouseRightButtonHold)
+
+                if (Input.IsMouseRightButtonHold)
                 {
-                    AdjustRotation(new Vector2(_input.CrtMousePos.x, -_input.CrtMousePos.x));
+                    AdjustRotation(new Vector2(Input.CrtMousePos.x, -Input.CrtMousePos.x));
                 }
+
                 if (m_canMove)
                 {
-                    if (_input.IsMouseLeftButtonHold)
+                    if (Input.IsMouseLeftButtonHold)
                     {
-                        AdjustPosition(_input.CrtMouseMove);
+                        AdjustPosition(Input.CrtMouseMove);
                     }
                 }
             }
@@ -130,24 +123,24 @@ namespace NonsensicalKit.Tools.CameraTool
 
         protected void LateUpdate()
         {
-            var targetPos = _tarPos + Quaternion.Euler(_xAngle, _yAngle, 0) * new Vector3(0, 0, Mathf.Lerp(m_stickMinZoom, m_stickMaxZoom, _TargetZoom));
+            var targetPos = TarPos + Quaternion.Euler(XAngle, YAngle, 0) *
+                new Vector3(0, 0, Mathf.Lerp(m_stickMinZoom, m_stickMaxZoom, TargetZoom));
             if (Physics.CheckSphere(targetPos, 0.1f, m_checkLayers, QueryTriggerInteraction.Ignore))
             {
-                _tarPos = transform.position;
-                _TargetZoom = _zoom;
-                _xAngle = _trueX;
-                _yAngle = _trueY;
+                TarPos = transform.position;
+                TargetZoom = Mathf.Clamp01(Zoom);
+                XAngle = _trueX;
+                YAngle = _trueY;
             }
 
-            transform.position = Vector3.Lerp(transform.position, _tarPos, 0.05f);
-            _zoom = _zoom * 0.95f + _TargetZoom * 0.05f;
-            float distance = Mathf.Lerp(m_stickMinZoom, m_stickMaxZoom, _zoom);
+            transform.position = Vector3.Lerp(transform.position, TarPos, 0.05f);
+            Zoom = Zoom * 0.95f + TargetZoom * 0.05f;
+            float distance = Mathf.Lerp(m_stickMinZoom, m_stickMaxZoom, Zoom);
             m_stick.localPosition = new Vector3(0f, 0f, distance);
 
 
-
-            _trueX = _trueX * 0.95f + _xAngle * 0.05f;
-            _trueY = _trueY * 0.95f + _yAngle * 0.05f;
+            _trueX = _trueX * 0.95f + XAngle * 0.05f;
+            _trueY = _trueY * 0.95f + YAngle * 0.05f;
 
             m_swivel.transform.localRotation = Quaternion.Euler(_trueX, _trueY, 0f);
         }
@@ -158,7 +151,8 @@ namespace NonsensicalKit.Tools.CameraTool
 
             Gizmos.color = transparentGreen;
 
-            var targetPos = _tarPos + Quaternion.Euler(_xAngle, _yAngle, 0) * new Vector3(0, 0, Mathf.Lerp(m_stickMinZoom, m_stickMaxZoom, _TargetZoom));
+            var targetPos = TarPos + Quaternion.Euler(XAngle, YAngle, 0) *
+                new Vector3(0, 0, Mathf.Lerp(m_stickMinZoom, m_stickMaxZoom, TargetZoom));
             // when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
             Gizmos.DrawSphere(targetPos, 0.1f);
         }
@@ -174,19 +168,19 @@ namespace NonsensicalKit.Tools.CameraTool
 
         public void Init()
         {
-            _tarPos = transform.position;
-            _targetZoom = (m_stick.localPosition.z / (m_stickMinZoom + m_stickMaxZoom));
-            _zoom = _targetZoom;
-            _yAngle = m_swivel.transform.localEulerAngles.y;
-            _trueY = _yAngle;
-            _xAngle = m_swivel.transform.localEulerAngles.x;
-            _trueX = _xAngle;
+            TarPos = transform.position;
+            TargetZoom = (m_stick.localPosition.z / (m_stickMinZoom + m_stickMaxZoom));
+            Zoom = TargetZoom;
+            YAngle = m_swivel.transform.localEulerAngles.y;
+            _trueY = YAngle;
+            XAngle = m_swivel.transform.localEulerAngles.x;
+            _trueX = XAngle;
         }
 
         public void Foucs(Transform tsf)
         {
             transform.position = tsf.position;
-            _tarPos = tsf.position;
+            TarPos = tsf.position;
         }
 
         /// <summary>
@@ -195,7 +189,7 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="delta"></param>
         protected void AdjustZoom(float delta)
         {
-            _TargetZoom += delta * m_zoomSpeed;
+            TargetZoom =Mathf.Clamp01(TargetZoom+delta * m_zoomSpeed) ;
         }
 
         /// <summary>
@@ -204,7 +198,7 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="delta"></param>
         protected void AdjustRotation(Vector2 delta)
         {
-            _yAngle += delta.x * m_rotationSpeed * Time.deltaTime;
+            YAngle += delta.x * m_rotationSpeed * Time.deltaTime;
             //if (yAngle < 0f)
             //{
             //    yAngle += 360f;
@@ -214,7 +208,7 @@ namespace NonsensicalKit.Tools.CameraTool
             //    yAngle -= 360f;
             //}
 
-            _xAngle += delta.y * m_rotationSpeed * Time.deltaTime;
+            XAngle += delta.y * m_rotationSpeed * Time.deltaTime;
             //if (xAngle < 0f)
             //{
             //    xAngle += 360f;
@@ -229,9 +223,9 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             Vector3 direction = m_swivel.transform.localRotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
             float damping = Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y));
-            float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _zoom) * damping * Time.deltaTime;
+            float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, Zoom) * damping * Time.deltaTime;
 
-            _tarPos += direction * distance;
+            TarPos += direction * distance;
         }
     }
 }

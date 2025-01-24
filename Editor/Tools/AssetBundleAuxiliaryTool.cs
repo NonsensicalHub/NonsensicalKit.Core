@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Editor.Tools
 {
@@ -13,7 +14,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         [MenuItem("NonsensicalKit/AssestBundle辅助工具")]
         private static void ShowWindow()
         {
-            EditorWindow.GetWindow(typeof(AssetBundleAuxiliaryTool));
+            GetWindow(typeof(AssetBundleAuxiliaryTool));
         }
 
         private Array _optionsEnumArray;
@@ -33,7 +34,8 @@ namespace NonsensicalKit.Core.Editor.Tools
 
         private void OnGUI()
         {
-            _buildPath = PlayerPrefs.GetString("nk_assestBundleAuxiliaryTool_buildPath", Path.Combine(Application.dataPath, "Editor", "AssetBundles"));
+            _buildPath = PlayerPrefs.GetString("nk_assestBundleAuxiliaryTool_buildPath",
+                Path.Combine(Application.dataPath, "Editor", "AssetBundles"));
             _buildPath = EditorGUILayout.TextField("目标文件夹路径：", _buildPath);
             PlayerPrefs.SetString("nk_assestBundleAuxiliaryTool_buildPath", _buildPath);
 
@@ -49,6 +51,7 @@ namespace NonsensicalKit.Core.Editor.Tools
                 PlayerPrefs.SetInt("nk_assestBundleAuxiliaryTool_buildOption_" + item.ToString(), _options[i] ? 1 : 0);
                 i++;
             }
+
             EditorGUIUtility.labelWidth = originalValue;
 
             EditorGUILayout.Space();
@@ -62,6 +65,7 @@ namespace NonsensicalKit.Core.Editor.Tools
                 {
                     Directory.CreateDirectory(_buildPath);
                 }
+
                 BuildAssetBundleOptions buildOption = 0;
 
                 int j = 0;
@@ -71,6 +75,7 @@ namespace NonsensicalKit.Core.Editor.Tools
                     {
                         buildOption |= item;
                     }
+
                     j++;
                 }
 
@@ -94,18 +99,17 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
         }
 
-        private static void CheckFileSystemInfo()  //检查目标目录下的文件系统
+        private static void CheckFileSystemInfo() //检查目标目录下的文件系统
         {
             AssetDatabase.RemoveUnusedAssetBundleNames(); //移除没有用的assetbundlename
-            UnityEngine.Object obj = Selection.activeObject;    // Selection.activeObject 返回选择的物体
-            string path = AssetDatabase.GetAssetPath(obj);//选中的文件夹
+            Object obj = Selection.activeObject; // Selection.activeObject 返回选择的物体
+            string path = AssetDatabase.GetAssetPath(obj); //选中的文件夹
             CoutineCheck(path);
         }
 
         private static void CheckFileOrDirectory(FileSystemInfo fileSystemInfo, string path) //判断是文件还是文件夹
         {
-            FileInfo fileInfo = fileSystemInfo as FileInfo;
-            if (fileInfo != null)
+            if (fileSystemInfo is FileInfo)
             {
                 SetBundleName(path);
             }
@@ -115,7 +119,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
         }
 
-        private static void CoutineCheck(string path)   //是文件夹，继续向下
+        private static void CoutineCheck(string path) //是文件夹，继续向下
         {
             DirectoryInfo directory = new DirectoryInfo(@path);
             FileSystemInfo[] fileSystemInfos = directory.GetFileSystemInfos();
@@ -123,24 +127,23 @@ namespace NonsensicalKit.Core.Editor.Tools
             foreach (var item in fileSystemInfos)
             {
                 // Debug.Log(item);
-                int idx = item.ToString().LastIndexOf(@"\");//得到最后一个'\'的索引
-                string name = item.ToString().Substring(idx + 1);//截取后面的作为名称
+                int idx = item.ToString().LastIndexOf(@"\", StringComparison.Ordinal); //得到最后一个'\'的索引
+                string name = item.ToString().Substring(idx + 1); //截取后面的作为名称
 
                 if (!name.Contains(".meta"))
                 {
-                    CheckFileOrDirectory(item, path + "/" + name);  //item  文件系统，加相对路径
+                    CheckFileOrDirectory(item, path + "/" + name); //item  文件系统，加相对路径
                 }
             }
         }
 
-        private static void SetBundleName(string path)  //设置assetbundle名字
+        private static void SetBundleName(string path) //设置assetbundle名字
         {
             var importer = AssetImporter.GetAtPath(path);
             string[] strs = path.Split('.');
             string[] dictors = strs[0].Split('/');
-            string name = "";
 
-            name = dictors[dictors.Length - 1];
+            var name = dictors[^1];
 
             if (importer != null)
             {

@@ -10,23 +10,23 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
     [RequireComponent(typeof(LogicNodeMono))]
     public abstract class LogicNodeSwitchBase : NonsensicalMono
     {
-        protected LogicNodeManager _manager;
+        protected LogicNodeManager Manager;
 
-        protected LogicNodeMono _nodeMono;
+        protected LogicNodeMono NodeMono;
 
         protected virtual void Awake()
         {
             ServiceCore.SafeGet<LogicNodeManager>(OnGetService);
-            if (TryGetComponent<LogicNodeMono>(out _nodeMono))
+            if (TryGetComponent<LogicNodeMono>(out NodeMono))
             {
-                _nodeMono.OnNodeEnter.AddListener(OnEnter);
-                _nodeMono.OnNodeExit.AddListener(OnExit);
+                NodeMono.OnNodeEnter.AddListener(OnEnter);
+                NodeMono.OnNodeExit.AddListener(OnExit);
             }
         }
 
         protected virtual void OnGetService(LogicNodeManager manager)
         {
-            _manager = manager;
+            Manager = manager;
         }
 
         protected abstract void OnEnter();

@@ -17,14 +17,16 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
             {
                 return;
             }
+
             if (_asset.GetData() == null)
             {
                 return;
             }
-            var v = (_asset.GetData() as LogicNodeTreeConfigData).Root;
-            if (v != null)
+
+            var nodeData = (_asset.GetData() as LogicNodeTreeConfigData).Root;
+            if (nodeData != null)
             {
-                _nodeTreeEdit = new NodeTreeEdit<LogicNodeData>((_asset.GetData() as LogicNodeTreeConfigData).Root);
+                _nodeTreeEdit = new NodeTreeEdit<LogicNodeData>(nodeData);
 
                 _nodeTreeEdit.GetHeadString += GetHeaderString;
                 _nodeTreeEdit.OnDrawElement += DrawElement;
@@ -66,8 +68,10 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem.Editor
 
         private void ChildAdd(LogicNodeData node)
         {
-            var v = new LogicNodeData("newNode");
-            v.Parent = node;
+            var v = new LogicNodeData("newNode")
+            {
+                Parent = node
+            };
             node.Children.Add(v);
         }
 

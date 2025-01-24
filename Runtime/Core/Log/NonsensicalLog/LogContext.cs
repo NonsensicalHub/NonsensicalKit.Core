@@ -1,4 +1,5 @@
 using System;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
@@ -9,14 +10,15 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
     {
         public LogLevel LogLevel;
         public object Obj;
-        public UnityEngine.Object Context;
+        public Object Context;
         public string[] Tags;
         public DateTime Time;
         public string MemberName;
         public string FilePath;
         public int LineNumber;
 
-        public LogContext(LogLevel logLevel, object obj, UnityEngine.Object context, string[] tags, string memberName, string filePath, int lineNumber)
+        public LogContext(LogLevel logLevel, object obj, Object context, string[] tags, string memberName, string filePath,
+            int lineNumber)
         {
             LogLevel = logLevel;
             Context = context;

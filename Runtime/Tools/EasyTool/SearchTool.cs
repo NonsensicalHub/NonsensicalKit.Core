@@ -146,6 +146,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 _sources[i] = getter(sources[i]);
             }
+
             Sort();
         }
 
@@ -160,7 +161,7 @@ namespace NonsensicalKit.Tools.EasyTool
             int endIndex = -1;
             for (int i = 0; i < _sources.Length; i++)
             {
-                if (startIndex==-1&&_sources[i] >= start)
+                if (startIndex == -1 && _sources[i] >= start)
                 {
                     startIndex = i;
                 }
@@ -186,27 +187,28 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 result[resultIndex++] = _sourceIndexes[i];
             }
+
             Array.Sort(result);
             return result;
         }
 
         private void Sort()
         {
-            _sourceIndexes=new int[_sources.Length];
+            _sourceIndexes = new int[_sources.Length];
 
             for (int i = 0; i < _sourceIndexes.Length; i++)
             {
                 _sourceIndexes[i] = i;
             }
 
-            for (int i = 0; i < _sources.Length-1; i++)
+            for (int i = 0; i < _sources.Length - 1; i++)
             {
-                for (int j = _sources.Length-1; j >i; j--)
+                for (int j = _sources.Length - 1; j > i; j--)
                 {
-                    if (_sources[j]<_sources[j-1])
+                    if (_sources[j] < _sources[j - 1])
                     {
-                        (_sources[j], _sources[j-1]) = (_sources[j-1], _sources[j]);
-                        (_sourceIndexes[j], _sourceIndexes[j-1]) = (_sourceIndexes[j-1], _sourceIndexes[j]);
+                        (_sources[j], _sources[j - 1]) = (_sources[j - 1], _sources[j]);
+                        (_sourceIndexes[j], _sourceIndexes[j - 1]) = (_sourceIndexes[j - 1], _sourceIndexes[j]);
                     }
                 }
             }

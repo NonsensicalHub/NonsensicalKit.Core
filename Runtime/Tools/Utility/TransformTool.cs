@@ -12,8 +12,8 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 根据路径获取对应的子节点
         /// </summary>
-        /// <param name="t"></param>
-        /// <param name="s">使用'|'分割，like"1|2|3|5"</param>
+        /// <param name="root"></param>
+        /// <param name="path">使用'|'分割，like"1|2|3|5"</param>
         /// <returns></returns>
         public static Transform GetTransformByNodePath(Transform root, string path)
         {
@@ -66,12 +66,12 @@ namespace NonsensicalKit.Tools
                 }
             }
 
-            bounds.center = root.transform.InverseTransformPoint(bounds.center);;
+            bounds.center = root.transform.InverseTransformPoint(bounds.center);
             root.rotation = qn;
             return bounds;
         }
-        
-        
+
+
         public static Bounds BoundingBoxGlobal(this Transform root, bool includeInactive = false)
         {
             bool hasBounds = false;
@@ -121,7 +121,7 @@ namespace NonsensicalKit.Tools
             }
 
             root.rotation = qn;
-            bounds.center = root.transform.InverseTransformPoint(bounds.center);;
+            bounds.center = root.transform.InverseTransformPoint(bounds.center);
             return bounds;
         }
 
@@ -131,7 +131,7 @@ namespace NonsensicalKit.Tools
         /// <param name="tsf"></param>
         /// <param name="camera"></param>
         /// <returns></returns>
-        public static (Vector3 ,float)GetSafeFocus(this Transform tsf, Camera camera = null)
+        public static (Vector3, float) GetSafeFocus(this Transform tsf, Camera camera = null)
         {
             if (camera == null)
             {
@@ -140,7 +140,7 @@ namespace NonsensicalKit.Tools
 
             if (camera == null)
             {
-                return (Vector3.zero,0f);
+                return (Vector3.zero, 0f);
             }
 
             Bounds bounds = tsf.BoundingBoxGlobal();
@@ -158,10 +158,10 @@ namespace NonsensicalKit.Tools
             //safeDistance=distance* 6/5
             float distance = (0.6f * diagonal) / Mathf.Tan(fov * 0.5f);
 
-            return (bounds.center,distance);
+            return (bounds.center, distance);
         }
 
-        public static (Vector3 ,float) GetFocus(this Transform tsf, Camera camera = null)
+        public static (Vector3, float) GetFocus(this Transform tsf, Camera camera = null)
         {
             if (camera == null)
             {
@@ -170,22 +170,22 @@ namespace NonsensicalKit.Tools
 
             if (camera == null)
             {
-                return (Vector3.zero,0f);
+                return (Vector3.zero, 0f);
             }
 
             Bounds bounds = tsf.BoundingBoxGlobal();
-            var boundsHW = GetBoundsHW(camera, tsf.position, bounds);
-            var xScale = 1/ boundsHW.x;
-            var yScale = 1/ boundsHW.y;
+            var boundsHw = GetBoundsHw(camera, tsf.position, bounds);
+            var xScale = 1 / boundsHw.x;
+            var yScale = 1 / boundsHw.y;
 
             var minScale = Mathf.Min(xScale, yScale);
 
-            var distance = boundsHW.z / minScale*1.2f;
+            var distance = boundsHw.z / minScale * 1.2f;
 
-            return (bounds.center,distance);
+            return (bounds.center, distance);
         }
 
-        public static Vector3 GetBoundsHW(Camera camera, Vector3 basePos, Bounds bounds)
+        public static Vector3 GetBoundsHw(Camera camera, Vector3 basePos, Bounds bounds)
         {
             Vector3[] corners = new Vector3[8];
             corners[0] = basePos + bounds.center + new Vector3(bounds.extents.x, bounds.extents.y, bounds.extents.z);
@@ -240,25 +240,26 @@ namespace NonsensicalKit.Tools
             return list;
         }
 
-        public static List<Comp> GetComponentsInChildrenWithout<Comp, Without>(this Transform tsf) where Without : Component where Comp : Component
+        public static List<TComp> GetComponentsInChildrenWithout<TComp, TWithout>(this Transform tsf)
+            where TWithout : Component where TComp : Component
         {
             Queue<Transform> queues = new Queue<Transform>();
 
-            List<Comp> list = new List<Comp>();
+            List<TComp> list = new List<TComp>();
             queues.Enqueue(tsf);
 
             while (queues.Count > 0)
             {
                 Transform crt = queues.Dequeue();
 
-                if (crt.TryGetComponent<Comp>(out var v))
+                if (crt.TryGetComponent<TComp>(out var v))
                 {
                     list.Add(v);
                 }
 
                 foreach (Transform child in crt)
                 {
-                    if (child.GetComponent<Without>() == null)
+                    if (child.GetComponent<TWithout>() == null)
                     {
                         queues.Enqueue(child);
                     }

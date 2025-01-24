@@ -250,7 +250,7 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
         /// <summary>
         /// 构建节点树
         /// </summary>
-        /// <param name="datas"></param>
+        /// <param name="root"></param>
         private void BuildLogicNodeTree(LogicNodeData root)
         {
             Queue<LogicNode> sns = new Queue<LogicNode>();
@@ -292,17 +292,13 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
 
             while (nodes.Count > 0)
             {
-                LogicNode crtSN = nodes.Dequeue();
-                if (_dic.ContainsKey(crtSN.NodeID))
+                LogicNode crtSn = nodes.Dequeue();
+                if (!_dic.TryAdd(crtSn.NodeID, crtSn))
                 {
-                    LogCore.Warning($"节点名称重复:{crtSN.NodeID}");
-                }
-                else
-                {
-                    _dic.Add(crtSN.NodeID, crtSN);
+                    LogCore.Warning($"节点名称重复:{crtSn.NodeID}");
                 }
 
-                foreach (var item in crtSN.ChildNode)
+                foreach (var item in crtSn.ChildNode)
                 {
                     nodes.Enqueue(item);
                 }

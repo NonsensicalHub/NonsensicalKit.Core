@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NonsensicalKit.Tools;
@@ -59,7 +58,7 @@ namespace NonsensicalKit.Core.Updater
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 callback?.Invoke(null);
                 yield break;
@@ -122,8 +121,31 @@ namespace NonsensicalKit.Core.Updater
 
             callback?.Invoke(_updaterPath);
         }
-        
-        
+
+        public IEnumerator Check(string url, Action<bool, List<PatchInfo>> callback)
+        {
+            UnityWebRequest getJson = new UnityWebRequest();
+            yield return getJson.Get(url);
+            string json = getJson.downloadHandler.text;
+            List<PatchInfo> infos = null;
+            try
+            {
+                infos = JsonConvert.DeserializeObject<List<PatchInfo>>(json);
+            }
+            catch
+            {
+            }
+
+            if (infos != null)
+            {
+                callback?.Invoke(Check(infos), infos);
+            }
+            else
+            {
+                callback?.Invoke(false, null);
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -136,14 +158,17 @@ namespace NonsensicalKit.Core.Updater
                 return false;
             }
 
-            var v=infos[infos.Count - 1];
-            
+            if (infos.Count == 0)
+            {
+                return false;
+            }
+
             Version newestVersion = Version.Parse(infos[^1].Version);
             Version crtVersion = Version.Parse(Application.version);
-            
+
             return newestVersion > crtVersion;
         }
-        
+
         public bool Update(List<PatchInfo> infos, string exeName = null)
         {
             if (PlatformInfo.IsWindow == false)
@@ -160,9 +185,9 @@ namespace NonsensicalKit.Core.Updater
             {
                 return false;
             }
-            
+
             Version crtVersion = Version.Parse(Application.version);
-            List<string> urls=new List<string>();
+            List<string> urls = new List<string>();
             foreach (var info in infos)
             {
                 Version version = Version.Parse(info.Version);

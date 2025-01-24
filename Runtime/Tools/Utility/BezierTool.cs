@@ -5,7 +5,7 @@ namespace NonsensicalKit.Tools
     /// <summary>
     /// 贝塞尔曲线工具类
     /// </summary>
-    public class BezierTool
+    public static class BezierTool
     {
         /// <summary>
         /// 二次贝塞尔曲线，根据T值，计算贝塞尔曲线上面相对应的点
@@ -82,7 +82,7 @@ namespace NonsensicalKit.Tools
         /// <param name="endPoint"></param>目标点
         /// <param name="segmentNum">采样点的数量，包含起点终点</param>采样点的数量
         /// <returns></returns>存储贝塞尔曲线点的数组
-        public static Vector3[] GetCubicBeizerList(Vector3 startPoint, Vector3 controlPoint, Vector3 endPoint, int segmentNum)
+        public static Vector3[] GetCubicBezierList(Vector3 startPoint, Vector3 controlPoint, Vector3 endPoint, int segmentNum)
         {
             Vector3[] path = new Vector3[segmentNum];
             for (int i = 0; i < segmentNum; i++)
@@ -92,8 +92,8 @@ namespace NonsensicalKit.Tools
                     controlPoint, endPoint);
                 path[i] = pixel;
             }
-            return path;
 
+            return path;
         }
 
         /// <summary>
@@ -105,7 +105,8 @@ namespace NonsensicalKit.Tools
         /// <param name="endPoint"></param>
         /// <param name="segmentNum">采样点的数量，包含起点终点</param>
         /// <returns></returns>存储贝塞尔曲线点的数组
-        public static Vector3[] GetThreePowerBeizerList(Vector3 startPoint, Vector3 controlPoint1, Vector3 controlPoint2, Vector3 endPoint, int segmentNum)
+        public static Vector3[] GetThreePowerBezierList(Vector3 startPoint, Vector3 controlPoint1, Vector3 controlPoint2, Vector3 endPoint,
+            int segmentNum)
         {
             Vector3[] path = new Vector3[segmentNum];
             for (int i = 0; i < segmentNum; i++)
@@ -115,6 +116,7 @@ namespace NonsensicalKit.Tools
                     controlPoint1, controlPoint2, endPoint);
                 path[i] = pixel;
             }
+
             return path;
         }
 
@@ -127,7 +129,8 @@ namespace NonsensicalKit.Tools
         /// <param name="endPoint"></param>
         /// <param name="segmentNum">采样点的数量，包含起点终点</param>
         /// <returns></returns>
-        public static Vector3[][] GetThreePowerBeizerListWithSlope(Vector3 startPoint, Vector3 controlPoint1, Vector3 controlPoint2, Vector3 endPoint, int segmentNum)
+        public static Vector3[][] GetThreePowerBezierListWithSlope(Vector3 startPoint, Vector3 controlPoint1, Vector3 controlPoint2, Vector3 endPoint,
+            int segmentNum)
         {
             Vector3[] path = new Vector3[segmentNum];
             Vector3[] slopes = new Vector3[segmentNum];
@@ -141,7 +144,8 @@ namespace NonsensicalKit.Tools
                 path[i] = pixel;
                 slopes[i] = slope;
             }
-            return new Vector3[][] { path, slopes };
+
+            return new[] { path, slopes };
         }
     }
 }

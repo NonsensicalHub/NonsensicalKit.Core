@@ -1,8 +1,8 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools
@@ -10,7 +10,9 @@ namespace NonsensicalKit.Tools
     public static class JsonTool
     {
         public static MethodInfo DESERIALIZE_METHOD = typeof(JsonConvert).GetMethods().FirstOrDefault(
-                        p => p.IsStatic == true && p.IsPublic == true && p.Name == "DeserializeObject" && p.ContainsGenericParameters == true);
+            p => p.IsStatic == true && p.IsPublic == true && p.Name == "DeserializeObject" && p.ContainsGenericParameters == true);
+        
+        public static readonly JsonSerializerSettings IgnoreLoopSetting = new() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
 
         /// <summary>
         /// 动态生成json(使用递归)
@@ -24,7 +26,6 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static JObject Test(string[] a, int b, int pos = 0)
         {
-
             if (pos == a.Length)
             {
                 return new JObject(b);
@@ -33,7 +34,7 @@ namespace NonsensicalKit.Tools
             {
                 JObject jd = new JObject();
 
-                jd[a[(int)pos]] = Test(a, b, pos + 1);
+                jd[a[pos]] = Test(a, b, pos + 1);
 
                 return jd;
             }
@@ -134,15 +135,14 @@ namespace NonsensicalKit.Tools
             return JsonConvert.SerializeObject(obj);
         }
 
-        private static JsonSerializerSettings IgnoreLoop = new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
         public static string SerializeObjectIgnoreLoop(object obj)
         {
-            return JsonConvert.SerializeObject(obj, IgnoreLoop);
+            return JsonConvert.SerializeObject(obj, IgnoreLoopSetting);
         }
 
         public static T DeserializeObject<T>(string str)
         {
-            str = str.TrimBOM();
+            str = str.TrimBom();
             return JsonConvert.DeserializeObject<T>(str);
         }
     }

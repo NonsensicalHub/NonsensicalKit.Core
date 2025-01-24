@@ -1,5 +1,5 @@
-using NonsensicalKit.Core;
 using System;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.InputTool
@@ -11,13 +11,13 @@ namespace NonsensicalKit.Tools.InputTool
         public Action<float> OnTwoFingerDistanceChanged { get; set; }
 
 
-        public Action OnOneFingerDowm { get; set; }
+        public Action OnOneFingerDown { get; set; }
         public Action OnOneFingerUp { get; set; }
-        public Action OnTwoFingerDowm { get; set; }
+        public Action OnTwoFingerDown { get; set; }
         public Action OnTwoFingerUp { get; set; }
 
-        public bool ISOneFingerHold { get; private set; }
-        public bool ISTwoFingerHold { get; private set; }
+        public bool IsOneFingerHold { get; private set; }
+        public bool IsTwoFingerHold { get; private set; }
 
 
         public Vector2 TheOneFingerMove { get; private set; }

@@ -12,31 +12,31 @@ namespace NonsensicalKit.Tools.ObjectPool
     {
         public Action<GameObjectPool, GameObject> FirstInitAction
         {
-            set { _firstInitAction = value; }
+            set => _firstInitAction = value;
         }
 
-        private GameObject _prefab; //预制体
-        private Queue<GameObject> _queue; //待使用的对象
-        private Action<GameObject> _resetAction; //返回池中后调用
-        private Action<GameObject> initAction; //取出时调用
+        private readonly GameObject _prefab; //预制体
+        private readonly Queue<GameObject> _queue; //待使用的对象
+        private readonly Action<GameObject> _resetAction; //返回池中后调用
+        private readonly Action<GameObject> _initAction; //取出时调用
         private Action<GameObjectPool, GameObject> _firstInitAction; //首次生成时调用
 
         public GameObjectPool(GameObject prefab)
         {
-            this._prefab = prefab;
+            _prefab = prefab;
             _queue = new Queue<GameObject>();
             _resetAction = DefaultReset;
-            initAction = DefaultInit;
+            _initAction = DefaultInit;
         }
 
-        public GameObjectPool(GameObject prefab, Action<GameObject>
-            ResetAction = null, Action<GameObject> InitAction = null, Action<GameObjectPool, GameObject> FirstInitAction = null)
+        public GameObjectPool(GameObject prefab, Action<GameObject> resetAction = null, Action<GameObject> initAction = null,
+            Action<GameObjectPool, GameObject> firstInitAction = null)
         {
-            this._prefab = prefab;
+            _prefab = prefab;
             _queue = new Queue<GameObject>();
-            _resetAction = ResetAction;
-            initAction = InitAction;
-            _firstInitAction = FirstInitAction;
+            _resetAction = resetAction;
+            _initAction = initAction;
+            _firstInitAction = firstInitAction;
         }
 
         /// <summary>
@@ -48,14 +48,14 @@ namespace NonsensicalKit.Tools.ObjectPool
             if (_queue.Count > 0)
             {
                 GameObject t = _queue.Dequeue();
-                initAction?.Invoke(t);
+                _initAction?.Invoke(t);
                 return t;
             }
             else
             {
-                GameObject t = GameObject.Instantiate(_prefab);
+                GameObject t = Object.Instantiate(_prefab);
                 _firstInitAction?.Invoke(this, t);
-                initAction?.Invoke(t);
+                _initAction?.Invoke(t);
 
                 return t;
             }
@@ -90,24 +90,24 @@ namespace NonsensicalKit.Tools.ObjectPool
     /// </summary>
     public class GameObjectPool_MK2
     {
-        private GameObject _prefab; //预制体
-        private Queue<GameObject> _queue; //待使用的对象
-        private List<GameObject> _actives; //使用中的对象
-        private Action<GameObject> _resetAction; //返回池中后调用
-        private Action<GameObject> _initAction; //取出时调用
-        private Action<GameObjectPool_MK2, GameObject> _firstInitAction; //首次生成时调用
+        private readonly GameObject _prefab; //预制体
+        private readonly Queue<GameObject> _queue; //待使用的对象
+        private readonly List<GameObject> _actives; //使用中的对象
+        private readonly Action<GameObject> _resetAction; //返回池中后调用
+        private readonly Action<GameObject> _initAction; //取出时调用
+        private readonly Action<GameObjectPool_MK2, GameObject> _firstInitAction; //首次生成时调用
 
         public GameObjectPool_MK2(GameObject prefab,
-            Action<GameObject> ResetAction = null,
-            Action<GameObject> InitAction = null,
-            Action<GameObjectPool_MK2, GameObject> FirstInitAction = null)
+            Action<GameObject> resetAction = null,
+            Action<GameObject> initAction = null,
+            Action<GameObjectPool_MK2, GameObject> firstInitAction = null)
         {
             this._prefab = prefab;
             _queue = new Queue<GameObject>();
             _actives = new List<GameObject>();
-            _resetAction = ResetAction;
-            _initAction = InitAction;
-            _firstInitAction = FirstInitAction;
+            _resetAction = resetAction;
+            _initAction = initAction;
+            _firstInitAction = firstInitAction;
         }
 
         /// <summary>
@@ -163,47 +163,47 @@ namespace NonsensicalKit.Tools.ObjectPool
         }
     }
 
-    public class ComponentPool<C> where C : Component
+    public class ComponentPool<TComponent> where TComponent : Component
     {
-        private C _prefab; //预制体
-        private Queue<C> _queue; //待使用的对象
-        private Action<C> _resetAction; //返回池中后调用
-        private Action<C> _initAction; //取出时调用
-        private Action<ComponentPool<C>, C> _firstInitAction; //首次生成时调用
+        private readonly TComponent _prefab; //预制体
+        private readonly Queue<TComponent> _queue; //待使用的对象
+        private readonly Action<TComponent> _resetAction; //返回池中后调用
+        private readonly Action<TComponent> _initAction; //取出时调用
+        private readonly Action<ComponentPool<TComponent>, TComponent> _firstInitAction; //首次生成时调用
 
-        public ComponentPool(C prefab)
+        public ComponentPool(TComponent prefab)
         {
             this._prefab = prefab;
-            _queue = new Queue<C>();
+            _queue = new Queue<TComponent>();
             _resetAction = DefaultReset;
             _initAction = DefaultInit;
         }
 
-        public ComponentPool(C prefab, Action<C>
-            ResetAction = null, Action<C> InitAction = null, Action<ComponentPool<C>, C> FirstInitAction = null)
+        public ComponentPool(TComponent prefab, Action<TComponent> resetAction = null, Action<TComponent> initAction = null,
+            Action<ComponentPool<TComponent>, TComponent> firstInitAction = null)
         {
             this._prefab = prefab;
-            _queue = new Queue<C>();
-            _resetAction = ResetAction;
-            _initAction = InitAction;
-            _firstInitAction = FirstInitAction;
+            _queue = new Queue<TComponent>();
+            _resetAction = resetAction;
+            _initAction = initAction;
+            _firstInitAction = firstInitAction;
         }
 
         /// <summary>
         /// 取出对象
         /// </summary>
         /// <returns></returns>
-        public C New()
+        public TComponent New()
         {
             if (_queue.Count > 0)
             {
-                C t = _queue.Dequeue();
+                TComponent t = _queue.Dequeue();
                 _initAction?.Invoke(t);
                 return t;
             }
             else
             {
-                C t = Object.Instantiate(_prefab);
+                TComponent t = Object.Instantiate(_prefab);
                 _firstInitAction?.Invoke(this, t);
                 _initAction?.Invoke(t);
 
@@ -215,7 +215,7 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// 放回对象
         /// </summary>
         /// <param name="obj"></param>
-        public void Store(C obj)
+        public void Store(TComponent obj)
         {
             if (_queue.Contains(obj) == false)
             {
@@ -224,47 +224,47 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
         }
 
-        public static void DefaultReset(C go)
+        public static void DefaultReset(TComponent go)
         {
             go.gameObject.SetActive(false);
         }
 
-        public static void DefaultInit(C go)
+        public static void DefaultInit(TComponent go)
         {
             go.gameObject.SetActive(true);
         }
     }
 
 
-    public class ComponentPool_MK2<C> where C : Component
+    public class ComponentPool_MK2<TComponent> where TComponent : Component
     {
-        private C _prefab; //预制体
-        private Queue<C> _queue; //待使用的对象
-        private List<C> _actives; //使用中的对象
-        private Action<C> _resetAction; //返回池中后调用
-        private Action<C> _initAction; //取出时调用
-        private Action<ComponentPool_MK2<C>, C> _firstInitAction; //首次生成时调用
+        private readonly TComponent _prefab; //预制体
+        private readonly Queue<TComponent> _queue; //待使用的对象
+        private readonly List<TComponent> _actives; //使用中的对象
+        private readonly Action<TComponent> _resetAction; //返回池中后调用
+        private readonly Action<TComponent> _initAction; //取出时调用
+        private readonly Action<ComponentPool_MK2<TComponent>, TComponent> _firstInitAction; //首次生成时调用
 
-        public ComponentPool_MK2(C prefab,
-            Action<C> ResetAction = null,
-            Action<C> InitAction = null,
-            Action<ComponentPool_MK2<C>, C> FirstInitAction = null)
+        public ComponentPool_MK2(TComponent prefab,
+            Action<TComponent> resetAction = null,
+            Action<TComponent> initAction = null,
+            Action<ComponentPool_MK2<TComponent>, TComponent> firstInitAction = null)
         {
             this._prefab = prefab;
-            _queue = new Queue<C>();
-            _actives = new List<C>();
-            _resetAction = ResetAction;
-            _initAction = InitAction;
-            _firstInitAction = FirstInitAction;
+            _queue = new Queue<TComponent>();
+            _actives = new List<TComponent>();
+            _resetAction = resetAction;
+            _initAction = initAction;
+            _firstInitAction = firstInitAction;
         }
 
         /// <summary>
         /// 取出对象
         /// </summary>
         /// <returns></returns>
-        public C New()
+        public TComponent New()
         {
-            C newC;
+            TComponent newC;
             if (_queue.Count > 0)
             {
                 newC = _queue.Dequeue();
@@ -284,7 +284,7 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// 放回对象
         /// </summary>
         /// <param name="obj"></param>
-        public void Store(C obj)
+        public void Store(TComponent obj)
         {
             if (_queue.Contains(obj) == false)
             {
@@ -310,23 +310,17 @@ namespace NonsensicalKit.Tools.ObjectPool
     }
 
     [Serializable]
-    public class SerializableGameobjectPool
+    public class SerializableGameObjectPool
     {
         [SerializeField] private GameObject m_prefab; //预制体
         [SerializeField] private Transform m_birthPoint; //出生点
-        [SerializeField] private List<GameObject> m_using=new List<GameObject>(); //使用中对象
-        [SerializeField] private List<GameObject> m_storage=new List<GameObject>(); //存储对象
+        [SerializeField] private List<GameObject> m_using = new List<GameObject>(); //使用中对象
+        [SerializeField] private List<GameObject> m_storage = new List<GameObject>(); //存储对象
 
         public GameObject Prefab
         {
-            get
-            {
-                return m_prefab;
-            }
-            set
-            {
-                m_prefab = value;
-            }
+            get => m_prefab;
+            set => m_prefab = value;
         }
 
         private List<GameObject> _cache;

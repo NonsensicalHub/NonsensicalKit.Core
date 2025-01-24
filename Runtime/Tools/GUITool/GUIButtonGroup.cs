@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -26,7 +27,7 @@ namespace NonsensicalKit.Tools.GUITool
         {
             if (_style == null)
             {
-                _style = UnityEngine.GUI.skin.button;
+                _style = GUI.skin.button;
                 _style.fontSize = m_fontSize;
             }
 
@@ -36,7 +37,7 @@ namespace NonsensicalKit.Tools.GUITool
             foreach (var buttonSetting in m_buttonSettings)
             {
                 Rect rect = new Rect(crtX, crtY, m_width, m_height);
-                if (UnityEngine.GUI.Button(rect, buttonSetting.Text, _style))
+                if (GUI.Button(rect, buttonSetting.Text, _style))
                 {
                     buttonSetting.OnClick?.Invoke();
                 }
@@ -72,7 +73,7 @@ namespace NonsensicalKit.Tools.GUITool
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public class GUIButtonSetting
     {
         public string Text;

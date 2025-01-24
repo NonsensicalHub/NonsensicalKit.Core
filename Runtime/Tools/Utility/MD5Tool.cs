@@ -13,18 +13,19 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// md5 16位加密
         /// </summary>
-        /// <param name="ConvertString"></param>
+        /// <param name="convertString"></param>
         /// <param name="toLower"></param>
         /// <returns></returns>
-        public static string GetMd5Str(string ConvertString, bool toLower)
+        public static string GetMd5Str(string convertString, bool toLower)
         {
             MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-            string t2 = BitConverter.ToString(md5.ComputeHash(UTF8Encoding.Default.GetBytes(ConvertString)), 4, 8);
+            string t2 = BitConverter.ToString(md5.ComputeHash(Encoding.Default.GetBytes(convertString)), 4, 8);
             t2 = t2.Replace("-", "");
             if (toLower)
             {
                 t2 = t2.ToLower();
             }
+
             return t2;
         }
 
@@ -37,15 +38,16 @@ namespace NonsensicalKit.Tools
         {
             string cl = str;
             string pwd = "";
-            MD5 md5 = MD5.Create();//实例化一个md5对像
-                                   // 加密后是一个字节类型的数组，这里要注意编码UTF8/Unicode等的选择　
+            MD5 md5 = MD5.Create(); //实例化一个md5对像
+            // 加密后是一个字节类型的数组，这里要注意编码UTF8/Unicode等的选择　
             byte[] s = md5.ComputeHash(Encoding.UTF8.GetBytes(cl));
             // 通过使用循环，将字节类型的数组转换为字符串，此字符串是常规字符格式化所得
-            for (int i = 0; i < s.Length; i++)
+            foreach (var t in s)
             {
                 // 将得到的字符串使用十六进制类型格式。格式后的字符是小写的字母，如果使用大写（X）则格式后的字符是大写字符                 
-                pwd = pwd + s[i].ToString("X");
+                pwd = pwd + t.ToString("X");
             }
+
             return pwd;
         }
 
@@ -54,10 +56,11 @@ namespace NonsensicalKit.Tools
             MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
             byte[] encryptedBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(inputString));
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < encryptedBytes.Length; i++)
+            foreach (var t in encryptedBytes)
             {
-                sb.AppendFormat("{0:x2}", encryptedBytes[i]);
+                sb.AppendFormat("{0:x2}", t);
             }
+
             return sb.ToString();
         }
 
@@ -72,9 +75,9 @@ namespace NonsensicalKit.Tools
 
             // Loop through each byte of the hashed data 
             // and format each one as a hexadecimal string.
-            for (var i = 0; i < data.Length; i++)
+            foreach (var t in data)
             {
-                sBuilder.Append(data[i].ToString("x2"));
+                sBuilder.Append(t.ToString("x2"));
             }
 
             // Return the hexadecimal string.
@@ -94,6 +97,7 @@ namespace NonsensicalKit.Tools
             {
                 return true;
             }
+
             return false;
         }
 
@@ -101,6 +105,7 @@ namespace NonsensicalKit.Tools
         /// 获取文件MD5值
         /// </summary>
         /// <param name="fileName">文件绝对路径</param>
+        /// <param name="size"></param>
         /// <returns>MD5值</returns>
         public static string GetMD5HashFromFile(string fileName, int size = 0)
         {
@@ -116,7 +121,6 @@ namespace NonsensicalKit.Tools
             }
 
             MD5 md5 = new MD5CryptoServiceProvider();
-            byte[] bytes;
             byte[] retVal;
             if (size <= 0)
             {
@@ -124,18 +128,24 @@ namespace NonsensicalKit.Tools
             }
             else
             {
-                bytes = new byte[size];
-                file.Read(bytes, 0, size);
+                var bytes = new byte[size];
+                var l = file.Read(bytes, 0, size);
+                if (l < size)
+                {
+                    Array.Resize(ref bytes, l);
+                }
+
                 retVal = md5.ComputeHash(bytes);
             }
 
             file.Close();
 
             sb = new StringBuilder();
-            for (int i = 0; i < retVal.Length; i++)
+            foreach (var t in retVal)
             {
-                sb.Append(retVal[i].ToString("x2"));
+                sb.Append(t.ToString("x2"));
             }
+
             return sb.ToString();
         }
     }

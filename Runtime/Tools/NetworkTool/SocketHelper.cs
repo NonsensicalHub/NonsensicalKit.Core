@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.NetworkTool
@@ -13,8 +14,8 @@ namespace NonsensicalKit.Tools.NetworkTool
     public class SocketHelper : MonoBehaviour
     {
         public Action<string> OnReceived { get; set; }
-        private ScoektClientInstace _sci;
-        private Queue<string> _datas = new Queue<string>();
+        private SocketClientInstance _sci;
+        private Queue<string> _datas = new();
 
         private void Update()
         {
@@ -32,10 +33,10 @@ namespace NonsensicalKit.Tools.NetworkTool
 
         public void Init(int port)
         {
-            _sci = new ScoektClientInstace();
-            _sci.SocketConnectAsync(port);
+            _sci = new SocketClientInstance();
+            _ = _sci.SocketConnectAsync(port);
             _sci.OnConnectSuccess += () => { Debug.Log("连接成功"); };
-            _sci.OnConnectFail += (msg) => { Debug.LogWarning(msg); };
+            _sci.OnConnectFail += Debug.LogWarning;
             _sci.OnReceived += OnReceivedMessage;
         }
 
@@ -46,7 +47,6 @@ namespace NonsensicalKit.Tools.NetworkTool
 
         public void Send(string msg)
         {
-
             _sci.Send(msg);
         }
 
@@ -62,35 +62,29 @@ namespace NonsensicalKit.Tools.NetworkTool
         public const int BufferSize = 2048;
 
         // Receive buffer.  
-        public byte[] buffer = new byte[BufferSize];
+        public byte[] Buffer = new byte[BufferSize];
 
         // Received data string.
-        public StringBuilder sb = new StringBuilder();
+        public StringBuilder Sb = new StringBuilder();
 
         // Client socket.
-        public Socket workSocket = null;
+        public Socket WorkSocket;
     }
 
-    public class ScoektClientInstace
+    public class SocketClientInstance
     {
         public Action OnConnectSuccess { get; set; }
         public Action<string> OnConnectFail { get; set; }
         public Action<string> OnReceived { get; set; }
 
-        public bool Connected
-        {
-            get
-            {
-                return _socket.Connected;
-            }
-        }
+        public bool Connected => _socket.Connected;
 
         private Socket _socket;
 
-        public async void SocketConnectAsync(int post)
+        public async Task SocketConnectAsync(int post)
         {
             string host = Dns.GetHostName();
-            IPHostEntry hostEntry = Dns.GetHostEntry(host);
+            IPHostEntry hostEntry = await Dns.GetHostEntryAsync(host);
             foreach (IPAddress address in hostEntry.AddressList)
             {
                 IPEndPoint ipe = new IPEndPoint(address, post);
@@ -107,17 +101,13 @@ namespace NonsensicalKit.Tools.NetworkTool
                         ReceiveMsg();
                         break;
                     }
-                    else
-                    {
-                        continue;
-                    }
                 }
                 catch (Exception e)
                 {
-                    OnConnectFail?.Invoke(address.ToString() + "连接失败\n错误原因: " + e.ToString());
+                    OnConnectFail?.Invoke(address + "连接失败\n错误原因: " + e);
                 }
-
             }
+
             if (_socket == null)
             {
                 OnConnectFail?.Invoke("无可用连接");
@@ -145,38 +135,34 @@ namespace NonsensicalKit.Tools.NetworkTool
         private void ReceiveMsg()
         {
             StateObject state = new StateObject();
-            state.workSocket = _socket;
-            _socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                new AsyncCallback(ReceiveCallBack), state);
-
+            state.WorkSocket = _socket;
+            _socket.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0, ReceiveCallBack, state);
         }
 
         private void ReceiveCallBack(IAsyncResult ar)
         {
-            string content = string.Empty;
-
             StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
+            Socket handler = state.WorkSocket;
 
             int bytesRead = handler.EndReceive(ar);
             if (bytesRead > 0)
             {
-                state.sb.Append(Encoding.UTF8.GetString(
-                    state.buffer, 0, bytesRead));
-                content = state.sb.ToString();
+                state.Sb.Append(Encoding.UTF8.GetString(
+                    state.Buffer, 0, bytesRead));
+                var content = state.Sb.ToString();
 
-                string[] contents = content.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] contents = content.Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
                 int i;
                 for (i = 0; i < contents.Length - 1; i++)
                 {
                     OnReceived?.Invoke(contents[i]);
                 }
 
-                state.sb.Clear();
-                state.sb.Append(contents[i]);
-                state.sb.Append("\0");
-                handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReceiveCallBack), state);
+                state.Sb.Clear();
+                state.Sb.Append(contents[i]);
+                state.Sb.Append("\0");
+                handler.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0,
+                    ReceiveCallBack, state);
             }
             else
             {

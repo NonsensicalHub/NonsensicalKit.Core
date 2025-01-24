@@ -33,6 +33,7 @@ namespace NonsensicalKit.Tools
                     return type;
                 }
             }
+
             return null;
         }
 
@@ -49,7 +50,7 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 获取继承了某个类的所有非抽象类
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <param name="type"></param>
         /// <returns></returns>
         public static List<Type> GetConcreteTypes(Type type)
         {
@@ -57,6 +58,7 @@ namespace NonsensicalKit.Tools
             {
                 _assemblyBuffer = AppDomain.CurrentDomain.GetAssemblies();
             }
+
             List<Type> types = new List<Type>();
             foreach (var assembly in _assemblyBuffer)
             {
@@ -81,14 +83,16 @@ namespace NonsensicalKit.Tools
                         }
                     }
                 }
-
             }
+
             return types;
         }
+
         /// <summary>
         /// 获取继承了某两个类型的所有非抽象类
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
         /// <returns></returns>
         public static List<Type> GetConcreteTypes<T1, T2>()
         {
@@ -119,10 +123,12 @@ namespace NonsensicalKit.Tools
                         {
                             continue;
                         }
+
                         if (typeof(T1).IsAssignableFrom(t) == false)
                         {
                             continue;
                         }
+
                         if (typeof(T2).IsAssignableFrom(t) == false)
                         {
                             continue;
@@ -131,8 +137,8 @@ namespace NonsensicalKit.Tools
                         types.Add(t);
                     }
                 }
-
             }
+
             return types;
         }
 
@@ -168,6 +174,7 @@ namespace NonsensicalKit.Tools
                     }
                 }
             }
+
             return enums;
         }
 
@@ -175,7 +182,7 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 获取继承了某个类的所有非抽象类的类名字符串
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <param name="type"></param>
         /// <returns></returns>
         public static List<string> GetConcreteTypesString(Type type)
         {
@@ -183,6 +190,7 @@ namespace NonsensicalKit.Tools
             {
                 _assemblyBuffer = AppDomain.CurrentDomain.GetAssemblies();
             }
+
             List<string> types = new List<string>();
             foreach (var assembly in _assemblyBuffer)
             {
@@ -208,6 +216,7 @@ namespace NonsensicalKit.Tools
                     }
                 }
             }
+
             return types;
         }
 
@@ -224,7 +233,8 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 获取继承了某两个类的所有非抽象类的类名字符串
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
         /// <returns></returns>
         public static List<string> GetConcreteTypesString<T1, T2>()
         {
@@ -232,6 +242,7 @@ namespace NonsensicalKit.Tools
             {
                 _assemblyBuffer = AppDomain.CurrentDomain.GetAssemblies();
             }
+
             List<string> types = new List<string>();
             foreach (var assembly in _assemblyBuffer)
             {
@@ -254,10 +265,12 @@ namespace NonsensicalKit.Tools
                         {
                             continue;
                         }
+
                         if (typeof(T1).IsAssignableFrom(t) == false)
                         {
                             continue;
                         }
+
                         if (typeof(T2).IsAssignableFrom(t) == false)
                         {
                             continue;
@@ -267,6 +280,7 @@ namespace NonsensicalKit.Tools
                     }
                 }
             }
+
             return types;
         }
     }

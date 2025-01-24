@@ -16,9 +16,15 @@ namespace NonsensicalKit.Tools.EasyTool
 
 
         [SerializeField] private FixedMode m_fixedMode;
-        [SerializeField][ShowIf("m_fixedMode", FixedMode.FixedRadio)][Range(0, 1)] private float m_radio = 0.9f;
-        [SerializeField][ShowIf("m_fixedMode", FixedMode.FixedLeftDistance)][Label("Distance")] private float m_leftDistance = 200f;
-        [SerializeField][ShowIf("m_fixedMode", FixedMode.FixedRightDistance)][Label("Distance")] private float m_rightDistance = 200f;
+
+        [SerializeField] [ShowIf("m_fixedMode", FixedMode.FixedRadio)] [Range(0, 1)]
+        private float m_radio = 0.9f;
+
+        [SerializeField] [ShowIf("m_fixedMode", FixedMode.FixedLeftDistance)] [Label("Distance")]
+        private float m_leftDistance = 200f;
+
+        [SerializeField] [ShowIf("m_fixedMode", FixedMode.FixedRightDistance)] [Label("Distance")]
+        private float m_rightDistance = 200f;
 
         private Transform _cameraTrans;
 
@@ -43,22 +49,22 @@ namespace NonsensicalKit.Tools.EasyTool
             switch (m_fixedMode)
             {
                 case FixedMode.FixedRadio:
-                    {
-                        horizontalRadio = m_radio;
-                    }
+                {
+                    horizontalRadio = m_radio;
+                }
                     break;
                 case FixedMode.FixedLeftDistance:
                 case FixedMode.FixedRightDistance:
-                    {
-                        bool left = m_fixedMode == FixedMode.FixedLeftDistance;
-                        float targetPos = left ? m_leftDistance : (width - m_rightDistance);
-                        horizontalRadio = targetPos / width;
-
-                    }
+                {
+                    bool left = m_fixedMode == FixedMode.FixedLeftDistance;
+                    float targetPos = left ? m_leftDistance : (width - m_rightDistance);
+                    horizontalRadio = targetPos / width;
+                }
                     break;
                 default:
                     return;
             }
+
             var xOffset = halfSize * (horizontalRadio - 0.5f) * 2;
             _localPos.x = xOffset;
 

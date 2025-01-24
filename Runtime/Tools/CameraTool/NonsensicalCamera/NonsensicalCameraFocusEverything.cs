@@ -1,4 +1,3 @@
-using System;
 using NonsensicalKit.Core;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
@@ -9,7 +8,7 @@ namespace NonsensicalKit.Tools.CameraTool
     {
         [SerializeField] private bool m_setDistance;
         [SerializeField] private bool m_immediate;
-        
+
         private NonsensicalCamera _camera;
         private RaycastHit _hit;
         private InputHub _input;
@@ -20,6 +19,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 _camera = IOCC.Get<NonsensicalCamera>();
             }
+
             if (_camera != null)
             {
                 _input = InputHub.Instance;
@@ -34,7 +34,7 @@ namespace NonsensicalKit.Tools.CameraTool
             Physics.Raycast(ray, out _hit, 100);
             if (_hit.transform != null)
             {
-                _camera.Focus(_hit.transform,m_immediate,m_setDistance);
+                _camera.Focus(_hit.transform, m_immediate, m_setDistance);
             }
         }
     }

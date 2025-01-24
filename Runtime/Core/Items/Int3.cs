@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -7,15 +8,16 @@ namespace NonsensicalKit.Core
     /// 限定值为Int的三位向量
     /// 新版本Unity可用Vector3Int
     /// </summary>
-    public struct Int3
+    [Serializable]
+    public struct Int3 : IEquatable<Int3>
     {
         [SerializeField] private int m_i1;
         [SerializeField] private int m_i2;
         [SerializeField] private int m_i3;
 
-        public int I1 { get { return m_i1; } set { m_i1 = value; } }
-        public int I2 { get { return m_i2; } set { m_i2 = value; } }
-        public int I3 { get { return m_i3; } set { m_i3 = value; } }
+        public int I1 { get => m_i1; set => m_i1 = value; }
+        public int I2 { get => m_i2; set => m_i2 = value; }
+        public int I3 { get => m_i3; set => m_i3 = value; }
 
         [JsonIgnore] public int X => I1;
         [JsonIgnore] public int Y => I2;
@@ -28,22 +30,22 @@ namespace NonsensicalKit.Core
             m_i3 = i3;
         }
 
-        public Int3(Float3 _float3)
+        public Int3(Float3 float3)
         {
-            m_i1 = (int)_float3.F1;
-            if (_float3.F1 - m_i1 >= 0.5f)
+            m_i1 = (int)float3.F1;
+            if (float3.F1 - m_i1 >= 0.5f)
             {
                 m_i1++;
             }
 
-            m_i2 = (int)_float3.F2;
-            if (_float3.F2 - m_i2 >= 0.5f)
+            m_i2 = (int)float3.F2;
+            if (float3.F2 - m_i2 >= 0.5f)
             {
                 m_i2++;
             }
 
-            m_i3 = (int)_float3.F3;
-            if (_float3.F3 - m_i3 >= 0.5f)
+            m_i3 = (int)float3.F3;
+            if (float3.F3 - m_i3 >= 0.5f)
             {
                 m_i3++;
             }
@@ -59,6 +61,7 @@ namespace NonsensicalKit.Core
             };
             return c;
         }
+
         public static Int3 operator -(Int3 a, Int3 b)
         {
             Int3 c = new Int3
@@ -69,6 +72,7 @@ namespace NonsensicalKit.Core
             };
             return c;
         }
+
         public static Int3 operator -(Int3 a)
         {
             Int3 c = new Int3
@@ -84,20 +88,15 @@ namespace NonsensicalKit.Core
         {
             if (a.I1 != 0)
             {
-                return this.I1;
+                return I1;
             }
-            else if (a.I2 != 0)
+
+            if (a.I2 != 0)
             {
-                return this.I2;
+                return I2;
             }
-            else if (a.I3 != 0)
-            {
-                return this.I3;
-            }
-            else
-            {
-                return 0;
-            }
+
+            return a.I3 != 0 ? I3 : 0;
         }
 
         /// <summary>
@@ -129,6 +128,16 @@ namespace NonsensicalKit.Core
             return I1 == obj.I1 &&
                    I2 == obj.I2 &&
                    I3 == obj.I3;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Int3 other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(m_i1, m_i2, m_i3);
         }
     }
 }

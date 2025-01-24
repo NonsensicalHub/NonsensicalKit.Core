@@ -28,7 +28,7 @@ namespace NonsensicalKit.Core.Service.Config
 
         private Dictionary<string, ConfigData> _configs;
 
-        private int _count = 0;
+        private int _count;
 
         public bool IsReady { get; set; }
 
@@ -122,26 +122,26 @@ namespace NonsensicalKit.Core.Service.Config
         /// 同时使用类型和ID来获取配置信息，返回匹配的第一个
         /// </summary>
         /// <typeparam name="T">配置类的类型</typeparam>
-        /// <param name="ID">想要获取的ID</param>
+        /// <param name="id">想要获取的ID</param>
         /// <param name="t">out值，获取不到时为默认值</param>
         /// <returns>是否获取成功</returns>
-        public bool TryGetConfig<T>(string ID, out T t) where T : ConfigData
+        public bool TryGetConfig<T>(string id, out T t) where T : ConfigData
         {
             t = null;
 
-            if (_configs.ContainsKey(ID))
+            if (_configs.TryGetValue(id, out var config))
             {
-                t = _configs[ID] as T;
+                t = config as T;
             }
 
             return t != null;
         }
 
-        public T GetConfig<T>(string ID) where T : ConfigData
+        public T GetConfig<T>(string id) where T : ConfigData
         {
-            if (_configs.ContainsKey(ID))
+            if (_configs.TryGetValue(id, out var config))
             {
-                return _configs[ID] as T;
+                return config as T;
             }
 
             return null;
@@ -151,7 +151,7 @@ namespace NonsensicalKit.Core.Service.Config
         /// 使用类型来获取配置信息，返回所有匹配的对象
         /// </summary>
         /// <typeparam name="T">配置类的类型</typeparam>
-        /// <param name="t">out值，获取不到时为默认值</param>
+        /// <param name="values">out值，获取不到时为默认值</param>
         /// <returns>是否获取成功</returns>
         public bool TryGetConfigs<T>(out IList<T> values) where T : ConfigData
         {
@@ -184,17 +184,17 @@ namespace NonsensicalKit.Core.Service.Config
         /// <summary>
         /// 获取某个配置类的某个字段的值
         /// </summary>
-        /// <typeparam name="Config">配置类的类型</typeparam>
+        /// <typeparam name="TConfig">配置类的类型</typeparam>
         /// <typeparam name="T">字段的类型</typeparam>
         /// <param name="filedName">字段的名称</param>
         /// <param name="t">out值，获取不到时为默认值</param>
         /// <returns>是否获取成功</returns>
-        public bool TryGetConfigValue<Config, T>(string filedName, out T t) where Config : ConfigData
+        public bool TryGetConfigValue<TConfig, T>(string filedName, out T t) where TConfig : ConfigData
         {
             t = default(T);
-            if (TryGetConfig(out Config config))
+            if (TryGetConfig(out TConfig config))
             {
-                Type type = typeof(Config);
+                Type type = typeof(TConfig);
 
                 var f = type.GetField(filedName);
                 if (f != null)
@@ -211,11 +211,11 @@ namespace NonsensicalKit.Core.Service.Config
             return false;
         }
 
-        public T GetConfigValue<Config, T>(string filedName) where Config : ConfigData
+        public T GetConfigValue<TConfig, T>(string filedName) where TConfig : ConfigData
         {
-            if (TryGetConfig(out Config config))
+            if (TryGetConfig(out TConfig config))
             {
-                Type type = typeof(Config);
+                Type type = typeof(TConfig);
 
                 var f = type.GetField(filedName);
                 if (f != null)
@@ -242,7 +242,7 @@ namespace NonsensicalKit.Core.Service.Config
             UnityWebRequest unityWebRequest = new UnityWebRequest();
             yield return unityWebRequest.Get(path);
 
-            if (unityWebRequest != null && unityWebRequest.result == UnityWebRequest.Result.Success)
+            if (unityWebRequest.result == UnityWebRequest.Result.Success)
             {
                 string str = unityWebRequest.downloadHandler.text;
                 SetData(str, data.GetType(), obj);
@@ -265,7 +265,7 @@ namespace NonsensicalKit.Core.Service.Config
         private string GetFilePath(ConfigData configData)
         {
             string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs",
-                configData.GetType().ToString() + "_" + configData.ConfigID + ".json");
+                configData.GetType() + "_" + configData.ConfigID + ".json");
             return configFilePath;
         }
 
@@ -277,15 +277,15 @@ namespace NonsensicalKit.Core.Service.Config
         /// <param name="configData"></param>
         private void SetData(string str, Type type, ConfigObject configData)
         {
-            MethodInfo deserializeMethod = JsonTool.DESERIALIZE_METHOD.MakeGenericMethod(new Type[] { type });
-            object deserializeData = null;
+            MethodInfo deserializeMethod = JsonTool.DESERIALIZE_METHOD.MakeGenericMethod(new[] { type });
+            object deserializeData;
             try
             {
                 deserializeData = deserializeMethod.Invoke(null, new object[] { str });
             }
             catch (Exception e)
             {
-                Debug.LogError("NonsensicalAppConfig文件反序列化出错" + "\r\n" + e.ToString());
+                Debug.LogError("NonsensicalAppConfig文件反序列化出错" + "\r\n" + e);
                 return;
             }
 

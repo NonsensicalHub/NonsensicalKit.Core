@@ -1,8 +1,8 @@
+using System.Collections.Generic;
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Service;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
+using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.LogicNodeTreeSystem
 {
@@ -16,8 +16,11 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
         [SerializeField] private List<string> m_spOn;
         [SerializeField] private List<string> m_spOff;
 
-        [SerializeField] private GameObject[] _controlGameobjectss;
-        [SerializeField] private MonoBehaviour[] _controlComponents;
+        [FormerlySerializedAs("_controlGameobjectss")] [SerializeField]
+        private GameObject[] m_controlGameObjectss;
+
+        [FormerlySerializedAs("_controlComponents")] [SerializeField]
+        private MonoBehaviour[] m_controlComponents;
 
         private bool _isRunning;
 
@@ -67,22 +70,24 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
                 SetState(true);
                 return;
             }
+
             if (m_spOff.Contains(node.NodeID))
             {
                 SetState(false);
                 return;
             }
+
             SetState(_manager.CheckState(m_nodeID, m_checkType));
         }
 
         private void SetState(bool newState)
         {
-            foreach (var item in _controlGameobjectss)
+            foreach (var item in m_controlGameObjectss)
             {
                 item.SetActive(newState);
             }
 
-            foreach (var item in _controlComponents)
+            foreach (var item in m_controlComponents)
             {
                 item.enabled = newState;
             }

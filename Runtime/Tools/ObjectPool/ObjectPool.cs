@@ -5,16 +5,16 @@ namespace NonsensicalKit.Tools.ObjectPool
 {
     public class ObjectPool<T> where T : class, new()
     {
-        private Queue<T> _objectQueue;
-        private Action<T> _resetAction;
-        private Action<T> _onetimeInitAction;
+        private readonly Queue<T> _objectQueue;
+        private readonly Action<T> _resetAction;
+        private readonly Action<T> _onetimeInitAction;
 
         public ObjectPool(int initialBufferSize, Action<T>
             resetAction = null, Action<T> onetimeInitAction = null)
         {
             _objectQueue = new Queue<T>();
-            this._resetAction = resetAction;
-            this._onetimeInitAction = onetimeInitAction;
+            _resetAction = resetAction;
+            _onetimeInitAction = onetimeInitAction;
             for (int i = 0; i < initialBufferSize; i++)
             {
                 Store(New());

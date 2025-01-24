@@ -1,7 +1,6 @@
-using NonsensicalKit.Core;
-using NonsensicalKit.Tools;
 using System.Collections.Generic;
 using System.Linq;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.MeshTool
@@ -15,16 +14,16 @@ namespace NonsensicalKit.Tools.MeshTool
         /// 清除未被使用的顶点
         /// </summary>
         /// <param name="mesh"></param>
-        public static void ClearUnuseVertex(Mesh mesh)
+        public static void ClearUnUseVertex(Mesh mesh)
         {
             //值类型转引用类型存储
-            List<Vector3?> vertexsQuote = new List<Vector3?>();
+            List<Vector3> vertexQuote = new List<Vector3>();
             List<Vector2> uv = new List<Vector2>(mesh.uv);
             List<Vector3> normals = new List<Vector3>(mesh.normals);
 
             foreach (var item in mesh.vertices)
             {
-                vertexsQuote.Add(item);
+                vertexQuote.Add(item);
             }
 
             //保存引用类型
@@ -32,7 +31,7 @@ namespace NonsensicalKit.Tools.MeshTool
 
             foreach (var item in mesh.triangles)
             {
-                triangleContainers.Add(new TriangleContainer(vertexsQuote[item]));
+                triangleContainers.Add(new TriangleContainer(vertexQuote[item]));
             }
 
             //获取未被使用的定点
@@ -44,11 +43,11 @@ namespace NonsensicalKit.Tools.MeshTool
             }
 
             //从链表中清除未被使用的定点
-            for (int i = 0, useCount = 0; i < vertexsQuote.Count; i++, useCount++)
+            for (int i = 0, useCount = 0; i < vertexQuote.Count; i++, useCount++)
             {
                 if (use[useCount] == false)
                 {
-                    vertexsQuote.RemoveAt(i);
+                    vertexQuote.RemoveAt(i);
                     uv.RemoveAt(i);
                     normals.RemoveAt(i);
                     i--;
@@ -60,14 +59,14 @@ namespace NonsensicalKit.Tools.MeshTool
 
             foreach (var item in triangleContainers)
             {
-                triangles.Add(vertexsQuote.IndexOf(item.Vertice));
+                triangles.Add(vertexQuote.IndexOf(item.Vertice));
             }
 
             //链表转数组
             List<Vector3> vertices = new List<Vector3>();
-            foreach (var item in vertexsQuote)
+            foreach (var item in vertexQuote)
             {
-                vertices.Add((Vector3)item);
+                vertices.Add(item);
             }
 
             //赋值mesh
@@ -106,20 +105,21 @@ namespace NonsensicalKit.Tools.MeshTool
         /// <summary>
         /// 网格是否包含坐标,性能较低，但可以判断凹体网格或者三角面方向不正确的网格
         /// </summary>
-        public static bool Contain(Vector3[] vertices, int[] triangle, Vector3 pos_Local)
+        public static bool Contain(Vector3[] vertices, int[] triangle, Vector3 posLocal)
         {
-
             Vector3 dir = Vector3.up;
 
             List<Vector3> crossPoint = new List<Vector3>();
             for (int i = 0; i < triangle.Length; i += 3)
             {
-                Vector3? cross = VectorTool.GetRayTriangleCrossPoint(pos_Local, dir, vertices[triangle[i]], vertices[triangle[i + 1]], vertices[triangle[i + 2]]);
+                Vector3? cross = VectorTool.GetRayTriangleCrossPoint(posLocal, dir, vertices[triangle[i]], vertices[triangle[i + 1]],
+                    vertices[triangle[i + 2]]);
                 if (cross != null)
                 {
                     crossPoint.Add((Vector3)cross);
                 }
             }
+
             VectorTool.SortList(crossPoint);
 
             for (int i = 0; i < crossPoint.Count - 1; i++)
@@ -141,32 +141,31 @@ namespace NonsensicalKit.Tools.MeshTool
             }
         }
 
-        public static bool Contain(this Mesh mesh, Vector3 pos_Local)
+        public static bool Contain(this Mesh mesh, Vector3 posLocal)
         {
             Vector3[] vertices = mesh.vertices;
             int[] triangle = mesh.triangles;
-            return Contain(vertices, triangle, pos_Local);
+            return Contain(vertices, triangle, posLocal);
         }
 
-        public static bool Contain(this MeshBuilder mesh, Float3 pos_Local)
+        public static bool Contain(this MeshBuilder mesh, Float3 posLocal)
         {
-            return Contain(mesh, pos_Local.ToVector3());
+            return Contain(mesh, posLocal.ToVector3());
         }
 
-        public static bool Contain(this MeshBuilder mesh, Vector3 pos_Local)
+        public static bool Contain(this MeshBuilder mesh, Vector3 posLocal)
         {
             Vector3[] vertices = mesh.Vertices.ToArray();
             int[] triangle = mesh.Triangles.ToArray();
 
-            return Contain(vertices, triangle, pos_Local);
+            return Contain(vertices, triangle, posLocal);
         }
 
         /// <summary>
         /// 网格是否包含坐标，性能较高，但要求网格为非凹体且网格三角面方向完全正确
         /// </summary>
-        public static bool Contain_2(Vector3[] vertices, int[] triangle, Vector3 pos_Local)
+        public static bool Contain_2(Vector3[] vertices, int[] triangle, Vector3 posLocal)
         {
-
             for (int i = 0; i < triangle.Length; i += 3)
             {
                 Vector3 line1 = vertices[triangle[i + 1]] - vertices[triangle[i]];
@@ -174,7 +173,7 @@ namespace NonsensicalKit.Tools.MeshTool
 
                 Vector3 normal = Vector3.Cross(line1, line2);
 
-                Vector3 posDir = pos_Local - vertices[triangle[i + 1]];
+                Vector3 posDir = posLocal - vertices[triangle[i + 1]];
 
                 if (Vector3.Dot(posDir, normal) > 0)
                 {
@@ -185,20 +184,20 @@ namespace NonsensicalKit.Tools.MeshTool
             return true;
         }
 
-        public static bool Contain_2(this Mesh mesh, Vector3 pos_Local)
+        public static bool Contain_2(this Mesh mesh, Vector3 posLocal)
         {
             Vector3[] vertices = mesh.vertices;
             int[] triangle = mesh.triangles;
 
-            return Contain_2(vertices, triangle, pos_Local);
+            return Contain_2(vertices, triangle, posLocal);
         }
 
-        public static bool Contain_2(this MeshBuilder mesh, Vector3 pos_Local)
+        public static bool Contain_2(this MeshBuilder mesh, Vector3 posLocal)
         {
             Vector3[] vertices = mesh.Vertices.ToArray();
             int[] triangle = mesh.Triangles.ToArray();
 
-            return Contain_2(vertices, triangle, pos_Local);
+            return Contain_2(vertices, triangle, posLocal);
         }
 
         /// <summary>
@@ -238,9 +237,11 @@ namespace NonsensicalKit.Tools.MeshTool
                     hasBounds = true;
                 }
             }
+
             bounds.center = bounds.center - go.transform.position;
 
-            bounds.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y, bounds.size.z / go.transform.lossyScale.z);
+            bounds.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y,
+                bounds.size.z / go.transform.lossyScale.z);
 
             go.transform.rotation = old;
             return bounds;
@@ -248,11 +249,11 @@ namespace NonsensicalKit.Tools.MeshTool
 
         private class TriangleContainer
         {
-            public Vector3? Vertice;
+            public Vector3 Vertice;
 
-            public TriangleContainer(Vector3? _vertice)
+            public TriangleContainer(Vector3 vertice)
             {
-                Vertice = _vertice;
+                Vertice = vertice;
             }
         }
     }

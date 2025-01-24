@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using UnityEngine;
+using Random = System.Random;
 
 namespace NonsensicalKit.Tools
 {
@@ -37,7 +38,7 @@ namespace NonsensicalKit.Tools
         {
             byte[] buffer = Guid.NewGuid().ToByteArray();
             int iSeed = BitConverter.ToInt32(buffer, 0);
-            System.Random random = new System.Random(iSeed);
+            Random random = new Random(iSeed);
             int temp = random.Next(max * 2 - 1);
             temp = temp - max + 1;
 
@@ -48,7 +49,7 @@ namespace NonsensicalKit.Tools
         {
             byte[] buffer = Guid.NewGuid().ToByteArray();
             int iSeed = BitConverter.ToInt32(buffer, 0);
-            System.Random random = new System.Random(iSeed);
+            Random random = new Random(iSeed);
             float temp = (float)random.NextDouble() % max;
             return temp;
         }
@@ -60,7 +61,7 @@ namespace NonsensicalKit.Tools
         /// <param name="random">The given random instance</param>
         /// <param name="min">The inclusive minimum bound</param>
         /// <param name="max">The exclusive maximum bound.  Must be greater than min</param>
-        public static long NextLong(this System.Random random, long min = 0, long max = long.MaxValue)
+        public static long NextLong(this Random random, long min = 0, long max = long.MaxValue)
         {
             if (max <= min)
                 return min;
@@ -78,7 +79,8 @@ namespace NonsensicalKit.Tools
                 byte[] buf = new byte[8];
                 random.NextBytes(buf);
                 ulongRand = (ulong)BitConverter.ToInt64(buf, 0);
-            } while (ulongRand > ulong.MaxValue - ((ulong.MaxValue % uRange) + 1) % uRange);
+            }
+            while (ulongRand > ulong.MaxValue - ((ulong.MaxValue % uRange) + 1) % uRange);
 
             return (long)(ulongRand % uRange) + min;
         }

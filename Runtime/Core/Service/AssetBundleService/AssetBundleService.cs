@@ -28,7 +28,7 @@ namespace NonsensicalKit.Core.Service.Asset
         public Action InitCompleted { get; set; }
 
         public Action<string, float> OnBundleLoading { get; set; }
-        public Action<string,AssetBundle> OnBundleCompleted { get; set; }
+        public Action<string, AssetBundle> OnBundleCompleted { get; set; }
         public Action<string, string, float> OnResourceLoading { get; set; }
         public Action<string, string> OnResourceCompleted { get; set; }
 
@@ -36,7 +36,7 @@ namespace NonsensicalKit.Core.Service.Asset
 
         public int LoadBundleCount { get; private set; } //当前加载的包的数量
 
-        private HashSet<string> _bundleLogBuffer = new HashSet<string>();
+        private readonly HashSet<string> _bundleLogBuffer = new();
 
         private string _rootUrl; //基础url拼接平台字符串得出的根路径
 
@@ -200,7 +200,7 @@ namespace NonsensicalKit.Core.Service.Asset
         /// <param name="onComplete"></param>
         /// <param name="onLoading"></param>
         /// <param name="onLoaded"></param>
-        public void LoadAssetBundle(string bundlePath, Action<string,AssetBundle> onComplete = null, Action<string, float> onLoading = null,
+        public void LoadAssetBundle(string bundlePath, Action<string, AssetBundle> onComplete = null, Action<string, float> onLoading = null,
             Action<string> onLoaded = null)
         {
             bundlePath = bundlePath.ToLower();
@@ -222,7 +222,7 @@ namespace NonsensicalKit.Core.Service.Asset
                 {
                     onLoading?.Invoke(bundlePath, 1);
                     onLoaded?.Invoke(bundlePath);
-                    onComplete?.Invoke(bundlePath,_assetBundleDic[bundlePath].AssetBundlePack);
+                    onComplete?.Invoke(bundlePath, _assetBundleDic[bundlePath].AssetBundlePack);
                 }
                 catch (Exception)
                 {
@@ -314,8 +314,8 @@ namespace NonsensicalKit.Core.Service.Asset
 
             try
             {
-                _assetBundleDic[bundlePath].OnLoadCompleted?.Invoke(bundlePath,_assetBundleDic[bundlePath].AssetBundlePack);
-                OnBundleCompleted?.Invoke(bundlePath,_assetBundleDic[bundlePath].AssetBundlePack);
+                _assetBundleDic[bundlePath].OnLoadCompleted?.Invoke(bundlePath, assetBundle);
+                OnBundleCompleted?.Invoke(bundlePath,assetBundle);
             }
             catch (Exception)
             {
@@ -454,8 +454,8 @@ namespace NonsensicalKit.Core.Service.Asset
         /// 强制卸载ab包
         /// </summary>
         /// <param name="bundleName"></param>
-        /// <param name="checkDependencie"></param>
-        public void UnloadBundle(string bundleName, bool checkDependencie = true)
+        /// <param name="checkDependencies"></param>
+        public void UnloadBundle(string bundleName, bool checkDependencies = true)
         {
             bundleName = bundleName.ToLower();
             if (_assetBundleDic.ContainsKey(bundleName))
@@ -465,7 +465,7 @@ namespace NonsensicalKit.Core.Service.Asset
                 {
                     bundle.AssetBundlePack.Unload(true);
                     bundle.AssetBundlePack = null;
-                    if (checkDependencie)
+                    if (checkDependencies)
                     {
                         string[] dependencies = _assetBundleDic[bundleName].Dependencies;
                         foreach (var item in dependencies)
@@ -527,7 +527,7 @@ namespace NonsensicalKit.Core.Service.Asset
             public int LoadCount; //包内对象加载的次数
             public int DependencyCount; //被其他包依赖加载的次数
 
-            public Action<string,AssetBundle> OnLoadCompleted; //完全加载完成事件
+            public Action<string, AssetBundle> OnLoadCompleted; //完全加载完成事件
             public Action<string> OnLoaded; //加载完成事件，此时依赖包可能尚未加载
             public Action<string, float> OnLoading; //加载中进度事件，会使用一个0到1的进度调用此事件代表下载进度
 

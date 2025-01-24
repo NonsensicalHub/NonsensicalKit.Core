@@ -22,7 +22,6 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
         {
             if (_manager != null)
             {
-
                 _manager.SwitchNode(m_nodeID);
             }
         }

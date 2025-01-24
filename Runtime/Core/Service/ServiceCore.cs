@@ -1,17 +1,18 @@
-using NonsensicalKit.Core.Log;
-using NonsensicalKit.Core.Setting;
-using NonsensicalKit.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using NonsensicalKit.Core.Log;
+using NonsensicalKit.Core.Setting;
+using NonsensicalKit.Tools;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Service
 {
     public static class ServiceCore
     {
-        private static readonly Dictionary<Type, IService> _services = new Dictionary<Type, IService>();
+        private static readonly Dictionary<Type, IService> Services = new();
 
         private static List<string> _runningService;
 
@@ -38,7 +39,7 @@ namespace NonsensicalKit.Core.Service
                 {
                     LogCore.Info($"服务[{type.Name}]开始初始化");
                     var newService = Activator.CreateInstance(type) as IClassService;
-                    _services.Add(type, newService);
+                    Services.Add(type, newService);
 
                     if (newService.IsReady)
                     {
@@ -77,24 +78,26 @@ namespace NonsensicalKit.Core.Service
 
                         if (prefab != null)
                         {
-                            gameObject = UnityEngine.Object.Instantiate(prefab);
+                            gameObject = Object.Instantiate(prefab);
                         }
                         else
                         {
                             throw new TODOException($"无法实例化服务[{type}]，Resources路径“{prefabAttr.PrefabPath}”上未找到预制体");
                         }
                     }
+
                     if (gameObject == null)
                     {
                         gameObject = new GameObject();
                         gameObject.AddComponent(type);
                         gameObject.name = type.Name;
                     }
-                    UnityEngine.Object.DontDestroyOnLoad(gameObject);
+
+                    Object.DontDestroyOnLoad(gameObject);
 
                     var newService = gameObject.GetComponent(type) as IMonoService;
 
-                    _services.Add(type, newService);
+                    Services.Add(type, newService);
 
                     if (newService.IsReady)
                     {
@@ -128,9 +131,9 @@ namespace NonsensicalKit.Core.Service
         /// <returns></returns>
         public static T Get<T>() where T : class, IService
         {
-            if (_services.ContainsKey(typeof(T)))
+            if (Services.ContainsKey(typeof(T)))
             {
-                return _services[typeof(T)] as T;
+                return Services[typeof(T)] as T;
             }
             else
             {
@@ -140,9 +143,9 @@ namespace NonsensicalKit.Core.Service
 
         public static bool TryGet<T>(out T service) where T : class, IService
         {
-            if (_services.ContainsKey(typeof(T)))
+            if (Services.ContainsKey(typeof(T)))
             {
-                service = _services[typeof(T)] as T;
+                service = Services[typeof(T)] as T;
                 return true;
             }
             else
@@ -164,11 +167,11 @@ namespace NonsensicalKit.Core.Service
                 throw new TODOException($"服务[{typeof(T).Name}]未配置");
             }
 
-            if (_services.ContainsKey(typeof(T)))
+            if (Services.ContainsKey(typeof(T)))
             {
-                if (_services[typeof(T)].IsReady)
+                if (Services[typeof(T)].IsReady)
                 {
-                    callback(_services[typeof(T)] as T);
+                    callback(Services[typeof(T)] as T);
                 }
             }
 

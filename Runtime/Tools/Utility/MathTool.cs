@@ -23,6 +23,7 @@ namespace NonsensicalKit.Tools
             {
                 raw ^= change;
             }
+
             return raw;
         }
 
@@ -37,6 +38,7 @@ namespace NonsensicalKit.Tools
             {
                 return num > 1;
             }
+
             // 不在6的倍数两侧的一定不是质数
             if (num % 6 != 1 && num % 6 != 5)
             {
@@ -51,6 +53,7 @@ namespace NonsensicalKit.Tools
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -63,9 +66,7 @@ namespace NonsensicalKit.Tools
         /// <param name="i2"></param>
         public static void Swap<T>(IList<T> values, int i1, int i2)
         {
-            T tmp = values[i1];
-            values[i1] = values[i2];
-            values[i2] = tmp;
+            (values[i1], values[i2]) = (values[i2], values[i1]);
         }
 
         /// <summary>
@@ -80,6 +81,7 @@ namespace NonsensicalKit.Tools
             {
                 return -1;
             }
+
             int minIndex = 0;
             T min = list[0];
             for (int i = 1; i < list.Count; i++)
@@ -90,6 +92,7 @@ namespace NonsensicalKit.Tools
                     min = list[i];
                 }
             }
+
             return minIndex;
         }
 
@@ -127,6 +130,7 @@ namespace NonsensicalKit.Tools
                     }
                 }
             }
+
             return values;
         }
 
@@ -164,6 +168,7 @@ namespace NonsensicalKit.Tools
                     }
                 }
             }
+
             return values;
         }
 
@@ -178,6 +183,7 @@ namespace NonsensicalKit.Tools
             {
                 return 0;
             }
+
             rawNum = Mathf.Abs(rawNum);
             if (rawNum > 1)
             {
@@ -188,6 +194,7 @@ namespace NonsensicalKit.Tools
                     crtNum /= 10;
                     level++;
                 }
+
                 return level;
             }
             else
@@ -199,6 +206,7 @@ namespace NonsensicalKit.Tools
                     crtNum *= 10;
                     level--;
                 }
+
                 return level;
             }
         }

@@ -90,37 +90,26 @@ namespace NonsensicalKit.Tools
 
         public static void ActionAdd<TKey>(this Dictionary<TKey, Action> dictionary, TKey key, Action value)
         {
-            if (dictionary.ContainsKey(key))
+            if (!dictionary.TryAdd(key, value))
             {
                 dictionary[key] += value;
-            }
-            else
-            {
-                dictionary.Add(key, value);
             }
         }
 
         public static void ActionAdd<TKey, TValue>(this Dictionary<TKey, Action<TValue>> dictionary, TKey key, Action<TValue> value)
         {
-            if (dictionary.ContainsKey(key))
+            if (!dictionary.TryAdd(key, value))
             {
                 dictionary[key] += value;
-            }
-            else
-            {
-                dictionary.Add(key, value);
             }
         }
 
-        public static void ActionAdd<TKey, TValue1, TValue2>(this Dictionary<TKey, Action<TValue1, TValue2>> dictionary, TKey key, Action<TValue1, TValue2> value)
+        public static void ActionAdd<TKey, TValue1, TValue2>(this Dictionary<TKey, Action<TValue1, TValue2>> dictionary, TKey key,
+            Action<TValue1, TValue2> value)
         {
-            if (dictionary.ContainsKey(key))
+            if (!dictionary.TryAdd(key, value))
             {
                 dictionary[key] += value;
-            }
-            else
-            {
-                dictionary.Add(key, value);
             }
         }
     }

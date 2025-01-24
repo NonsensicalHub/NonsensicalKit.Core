@@ -1,8 +1,6 @@
-using NonsensicalKit.Core;
-using NonsensicalKit.Tools;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.MeshTool
@@ -389,7 +387,7 @@ namespace NonsensicalKit.Tools.MeshTool
 
             Triangles[index2++] = (rawLength + 1);
             Triangles[index2++] = (rawLength + 2);
-            Triangles[index2++] = (rawLength + 3);
+            Triangles[index2] = (rawLength + 3);
         }
 
         public void AddRound(Vector3 center, float radius, Vector3 dir, int smoothness)
@@ -398,6 +396,7 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 throw new Exception("点数过少");
             }
+
             Vector3 dir1 = VectorTool.GetCommonVerticalLine(dir, dir);
             Vector3 dir2 = VectorTool.GetCommonVerticalLine(dir, dir1);
             float partAngle = (2 * Mathf.PI) / smoothness;
@@ -407,6 +406,7 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 pointArray[i] = center + radius * dir1 * Mathf.Sin(partAngle * i) + radius * dir2 * Mathf.Cos(partAngle * i);
             }
+
             for (int i = 0; i < pointArray.Length; i++)
             {
                 int next = i + 1;
@@ -414,16 +414,18 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     next = 0;
                 }
-                AddTriangle(new Vector3[] { center, pointArray[i], pointArray[next] }, dir, Vector2.one * 0.5f);
+
+                AddTriangle(new[] { center, pointArray[i], pointArray[next] }, dir, Vector2.one * 0.5f);
             }
         }
 
-        public void AddRoundPlus(Vector3 center, float radius, Vector3 dir, int smoothness,int vIndex,int tIndex)
+        public void AddRoundPlus(Vector3 center, float radius, Vector3 dir, int smoothness, int vIndex, int tIndex)
         {
             if (smoothness < 3)
             {
                 throw new Exception("点数过少");
             }
+
             Vector3 dir1 = VectorTool.GetCommonVerticalLine(dir, dir);
             Vector3 dir2 = VectorTool.GetCommonVerticalLine(dir, dir1);
             float partAngle = (2 * Mathf.PI) / smoothness;
@@ -441,7 +443,8 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     next = 0;
                 }
-                AddTriangle_2(new Vector3[] { center, pointArray[i], pointArray[next] }, dir, Vector2.one * 0.5f, vIndex, tIndex);
+
+                AddTriangle_2(new[] { center, pointArray[i], pointArray[next] }, dir, Vector2.one * 0.5f, vIndex, tIndex);
                 vIndex += 3;
                 tIndex += 3;
             }
@@ -453,6 +456,7 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 throw new Exception("点数过少");
             }
+
             if (innerDiameter == 0)
             {
                 AddRound(center, outerDiameter, dir, smoothness);
@@ -479,7 +483,7 @@ namespace NonsensicalKit.Tools.MeshTool
                 }
 
                 //AddQuad(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, (pointArray1[i] + pointArray2[i] + pointArray2[next] + pointArray1[next]) * 0.25f, new Vector2(0.5f, 0.5f));
-                AddQuad(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, -dir, new Vector2(0.5f, 0.5f));
+                AddQuad(new[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, -dir, new Vector2(0.5f, 0.5f));
             }
         }
 
@@ -501,6 +505,7 @@ namespace NonsensicalKit.Tools.MeshTool
                 pointArray1[i] = ringSide1 + ringSide1Radius * dir1 * Mathf.Sin(partAngle * i) + ringSide1Radius * dir2 * Mathf.Cos(partAngle * i);
                 pointArray2[i] = ringSide2 + ringSide2Radius * dir1 * Mathf.Sin(partAngle * i) + ringSide2Radius * dir2 * Mathf.Cos(partAngle * i);
             }
+
             int index = Vertices.Length;
             int index2 = Triangles.Length;
 
@@ -515,8 +520,10 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     next = 0;
                 }
+
                 // AddQuad(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, (pointArray1[i] + pointArray2[i] + pointArray2[next] + pointArray1[next]) * 0.25f- (ringSide1+ringSide2)*0.5f, new Vector2(0.5f, 0.5f));
-                AddQuad_4(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, new Vector3[] { ringSide1, ringSide2, ringSide2, ringSide1 }, new Vector2(0.5f, 0.5f), index, index2);
+                AddQuad_4(new[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] },
+                    new[] { ringSide1, ringSide2, ringSide2, ringSide1 }, new Vector2(0.5f, 0.5f), index, index2);
 
                 index += 4;
                 index2 += 6;
@@ -528,22 +535,23 @@ namespace NonsensicalKit.Tools.MeshTool
         /// </summary>
         /// <param name="ringSide1"></param>
         /// <param name="ringSide1Radius"></param>
-        /// <param name="dir2"></param>
+        /// <param name="dir1"></param>
         /// <param name="ringSide2"></param>
         /// <param name="ringSide2Radius"></param>
         /// <param name="dir2"></param>
         /// <param name="smoothness"></param>
         /// <exception cref="Exception"></exception>
-        public void AddRing3D(Vector3 ringSide1, float ringSide1Radius, Vector3 d1, Vector3 ringSide2, float ringSide2Radius, Vector3 d2, int smoothness)
+        public void AddRing3D(Vector3 ringSide1, float ringSide1Radius, Vector3 dir1, Vector3 ringSide2, float ringSide2Radius, Vector3 dir2,
+            int smoothness)
         {
             if (smoothness < 3)
             {
                 throw new Exception("点数过少");
             }
 
-            Vector3 d3 = VectorTool.GetCommonVerticalLine(d1, d2);
-            Vector3 d1V = VectorTool.GetCommonVerticalLine(d1, d3);
-            Vector3 d2V = VectorTool.GetCommonVerticalLine(d2, d3);
+            Vector3 d3 = VectorTool.GetCommonVerticalLine(dir1, dir2);
+            Vector3 d1V = VectorTool.GetCommonVerticalLine(dir1, d3);
+            Vector3 d2V = VectorTool.GetCommonVerticalLine(dir2, d3);
 
             float partAngle = (2 * Mathf.PI) / smoothness;
             Vector3[] pointArray1 = new Vector3[smoothness];
@@ -554,6 +562,7 @@ namespace NonsensicalKit.Tools.MeshTool
                 pointArray1[i] = ringSide1 + ringSide1Radius * d3 * Mathf.Sin(partAngle * i) + ringSide1Radius * d1V * Mathf.Cos(partAngle * i);
                 pointArray2[i] = ringSide2 + ringSide2Radius * d3 * Mathf.Sin(partAngle * i) + ringSide2Radius * d2V * Mathf.Cos(partAngle * i);
             }
+
             int index = Vertices.Length;
             int index2 = Triangles.Length;
 
@@ -569,15 +578,18 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     next = 0;
                 }
+
                 // AddQuad(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, (pointArray1[i] + pointArray2[i] + pointArray2[next] + pointArray1[next]) * 0.25f- (ringSide1+ringSide2)*0.5f, new Vector2(0.5f, 0.5f));
-                AddQuad_4(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, new Vector3[] { ringSide1, ringSide2, ringSide2, ringSide1 }, new Vector2(0.5f, 0.5f), index, index2);
+                AddQuad_4(new[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] },
+                    new[] { ringSide1, ringSide2, ringSide2, ringSide1 }, new Vector2(0.5f, 0.5f), index, index2);
 
                 index += 4;
                 index2 += 6;
             }
         }
 
-        public void AddRing3D_2(Vector3 ringSide1, float ringSide1Radius, Vector3 d1, Vector3 ringSide2, float ringSide2Radius, Vector3 d2, int smoothness, int vIndex, int tIndex)
+        public void AddRing3D_2(Vector3 ringSide1, float ringSide1Radius, Vector3 d1, Vector3 ringSide2, float ringSide2Radius, Vector3 d2,
+            int smoothness, int vIndex, int tIndex)
         {
             if (smoothness < 3)
             {
@@ -605,8 +617,10 @@ namespace NonsensicalKit.Tools.MeshTool
                 {
                     next = 0;
                 }
+
                 // AddQuad(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, (pointArray1[i] + pointArray2[i] + pointArray2[next] + pointArray1[next]) * 0.25f- (ringSide1+ringSide2)*0.5f, new Vector2(0.5f, 0.5f));
-                AddQuad_4(new Vector3[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] }, new Vector3[] { ringSide1, ringSide2, ringSide2, ringSide1 }, new Vector2(0.5f, 0.5f), vIndex, tIndex);
+                AddQuad_4(new[] { pointArray1[i], pointArray2[i], pointArray2[next], pointArray1[next] },
+                    new[] { ringSide1, ringSide2, ringSide2, ringSide1 }, new Vector2(0.5f, 0.5f), vIndex, tIndex);
 
                 vIndex += 4;
                 tIndex += 6;
@@ -620,21 +634,25 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 writer.WriteVector3(item);
             }
+
             writer.Write(Normals.Length);
             foreach (var item in Normals)
             {
                 writer.WriteVector3(item);
             }
+
             writer.Write(Colors.Length);
             foreach (var item in Colors)
             {
                 writer.WriteColor(item);
             }
+
             writer.Write(UV.Length);
             foreach (var item in UV)
             {
                 writer.WriteVector2(item);
             }
+
             writer.Write(Triangles.Length);
             foreach (var item in Triangles)
             {
@@ -650,24 +668,28 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 Vertices[i] = (reader.ReadVector3());
             }
+
             int normalsCount = reader.ReadInt32();
             Normals = new Vector3[normalsCount];
             for (int i = 0; i < normalsCount; i++)
             {
                 Normals[i] = (reader.ReadVector3());
             }
+
             int colorsCount = reader.ReadInt32();
             Colors = new Color[colorsCount];
             for (int i = 0; i < colorsCount; i++)
             {
                 Colors[i] = (reader.ReadColor());
             }
+
             int uvCount = reader.ReadInt32();
             UV = new Vector2[uvCount];
             for (int i = 0; i < uvCount; i++)
             {
                 UV[i] = (reader.ReadVector2());
             }
+
             int triangleCount = reader.ReadInt32();
             Triangles = new int[triangleCount];
             for (int i = 0; i < triangleCount; i++)

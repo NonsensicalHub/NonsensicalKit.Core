@@ -1,30 +1,40 @@
 using NonsensicalKit.Core;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.EasyTool
 {
     public class MouseEventTrigger : NonsensicalMono
     {
+        [FormerlySerializedAs("useOnWebGL")] [SerializeField]
+        private bool m_useOnWebGL;
 
-        [SerializeField] private bool useOnWebGL;
-        [SerializeField] private bool enableRayHit = false;
-        [SerializeField] UnityEvent m_OnMouseEnter = null;
-        [SerializeField] UnityEvent m_OnMouseClick = null;
-        [SerializeField] UnityEvent m_OnMouseExit = null;
+        [FormerlySerializedAs("enableRayHit")] [SerializeField]
+        private bool m_enableRayHit;
 
-        private bool isEntered;
+        [FormerlySerializedAs("m_OnMouseEnter")] [SerializeField]
+        private UnityEvent m_onMouseEnter;
+
+        [FormerlySerializedAs("m_OnMouseClick")] [SerializeField]
+        private UnityEvent m_onMouseClick;
+
+        [FormerlySerializedAs("m_OnMouseExit")] [SerializeField]
+        private UnityEvent m_onMouseExit;
+
+        private bool _isEntered;
+
         private void Awake()
         {
-            if (useOnWebGL)
+            if (m_useOnWebGL)
             {
                 if (PlatformInfo.IsWebGL)
                 {
-                    enableRayHit = true;
+                    m_enableRayHit = true;
                 }
             }
 
-            if (enableRayHit)
+            if (m_enableRayHit)
             {
                 Subscribe<string>("onVirtualMouseEnter", OnVirtualMouseEnter);
                 Subscribe<string>("onVirtualMouseClick", OnVirtualMouseClick);
@@ -33,51 +43,48 @@ namespace NonsensicalKit.Tools.EasyTool
 
         private void OnMouseEnter()
         {
-            if (enableRayHit) return;
-            m_OnMouseEnter?.Invoke();
+            if (m_enableRayHit) return;
+            m_onMouseEnter?.Invoke();
         }
 
         private void OnMouseUpAsButton()
         {
-            if (enableRayHit) return;
-            m_OnMouseClick?.Invoke();
+            if (m_enableRayHit) return;
+            m_onMouseClick?.Invoke();
         }
 
         private void OnMouseExit()
         {
-            if (enableRayHit) return;
-            m_OnMouseExit?.Invoke();
+            if (m_enableRayHit) return;
+            m_onMouseExit?.Invoke();
         }
 
         private void OnVirtualMouseEnter(string obj)
         {
-            if (obj == this.name)
+            if (obj == name)
             {
-                if (isEntered == false)
+                if (_isEntered == false)
                 {
-                    m_OnMouseEnter?.Invoke();
-                    isEntered = true;
+                    m_onMouseEnter?.Invoke();
+                    _isEntered = true;
                 }
             }
             else
             {
-                if (isEntered == true)
+                if (_isEntered)
                 {
-                    m_OnMouseExit?.Invoke();
-                    isEntered = false;
+                    m_onMouseExit?.Invoke();
+                    _isEntered = false;
                 }
             }
         }
 
         private void OnVirtualMouseClick(string obj)
         {
-            if (obj == this.name)
+            if (obj == name)
             {
-                m_OnMouseClick?.Invoke();
+                m_onMouseClick?.Invoke();
             }
         }
-
-
     }
-
 }

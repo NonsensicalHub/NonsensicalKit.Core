@@ -1,5 +1,5 @@
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace NonsensicalKit.Core
@@ -10,18 +10,18 @@ namespace NonsensicalKit.Core
     [Serializable]
     public struct Float4
     {
-        public readonly static Float4 Zero = new Float4(0, 0, 0, 0);
-        public readonly static Float4 One = new Float4(1, 1, 1, 1);
+        public static readonly Float4 Zero = new Float4(0, 0, 0, 0);
+        public static readonly Float4 One = new Float4(1, 1, 1, 1);
 
         [SerializeField] private float m_f1;
         [SerializeField] private float m_f2;
         [SerializeField] private float m_f3;
         [SerializeField] private float m_f4;
 
-        public float F1 { get { return m_f1; } set { m_f1 = value; } }
-        public float F2 { get { return m_f2; } set { m_f2 = value; } }
-        public float F3 { get { return m_f3; } set { m_f3 = value; } }
-        public float F4 { get { return m_f4; } set { m_f4 = value; } }
+        public float F1 { get => m_f1; set => m_f1 = value; }
+        public float F2 { get => m_f2; set => m_f2 = value; }
+        public float F3 { get => m_f3; set => m_f3 = value; }
+        public float F4 { get => m_f4; set => m_f4 = value; }
 
         [JsonIgnore] public float X => F1;
         [JsonIgnore] public float Y => F2;
@@ -48,6 +48,7 @@ namespace NonsensicalKit.Core
             m_f3 = vector4.z;
             m_f4 = vector4.w;
         }
+
         public Float4(Color color)
         {
             m_f1 = color.r;
@@ -60,6 +61,7 @@ namespace NonsensicalKit.Core
         {
             return new Vector4(F1, F2, F3, F4);
         }
+
         public Color ToColor()
         {
             return new Color(F1, F2, F3, F4);
@@ -100,6 +102,7 @@ namespace NonsensicalKit.Core
             };
             return c;
         }
+
         public static Float4 operator -(Float4 a, Float4 b)
         {
             Float4 c = new Float4
@@ -111,6 +114,7 @@ namespace NonsensicalKit.Core
             };
             return c;
         }
+
         public static Float4 operator -(Float4 a)
         {
             Float4 c = new Float4
@@ -132,6 +136,7 @@ namespace NonsensicalKit.Core
         {
             return new Float4(v.x, v.y, v.z, v.w);
         }
+
         public static explicit operator Float4(Color c)
         {
             return new Float4(c.r, c.g, c.b, c.a);

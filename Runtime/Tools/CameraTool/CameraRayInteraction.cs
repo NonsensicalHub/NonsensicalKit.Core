@@ -1,37 +1,38 @@
 using NonsensicalKit.Core;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CameraRayInteraction : MonoBehaviour
 {
-    [SerializeField] private LayerMask layerMask;
-    [SerializeField] private Camera _camera;
-    [SerializeField] private int _maxHitDistance = 1000;
-    [SerializeField] private bool log;
-    [SerializeField] private bool useOnWebGL;
+    [FormerlySerializedAs("layerMask")] [SerializeField] private LayerMask m_layerMask;
+    [FormerlySerializedAs("_camera")] [SerializeField] private Camera m_camera;
+    [FormerlySerializedAs("_maxHitDistance")] [SerializeField] private int m_maxHitDistance = 1000;
+    [FormerlySerializedAs("log")] [SerializeField] private bool m_log;
+    [FormerlySerializedAs("useOnWebGL")] [SerializeField] private bool m_useOnWebGL;
 
-    [SerializeField] private bool enableRayHit;
+    [FormerlySerializedAs("enableRayHit")] [SerializeField] private bool m_enableRayHit;
 
     private void Awake()
     {
-        if (useOnWebGL)
+        if (m_useOnWebGL)
         {
             if (PlatformInfo.IsWebGL)
             {
-                enableRayHit = true;
-
+                m_enableRayHit = true;
             }
         }
     }
+
     private void Update()
     {
-        if (enableRayHit == true)
+        if (m_enableRayHit == true)
         {
-            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, _maxHitDistance, layerMask))
+            Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, m_maxHitDistance, m_layerMask))
             {
                 if (hit.collider != null)
                 {
-                    if (log)
+                    if (m_log)
                         Debug.Log(hit.collider.name);
                     IOCC.Publish("onVirtualMouseEnter", hit.collider.name);
                     if (Input.GetMouseButtonDown(0))

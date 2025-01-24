@@ -14,6 +14,7 @@ namespace NonsensicalKit.Tools.EasyTool
         /// 当被整体替换时
         /// </summary>
         public Action<List<T>, List<T>> OnListChanged;
+
         public Action<T> OnAdd;
         public Action<int, T> OnInsert;
         public Action<T> OnRemove;
@@ -22,10 +23,11 @@ namespace NonsensicalKit.Tools.EasyTool
         public Action OnClear;
 
         //预先初始化，防止空异常
-        private List<T> _list = new List<T>();
+        private List<T> _list = new();
+
         public List<T> List
         {
-            get { return _list; }
+            get => _list;
             set
             {
                 if (!ReferenceEquals(_list, value))
@@ -38,10 +40,7 @@ namespace NonsensicalKit.Tools.EasyTool
             }
         }
 
-        public int Count
-        {
-            get { return _list.Count; }
-        }
+        public int Count => _list.Count;
 
         public bool IsReadOnly { get; private set; }
 
@@ -89,6 +88,7 @@ namespace NonsensicalKit.Tools.EasyTool
                 OnRemove?.Invoke(item);
                 return true;
             }
+
             return false;
         }
 
@@ -111,7 +111,7 @@ namespace NonsensicalKit.Tools.EasyTool
 
         public T this[int index]
         {
-            get { return _list[index]; }
+            get => _list[index];
             set
             {
                 var old = _list[index];

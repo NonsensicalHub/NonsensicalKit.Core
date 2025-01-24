@@ -1,14 +1,14 @@
 using NonsensicalKit.Core;
-using System;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.CameraTool
 {
     public class RotateCubePart : NonsensicalMono
     {
-        [SerializeField] private bool useOnWebGL;
-        [SerializeField] private bool enableRayHit = false;
+        [FormerlySerializedAs("useOnWebGL")] [SerializeField] private bool m_useOnWebGL;
+        [FormerlySerializedAs("enableRayHit")] [SerializeField] private bool m_enableRayHit = false;
         [SerializeField] private Vector3 m_dir;
         [SerializeField] private UnityEvent m_onMouseEnter;
         [SerializeField] private UnityEvent m_onMouseExit;
@@ -16,18 +16,20 @@ namespace NonsensicalKit.Tools.CameraTool
         private RotateCube _cube;
 
         private bool isEntered;
+
         private void Awake()
         {
             _cube = GetComponentInParent<RotateCube>();
 
-            if (useOnWebGL)
+            if (m_useOnWebGL)
             {
                 if (PlatformInfo.IsWebGL)
                 {
-                    enableRayHit = true;
+                    m_enableRayHit = true;
                 }
             }
-            if (enableRayHit)
+
+            if (m_enableRayHit)
             {
                 Subscribe<string>("onVirtualMouseEnter", OnVirtualMouseEnter);
                 Subscribe<string>("onVirtualMouseClick", OnVirtualMouseClick);
@@ -36,19 +38,19 @@ namespace NonsensicalKit.Tools.CameraTool
 
         public void OnMouseEnter()
         {
-            if (enableRayHit) return;
+            if (m_enableRayHit) return;
             m_onMouseEnter?.Invoke();
         }
 
         public void OnMouseUpAsButton()
         {
-            if (enableRayHit) return;
+            if (m_enableRayHit) return;
             _cube.PartClick(m_dir);
         }
 
         public void OnMouseExit()
         {
-            if (enableRayHit) return;
+            if (m_enableRayHit) return;
             m_onMouseExit?.Invoke();
         }
 
@@ -79,6 +81,5 @@ namespace NonsensicalKit.Tools.CameraTool
                 _cube.PartClick(m_dir);
             }
         }
-
     }
 }

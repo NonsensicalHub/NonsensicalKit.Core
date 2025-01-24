@@ -17,6 +17,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             {
                 PlayerPrefs.DeleteAll();
             }
+
             if (GUILayout.Button("清空所有EditorPrefs"))
             {
                 EditorPrefs.DeleteAll();

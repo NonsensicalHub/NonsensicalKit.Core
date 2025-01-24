@@ -1,5 +1,5 @@
-using NonsensicalKit.Core;
 using System.Collections.Generic;
+using NonsensicalKit.Core;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools
@@ -58,14 +58,18 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static bool IsOnSameStraightLine(Vector3 line1Point1, Vector3 line1Point2, Vector3 line2Point1, Vector3 line2Point2)
         {
-            if (!IsNear(line2Point1, line1Point1) && !IsNear(line2Point1, line1Point2) && !IsEnoughParallel(line2Point1 - line1Point1, line2Point1 - line1Point2))
+            if (!IsNear(line2Point1, line1Point1) && !IsNear(line2Point1, line1Point2) &&
+                !IsEnoughParallel(line2Point1 - line1Point1, line2Point1 - line1Point2))
             {
                 return false;
             }
-            if (!IsNear(line2Point2, line1Point1) && !IsNear(line2Point2, line1Point2) && !IsEnoughParallel(line2Point2 - line1Point1, line2Point2 - line1Point2))
+
+            if (!IsNear(line2Point2, line1Point1) && !IsNear(line2Point2, line1Point2) &&
+                !IsEnoughParallel(line2Point2 - line1Point1, line2Point2 - line1Point2))
             {
                 return false;
             }
+
             return true;
         }
 
@@ -83,24 +87,29 @@ namespace NonsensicalKit.Tools
             line1Point2 *= 1000000;
             line2Point1 *= 1000000;
             line2Point2 *= 1000000;
-            if (!IsNear(line2Point1, line1Point1) && !IsNear(line2Point1, line1Point2) && !IsEnoughParallel(line2Point1 - line1Point1, line2Point1 - line1Point2))
+            if (!IsNear(line2Point1, line1Point1) && !IsNear(line2Point1, line1Point2) &&
+                !IsEnoughParallel(line2Point1 - line1Point1, line2Point1 - line1Point2))
             {
                 return false;
             }
-            if (!IsNear(line2Point2, line1Point1) && !IsNear(line2Point2, line1Point2) && !IsEnoughParallel(line2Point2 - line1Point1, line2Point2 - line1Point2))
+
+            if (!IsNear(line2Point2, line1Point1) && !IsNear(line2Point2, line1Point2) &&
+                !IsEnoughParallel(line2Point2 - line1Point1, line2Point2 - line1Point2))
             {
                 return false;
             }
+
             return true;
         }
 
-        public static float StraightLineAngle(Vector3 dir1,Vector3 dir2)
+        public static float StraightLineAngle(Vector3 dir1, Vector3 dir2)
         {
-           var angle= Vector3.Angle(dir1,dir2);
-            if (angle>90)
+            var angle = Vector3.Angle(dir1, dir2);
+            if (angle > 90)
             {
                 return 180 - angle;
             }
+
             return angle;
         }
 
@@ -109,12 +118,12 @@ namespace NonsensicalKit.Tools
         /// </summary>
         /// <param name="dir1"></param>
         /// <param name="dir2"></param>
-        /// <param name="thershold"></param>
+        /// <param name="threshold"></param>
         /// <returns></returns>
-        public static bool IsEnoughParallel(Vector3 dir1, Vector3 dir2, float thershold = 0.999998f)
+        public static bool IsEnoughParallel(Vector3 dir1, Vector3 dir2, float threshold = 0.999998f)
         {
-            //return Mathf.Abs(Vector3.Dot(dir1.normalized, dir2.normalized)) > thershold;
-            return Vector3.Dot(dir1.normalized, dir2.normalized) > thershold;
+            //return Mathf.Abs(Vector3.Dot(dir1.normalized, dir2.normalized)) > threshold;
+            return Vector3.Dot(dir1.normalized, dir2.normalized) > threshold;
         }
 
         public static List<Vector2> GetLineCrossUprightRect(Vector2 p1, Vector2 p2, Vector2 min, Vector2 max)
@@ -126,16 +135,19 @@ namespace NonsensicalKit.Tools
             {
                 result.Add((Vector2)v1);
             }
+
             var v2 = GetHorizonCross(max.y, p1, p2, min.x, max.x);
             if (v2 != null)
             {
                 result.Add((Vector2)v2);
             }
+
             var v3 = GetVerticalCross(min.x, p1, p2, min.y, max.y);
             if (v3 != null)
             {
                 result.Add((Vector2)v3);
             }
+
             var v4 = GetVerticalCross(max.x, p1, p2, min.y, max.y);
             if (v4 != null)
             {
@@ -151,7 +163,8 @@ namespace NonsensicalKit.Tools
             {
                 return null;
             }
-            if (p1.x == p2.x)
+
+            if (Mathf.Approximately(p1.x, p2.x))
             {
                 return new Vector2(p1.x, y);
             }
@@ -174,14 +187,16 @@ namespace NonsensicalKit.Tools
 
         private static Vector2? GetVerticalCross(float x, Vector2 p1, Vector2 p2, float rectMinY, float rectMaxY)
         {
-            if (p1.x == p2.x)
+            if (Mathf.Approximately(p1.x, p2.x))
             {
                 return null;
             }
-            if (p1.y == p2.y)
+
+            if (Mathf.Approximately(p1.y, p2.y))
             {
                 return new Vector2(x, p1.y);
             }
+
             float k = (p2.y - p1.y) / (p2.x - p1.x);
             float a = p1.y - k * p1.x;
             float y = k * x + a;
@@ -214,16 +229,19 @@ namespace NonsensicalKit.Tools
             {
                 result.Add((Vector2)v1);
             }
+
             var v2 = GetLineSegmentCrossPoint(p1, p2, new Vector2(min.x, max.y), max);
             if (v2 != null)
             {
                 result.Add((Vector2)v2);
             }
+
             var v3 = GetLineSegmentCrossPoint(p1, p2, new Vector2(max.x, min.y), max);
             if (v3 != null)
             {
                 result.Add((Vector2)v3);
             }
+
             var v4 = GetLineSegmentCrossPoint(p1, p2, min, new Vector2(max.x, min.y));
             if (v4 != null)
             {
@@ -291,105 +309,101 @@ namespace NonsensicalKit.Tools
             return distance;
         }
 
-        public static float NatureAngle(this float _value)
+        public static float NatureAngle(this float value)
         {
             while (true)
             {
-                if (_value > 360)
+                switch (value)
                 {
-                    _value -= 360;
-                }
-                else if (_value <0)
-                {
-                    _value += 360;
-                }
-                else
-                {
-                    return _value;
+                    case > 360: value -= 360; break;
+                    case < 0: value += 360; break;
+                    default: return value;
                 }
             }
         }
 
-        public static float AngleNear(this float _value, float targetValue)
+        public static float AngleNear(this float value, float targetValue)
         {
             while (true)
             {
-                if (_value == targetValue)
+                if (Mathf.Approximately(value, targetValue))
                 {
-                    return _value;
+                    return value;
                 }
-                else if (_value > targetValue)
+
+                if (value > targetValue)
                 {
-                    if (_value - 360 > targetValue)
+                    if (value - 360 > targetValue)
                     {
-                        _value -= 360;
+                        value -= 360;
                     }
-                    else if (Mathf.Abs(_value - targetValue) < Mathf.Abs(_value - 360 - targetValue))
+                    else if (Mathf.Abs(value - targetValue) < Mathf.Abs(value - 360 - targetValue))
                     {
-                        return _value;
+                        return value;
                     }
                     else
                     {
-                        _value -= 360;
-                        return _value;
+                        value -= 360;
+                        return value;
                     }
                 }
                 else
                 {
-                    if (_value + 360 < targetValue)
+                    if (value + 360 < targetValue)
                     {
-                        _value += 360;
+                        value += 360;
                     }
-                    else if (Mathf.Abs(_value - targetValue) < Mathf.Abs(_value + 360 - targetValue))
+                    else if (Mathf.Abs(value - targetValue) < Mathf.Abs(value + 360 - targetValue))
                     {
-                        return _value;
+                        return value;
                     }
                     else
                     {
-                        _value += 360;
-                        return _value;
+                        value += 360;
+                        return value;
                     }
                 }
             }
         }
 
-        public static Vector3 AngleNear(this Vector3 _value, Vector3 targetValue)
+        public static Vector3 AngleNear(this Vector3 value, Vector3 targetValue)
         {
             while (true)
             {
-                if (_value.x == targetValue.x)
+                if (Mathf.Approximately(value.x, targetValue.x))
                 {
                     break;
                 }
-                else if (_value.x > targetValue.x)
+
+                if (value.x > targetValue.x)
                 {
-                    if (_value.x - 360 > targetValue.x)
+                    if (value.x - 360 > targetValue.x)
                     {
-                        _value.x -= 360;
+                        value.x -= 360;
                     }
-                    else if (Mathf.Abs(_value.x - targetValue.x) < Mathf.Abs(_value.x - 360 - targetValue.x))
+                    else if (Mathf.Abs(value.x - targetValue.x) < Mathf.Abs(value.x - 360 - targetValue.x))
                     {
                         break;
                     }
                     else
                     {
-                        _value.x -= 360;
+                        value.x -= 360;
                         break;
                     }
                 }
                 else
                 {
-                    if (_value.x + 360 < targetValue.x)
+                    if (value.x + 360 < targetValue.x)
                     {
-                        _value.x += 360;
+                        value.x += 360;
                     }
-                    else if (Mathf.Abs(_value.x - targetValue.x) < Mathf.Abs(_value.x + 360 - targetValue.x))
+                    else if (Mathf.Abs(value.x - targetValue.x) < Mathf.Abs(value.x + 360 - targetValue.x))
                     {
                         break;
                     }
                     else
                     {
-                        _value.x += 360;
+                        value.x += 360;
                         break;
                     }
                 }
@@ -397,39 +411,39 @@ namespace NonsensicalKit.Tools
 
             while (true)
             {
-                if (_value.y == targetValue.y)
+                if (Mathf.Approximately(value.y, targetValue.y))
                 {
                     break;
                 }
-                else if (_value.y > targetValue.y)
+                else if (value.y > targetValue.y)
                 {
-                    if (_value.y - 360 > targetValue.y)
+                    if (value.y - 360 > targetValue.y)
                     {
-                        _value.y -= 360;
+                        value.y -= 360;
                     }
-                    else if (Mathf.Abs(_value.y - targetValue.y) < Mathf.Abs(_value.y - 360 - targetValue.y))
+                    else if (Mathf.Abs(value.y - targetValue.y) < Mathf.Abs(value.y - 360 - targetValue.y))
                     {
                         break;
                     }
                     else
                     {
-                        _value.y -= 360;
+                        value.y -= 360;
                         break;
                     }
                 }
                 else
                 {
-                    if (_value.y + 360 < targetValue.y)
+                    if (value.y + 360 < targetValue.y)
                     {
-                        _value.y += 360;
+                        value.y += 360;
                     }
-                    else if (Mathf.Abs(_value.y - targetValue.y) < Mathf.Abs(_value.y + 360 - targetValue.y))
+                    else if (Mathf.Abs(value.y - targetValue.y) < Mathf.Abs(value.y + 360 - targetValue.y))
                     {
                         break;
                     }
                     else
                     {
-                        _value.y += 360;
+                        value.y += 360;
                         break;
                     }
                 }
@@ -437,44 +451,45 @@ namespace NonsensicalKit.Tools
 
             while (true)
             {
-                if (_value.z == targetValue.z)
+                if (value.z == targetValue.z)
                 {
                     break;
                 }
-                else if (_value.z > targetValue.z)
+                else if (value.z > targetValue.z)
                 {
-                    if (_value.z - 360 > targetValue.z)
+                    if (value.z - 360 > targetValue.z)
                     {
-                        _value.z -= 360;
+                        value.z -= 360;
                     }
-                    else if (Mathf.Abs(_value.z - targetValue.z) < Mathf.Abs(_value.z - 360 - targetValue.z))
+                    else if (Mathf.Abs(value.z - targetValue.z) < Mathf.Abs(value.z - 360 - targetValue.z))
                     {
                         break;
                     }
                     else
                     {
-                        _value.z -= 360;
+                        value.z -= 360;
                         break;
                     }
                 }
                 else
                 {
-                    if (_value.z + 360 < targetValue.z)
+                    if (value.z + 360 < targetValue.z)
                     {
-                        _value.z += 360;
+                        value.z += 360;
                     }
-                    else if (Mathf.Abs(_value.z - targetValue.z) < Mathf.Abs(_value.z + 360 - targetValue.z))
+                    else if (Mathf.Abs(value.z - targetValue.z) < Mathf.Abs(value.z + 360 - targetValue.z))
                     {
                         break;
                     }
                     else
                     {
-                        _value.z += 360;
+                        value.z += 360;
                         break;
                     }
                 }
             }
-            return _value;
+
+            return value;
         }
 
         /// <summary>
@@ -601,17 +616,21 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static Vector3 GetFootDrop(Vector3 singlePoint, Vector3 linePoint1, Vector3 linePoint2)
         {
-            float denominator = (linePoint2.x - linePoint1.x) * (linePoint2.x - linePoint1.x) + (linePoint2.y - linePoint1.y) * (linePoint2.y - linePoint1.y) + (linePoint2.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
+            float denominator = (linePoint2.x - linePoint1.x) * (linePoint2.x - linePoint1.x) +
+                                (linePoint2.y - linePoint1.y) * (linePoint2.y - linePoint1.y) +
+                                (linePoint2.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
 
             if (denominator == 0)
             {
                 return Vector3.zero;
             }
+
             float numerator = (linePoint1.x - singlePoint.x) * (linePoint2.x - linePoint1.x)
-                + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
-                + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
+                              + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
+                              + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
             float k = -numerator / denominator;
-            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y, k * (linePoint2.z - linePoint1.z) + linePoint1.z);
+            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y,
+                k * (linePoint2.z - linePoint1.z) + linePoint1.z);
 
             return result;
         }
@@ -644,6 +663,7 @@ namespace NonsensicalKit.Tools
             {
                 value = -value;
             }
+
             return value;
         }
 
@@ -664,14 +684,17 @@ namespace NonsensicalKit.Tools
             Vector3 newScale = llScale.Invert();
             transform.localScale = newScale;
         }
+
         public static Vector3 TransformWithPos(this Matrix4x4 matrix4X4, float x, float y, float z)
         {
             return matrix4X4 * new Vector4(x, y, z, 1);
         }
+
         public static Vector3 TransformWithPos(this Matrix4x4 matrix4X4, Vector3 pos)
         {
             return matrix4X4 * new Vector4(pos.x, pos.y, pos.z, 1);
         }
+
         public static Float3 TransformWithPos(this Matrix4x4 matrix4X4, Float3 pos)
         {
             Vector3 newPos = matrix4X4 * new Vector4(pos.F1, pos.F2, pos.F3, 1);
@@ -689,9 +712,11 @@ namespace NonsensicalKit.Tools
         public static Vector3? GetFootDropInLineSegment(Vector3 singlePoint, Vector3 linePoint1, Vector3 linePoint2)
         {
             float numerator = (linePoint1.x - singlePoint.x) * (linePoint2.x - linePoint1.x)
-                + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
-                + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
-            float denominator = (linePoint2.x - linePoint1.x) * (linePoint2.x - linePoint1.x) + (linePoint2.y - linePoint1.y) * (linePoint2.y - linePoint1.y) + (linePoint2.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
+                              + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
+                              + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
+            float denominator = (linePoint2.x - linePoint1.x) * (linePoint2.x - linePoint1.x) +
+                                (linePoint2.y - linePoint1.y) * (linePoint2.y - linePoint1.y) +
+                                (linePoint2.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
 
             if (denominator == 0)
             {
@@ -703,7 +728,9 @@ namespace NonsensicalKit.Tools
             {
                 return null;
             }
-            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y, k * (linePoint2.z - linePoint1.z) + linePoint1.z);
+
+            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y,
+                k * (linePoint2.z - linePoint1.z) + linePoint1.z);
 
             return result;
         }
@@ -717,8 +744,8 @@ namespace NonsensicalKit.Tools
         /// <returns>没有看向地平线时返回null,否则返回视点的位置</returns>
         public static Vector3? GetViewPoint(Vector3 cameraPos, Vector3 cameraForwardPos, float horizontal)
         {
-            if ((cameraPos.y - horizontal) * (cameraForwardPos.y - horizontal) > 0//当摄像机的点和摄像机的前方点没有在地平线两侧时
-                       && Mathf.Abs(cameraPos.y) - Mathf.Abs(cameraForwardPos.y) < 0)//且当摄像机前方的位置比摄像机的位置更加远离地平线时的位置
+            if ((cameraPos.y - horizontal) * (cameraForwardPos.y - horizontal) > 0 //当摄像机的点和摄像机的前方点没有在地平线两侧时
+                && Mathf.Abs(cameraPos.y) - Mathf.Abs(cameraForwardPos.y) < 0) //且当摄像机前方的位置比摄像机的位置更加远离地平线时的位置
             {
                 //此时代表没有看向地面
                 return null;
@@ -776,7 +803,8 @@ namespace NonsensicalKit.Tools
         /// <param name="posTarget">UGUI中需放置位置的UI对象</param>
         /// <param name="renderCanvas">渲染ui的相机</param>
         /// <param name="zOffset">对象移动目标位置的深度</param>
-        public static void MovePosByUGUI(Transform changeTarget, Camera targetCamera, RectTransform posTarget, RectTransform renderCanvas, float zOffset = 10)
+        public static void MovePosByUGUI(Transform changeTarget, Camera targetCamera, RectTransform posTarget, RectTransform renderCanvas,
+            float zOffset = 10)
         {
             float x = (posTarget.localPosition.x + renderCanvas.rect.width * 0.5f) / renderCanvas.rect.width * Screen.width;
             float y = (posTarget.localPosition.y + renderCanvas.rect.height * 0.5f) / renderCanvas.rect.height * Screen.height;
@@ -822,19 +850,15 @@ namespace NonsensicalKit.Tools
             }
             else
             {
-
                 Vector3 normal = GetCommonVerticalLine(dir1, dir2);
                 Vector3 m = point1 - point2;
                 return Mathf.Abs(Vector3.Dot(m, normal)) / normal.magnitude;
-
             }
-
         }
 
         /// <summary>
         /// 求两个向量的公垂线，当两个向量平行时，随机返回一个与这两个向量垂直的向量
         /// </summary>
-        /// <param name="vector3"></param>
         /// <param name="dir1"></param>
         /// <param name="dir2"></param>
         /// <returns></returns>
@@ -863,7 +887,6 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 求两个向量的公垂线，当两个向量平行时，随机返回一个与这两个向量垂直的向量
         /// </summary>
-        /// <param name="vector3"></param>
         /// <param name="dir1"></param>
         /// <param name="dir2"></param>
         /// <returns></returns>
@@ -918,10 +941,10 @@ namespace NonsensicalKit.Tools
         /// 获取鼠标位置的世界坐标（深度由所选物体决定）
         /// </summary>
         /// <returns></returns>
-        public static Vector3 GetWorldPos(Transform _target)
+        public static Vector3 GetWorldPos(Transform target)
         {
             //获取需要移动物体的世界转屏幕坐标
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(_target.transform.position);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(target.transform.position);
             //获取鼠标位置
             Vector3 mousePos = Input.mousePosition;
             //因为鼠标只有X，Y轴，所以要赋予给鼠标Z轴
@@ -933,13 +956,13 @@ namespace NonsensicalKit.Tools
         /// <summary>
         /// 获取圆内随机一点
         /// </summary>
-        /// <param name="m_Radius"></param>
+        /// <param name="radius"></param>
         /// <returns></returns>
-        public static Vector2 GetCirclePoint(float m_Radius)
+        public static Vector2 GetCirclePoint(float radius)
         {
             //随机获取弧度
             float radin = RandomTool.GetRandomFloat(2 * Mathf.PI);
-            float distance = RandomTool.GetRandomFloat(m_Radius);
+            float distance = RandomTool.GetRandomFloat(radius);
             float x = distance * Mathf.Cos(radin);
             float y = distance * Mathf.Sin(radin);
             Vector2 endPoint = new Vector2(x, y);
@@ -951,24 +974,24 @@ namespace NonsensicalKit.Tools
         /// 推导过程：https://www.cnblogs.com/graphics/archive/2010/08/09/1795348.html
         /// </summary>
         /// <returns></returns>
-        public static Vector3? GetRayTriangleCrossPoint(Vector3 rayOrigin, Vector3 rayUnitVector, Vector3 TringlePoint1, Vector3 TringlePoint2, Vector3 TringlePoint3)
+        public static Vector3? GetRayTriangleCrossPoint(Vector3 rayOrigin, Vector3 rayUnitVector, Vector3 trianglePoint1, Vector3 trianglePoint2,
+            Vector3 trianglePoint3)
         {
-            Vector3 E1 = TringlePoint2 - TringlePoint1;
-            Vector3 E2 = TringlePoint3 - TringlePoint1;
-            Vector3 D = rayUnitVector;
+            Vector3 e1 = trianglePoint2 - trianglePoint1;
+            Vector3 e2 = trianglePoint3 - trianglePoint1;
 
-            Vector3 P = Vector3.Cross(D, E2);
+            Vector3 p = Vector3.Cross(rayUnitVector, e2);
 
             Vector3 T;
-            float det = Vector3.Dot(P, E1);
+            float det = Vector3.Dot(p, e1);
             if (det > 0)
             {
-                T = rayOrigin - TringlePoint1;
+                T = rayOrigin - trianglePoint1;
             }
             else
             {
                 det = -det;
-                T = TringlePoint1 - rayOrigin;
+                T = trianglePoint1 - rayOrigin;
             }
 
             //射线在面上
@@ -979,23 +1002,23 @@ namespace NonsensicalKit.Tools
             }
 
 
-            Vector3 Q = Vector3.Cross(T, E1);
+            Vector3 q = Vector3.Cross(T, e1);
 
-            float t = Vector3.Dot(Q, E2) / det;
+            float t = Vector3.Dot(q, e2) / det;
 
             if (t < 0)
             {
                 return null;
             }
 
-            float u = Vector3.Dot(P, T) / det;
+            float u = Vector3.Dot(p, T) / det;
 
             if (u < 0)
             {
                 return null;
             }
 
-            float v = Vector3.Dot(Q, D) / det;
+            float v = Vector3.Dot(q, rayUnitVector) / det;
 
             if (v < 0)
             {
@@ -1007,7 +1030,7 @@ namespace NonsensicalKit.Tools
                 return null;
             }
 
-            return rayOrigin + D * t;
+            return rayOrigin + rayUnitVector * t;
         }
 
         /// <summary>
@@ -1022,10 +1045,12 @@ namespace NonsensicalKit.Tools
             {
                 return false;
             }
+
             if (MathTool.IsNear(vec1.y, vec2.y) == false)
             {
                 return false;
             }
+
             if (MathTool.IsNear(vec1.z, vec2.z) == false)
             {
                 return false;
@@ -1090,9 +1115,7 @@ namespace NonsensicalKit.Tools
                 {
                     if (CompareVector3(rawData[j], rawData[j + 1]) == 1)
                     {
-                        Vector3 temp = rawData[j];
-                        rawData[j] = rawData[j + 1];
-                        rawData[j + 1] = temp;
+                        (rawData[j], rawData[j + 1]) = (rawData[j + 1], rawData[j]);
                     }
                 }
             }
@@ -1131,24 +1154,27 @@ namespace NonsensicalKit.Tools
         }
 
         //Returns the rotated Vector3 using a Quaterion
-        public static Vector3 RotateAroundPivot(this Vector3 Point, Vector3 Pivot, Quaternion Angle)
+        public static Vector3 RotateAroundPivot(this Vector3 point, Vector3 pivot, Quaternion angle)
         {
-            return Angle * (Point - Pivot) + Pivot;
+            return angle * (point - pivot) + pivot;
         }
+
         //Returns the rotated Vector3 using Euler
-        public static Vector3 RotateAroundPivot(this Vector3 Point, Vector3 Pivot, Vector3 Euler)
+        public static Vector3 RotateAroundPivot(this Vector3 point, Vector3 pivot, Vector3 euler)
         {
-            return RotateAroundPivot(Point, Pivot, Quaternion.Euler(Euler));
+            return RotateAroundPivot(point, pivot, Quaternion.Euler(euler));
         }
+
         //Rotates the Transform's position using a Quaterion
-        public static void RotateAroundPivot(this Transform Me, Vector3 Pivot, Quaternion Angle)
+        public static void RotateAroundPivot(this Transform me, Vector3 pivot, Quaternion angle)
         {
-            Me.position = Me.position.RotateAroundPivot(Pivot, Angle);
+            me.position = me.position.RotateAroundPivot(pivot, angle);
         }
+
         //Rotates the Transform's position using Euler
-        public static void RotateAroundPivot(this Transform Me, Vector3 Pivot, Vector3 Euler)
+        public static void RotateAroundPivot(this Transform me, Vector3 pivot, Vector3 euler)
         {
-            Me.position = Me.position.RotateAroundPivot(Pivot, Quaternion.Euler(Euler));
+            me.position = me.position.RotateAroundPivot(pivot, Quaternion.Euler(euler));
         }
     }
 }

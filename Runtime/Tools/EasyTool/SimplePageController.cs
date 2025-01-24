@@ -26,7 +26,7 @@ namespace NonsensicalKit.Tools.EasyTool
 
             _pages[0].SetActive(true);
 
-            if (m_buttonsParent!=null)
+            if (m_buttonsParent != null)
             {
                 for (int i = 0; i < m_buttonsParent.childCount; i++)
                 {
@@ -46,7 +46,6 @@ namespace NonsensicalKit.Tools.EasyTool
 
         public void GoPrevious()
         {
-
             Switch(_crtIndex - 1);
         }
 

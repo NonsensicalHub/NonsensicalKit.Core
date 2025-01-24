@@ -99,12 +99,12 @@ namespace NonsensicalKit.Core.Updater.Editor
         }
 
 
-        private void ShowInfos(List<PatchInfo> patchinfos)
+        private void ShowInfos(List<PatchInfo> patchInfos)
         {
             EditorGUILayout.BeginVertical();
             _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
             PatchInfo deleteTarget = null;
-            foreach (var info in patchinfos)
+            foreach (var info in patchInfos)
             {
                 info.Version = EditorGUILayout.TextField("版本", info.Version);
                 info.PatchUrl = EditorGUILayout.TextField("链接", info.PatchUrl);

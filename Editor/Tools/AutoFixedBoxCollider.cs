@@ -21,9 +21,9 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
             else
             {
-                for (int i = 0; i < Selection.gameObjects.Length; i++)
+                foreach (var t in Selection.gameObjects)
                 {
-                    Clear(Selection.gameObjects[i].transform);
+                    Clear(t.transform);
                 }
 
                 Debug.Log("盒子碰撞器自适应完成");
@@ -39,9 +39,9 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
             else
             {
-                for (int i = 0; i < Selection.gameObjects.Length; i++)
+                foreach (var t in Selection.gameObjects)
                 {
-                    AutoFixed(Selection.gameObjects[i].transform);
+                    AutoFixed(t.transform);
                 }
 
                 Debug.Log("盒子碰撞器自适应完成");
@@ -57,13 +57,13 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
             else
             {
-                for (int i = 0; i < Selection.gameObjects.Length; i++)
+                foreach (var t in Selection.gameObjects)
                 {
-                    FitToChildren(Selection.gameObjects[i]);
+                    FitToChildren(t);
                 }
-            }
 
-            Debug.Log("盒子碰撞器自适应完成");
+                Debug.Log("盒子碰撞器自适应完成");
+            }
         }
 
         private void OnGUI()
@@ -93,9 +93,9 @@ namespace NonsensicalKit.Core.Editor.Tools
             {
                 Transform crt = crtTargets.Pop();
 
-                Renderer Renderer = crt.gameObject.transform.GetComponent<Renderer>();
+                Renderer renderer = crt.gameObject.transform.GetComponent<Renderer>();
 
-                if (Renderer == null)
+                if (renderer == null)
                 {
                     FitToChildren(crt.gameObject);
                 }
@@ -117,8 +117,8 @@ namespace NonsensicalKit.Core.Editor.Tools
         /// <param name="go"></param>
         private static void FitCollider(GameObject go)
         {
-            Renderer Renderer = go.transform.GetComponent<Renderer>();
-            if (Renderer == null)
+            Renderer renderer = go.transform.GetComponent<Renderer>();
+            if (renderer == null)
             {
                 return;
             }
@@ -133,7 +133,7 @@ namespace NonsensicalKit.Core.Editor.Tools
 
             Quaternion qn = go.transform.rotation;
             go.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
-            Bounds bounds = Renderer.bounds;
+            Bounds bounds = renderer.bounds;
             go.transform.rotation = qn;
 
             bc.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y,
@@ -180,7 +180,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             collider.size = bounds.size.Division(go.transform.lossyScale);
 
             EditorUtility.SetDirty(collider);
-            //go.transform.rotation = qn;
+            go.transform.rotation = qn;
         }
     }
 }

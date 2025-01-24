@@ -15,6 +15,7 @@ namespace NonsensicalKit.Tools.GUITool
         public static DebugConsole Instance;
 
         #region Inspector Settings
+
         /// <summary>
         /// Whether to open the window by shaking the device (mobile-only).
         /// </summary>
@@ -88,6 +89,7 @@ namespace NonsensicalKit.Tools.GUITool
                 SwitchVisible();
             }
         }
+
         private void OnEnable()
         {
             Application.logMessageReceived += HandleLog;
@@ -123,7 +125,7 @@ namespace NonsensicalKit.Tools.GUITool
             DrawToolbar();
 
             // Allow the window to be dragged by its title bar.
-            UnityEngine.GUI.DragWindow(_titleBarRect);
+            GUI.DragWindow(_titleBarRect);
         }
 
         /// <summary>
@@ -149,7 +151,7 @@ namespace NonsensicalKit.Tools.GUITool
                     }
                 }
 
-                UnityEngine.GUI.contentColor = _logTypeColors[log.LogType];
+                GUI.contentColor = _logTypeColors[log.LogType];
 
                 string logContent = log.ToString();
 
@@ -158,13 +160,14 @@ namespace NonsensicalKit.Tools.GUITool
                     logContent = logContent.Substring(0, 1000);
                     logContent += "...";
                 }
+
                 GUILayout.Label(logContent);
             }
 
             GUILayout.EndScrollView();
 
             // Ensure GUI colour is reset before drawing other components.
-            UnityEngine.GUI.contentColor = Color.white;
+            GUI.contentColor = Color.white;
         }
 
         /// <summary>
@@ -226,10 +229,10 @@ namespace NonsensicalKit.Tools.GUITool
         public LogType LogType { get; private set; }
         public DateTime DateTime { get; private set; }
 
-        public LogInfo(string message, string staclTrace, LogType logType, DateTime dateTime)
+        public LogInfo(string message, string stackTrace, LogType logType, DateTime dateTime)
         {
             Message = message;
-            StackTrace = staclTrace;
+            StackTrace = stackTrace;
             LogType = logType;
             DateTime = dateTime;
         }
