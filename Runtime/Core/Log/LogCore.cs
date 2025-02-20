@@ -36,6 +36,19 @@ namespace NonsensicalKit.Core.Log
             _logger ??= new DefaultLog();
         }
 
+        public static void Debug(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        {
+            if (_logger == null)
+            {
+                UnityEngine.Debug.Log(obj);
+            }
+            else
+            {
+                _logger.Debug(obj, context, new[] { tag }, callerMemberName, callerFilePath, callerLineNumber);
+            }
+        }
+
         public static void Debug(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
@@ -46,6 +59,19 @@ namespace NonsensicalKit.Core.Log
             else
             {
                 _logger.Debug(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
+            }
+        }
+
+        public static void Info(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        {
+            if (_logger == null)
+            {
+                UnityEngine.Debug.Log(obj);
+            }
+            else
+            {
+                _logger.Info(obj, context, new[] { tag }, callerMemberName, callerFilePath, callerLineNumber);
             }
         }
 
@@ -62,6 +88,19 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
+        public static void Warning(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        {
+            if (_logger == null)
+            {
+                UnityEngine.Debug.Log(obj);
+            }
+            else
+            {
+                _logger.Warning(obj, context, new[] { tag }, callerMemberName, callerFilePath, callerLineNumber);
+            }
+        }
+
         public static void Warning(object obj, Object context = null, string[] tags = null,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
@@ -75,6 +114,19 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
+        public static void Error(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        {
+            if (_logger == null)
+            {
+                UnityEngine.Debug.Log(obj);
+            }
+            else
+            {
+                _logger.Error(obj, context, new[] { tag }, callerMemberName, callerFilePath, callerLineNumber);
+            }
+        }
+
         public static void Error(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
@@ -85,6 +137,19 @@ namespace NonsensicalKit.Core.Log
             else
             {
                 _logger.Error(obj, context, tags, callerMemberName, callerFilePath, callerLineNumber);
+            }
+        }
+
+        public static void Fatal(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        {
+            if (_logger == null)
+            {
+                UnityEngine.Debug.Log(obj);
+            }
+            else
+            {
+                _logger.Fatal(obj, context, new[] { tag }, callerMemberName, callerFilePath, callerLineNumber);
             }
         }
 

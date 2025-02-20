@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using NonsensicalKit.Core.Service;
 using NonsensicalKit.Core.Service.Config;
@@ -53,32 +52,32 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
             }
         }
 
-        public void Debug(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
-            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Debug(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+            int callerLineNumber = 0)
         {
             TryLog(new LogContext(LogLevel.DEBUG, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Info(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
-            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Info(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+            int callerLineNumber = 0)
         {
             TryLog(new LogContext(LogLevel.INFO, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Warning(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
-            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Warning(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+            int callerLineNumber = 0)
         {
             TryLog(new LogContext(LogLevel.WARNING, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Error(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
-            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Error(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+            int callerLineNumber = 0)
         {
             TryLog(new LogContext(LogLevel.ERROR, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Fatal(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
-            [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
+        public void Fatal(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+            int callerLineNumber = 0)
         {
             TryLog(new LogContext(LogLevel.FATAL, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
