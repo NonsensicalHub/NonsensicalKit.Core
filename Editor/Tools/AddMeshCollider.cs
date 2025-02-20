@@ -29,6 +29,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         private static List<T> GetSelectComponent<T>()
         {
             var v = NonsensicalEditorManager.SelectGameObjects;
+            if (v == null || v.Length == 0) return null;
             List<T> components = new List<T>();
 
             foreach (var item in v)

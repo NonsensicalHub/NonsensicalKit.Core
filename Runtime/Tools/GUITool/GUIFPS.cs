@@ -1,21 +1,22 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.GUITool
 {
     /// <summary>
     /// FPS在屏幕中的位置
     /// </summary>
-    public enum RectType
+    public enum RectPosition
     {
-        UpLeft,
-        UpMiddle,
-        UpRight,
-        DownLeft,
-        DownMiddle,
-        DownRight,
-        Middle,
+        TopLeft,
+        TopCenter,
+        TopRight,
         MiddleLeft,
-        MiddleRight
+        MiddleCenter,
+        MiddleRight,
+        BottomLeft,
+        BottomCenter,
+        BottomRight,
     }
 
     /// <summary>
@@ -23,12 +24,22 @@ namespace NonsensicalKit.Tools.GUITool
     /// </summary>
     public class GUIFPS : MonoBehaviour
     {
-        [SerializeField] private RectType m_rectType;
+        [FormerlySerializedAs("m_rectType")] [SerializeField]
+        private RectPosition m_rectPosition;
+
         [SerializeField] private float m_calculateInterval = 0.5f;
 
         private int _frameCount;
         private float _timer;
         private string _result;
+
+        private RectPosition _lastPosition;
+        private Rect _rect;
+
+        private void Awake()
+        {
+            UpdateRect();
+        }
 
         private void Start()
         {
@@ -57,40 +68,48 @@ namespace NonsensicalKit.Tools.GUITool
 
         private void OnGUI()
         {
-            Rect rect;
-            switch (m_rectType)
+            if (_lastPosition != m_rectPosition)
             {
-                default:
-                case RectType.UpLeft:
-                    rect = new Rect(0, 0, 200, 200);
-                    break;
-                case RectType.UpMiddle:
-                    rect = new Rect(Screen.width * 0.5f, 0, 200, 200);
-                    break;
-                case RectType.UpRight:
-                    rect = new Rect(Screen.width - 70, 0, 200, 200);
-                    break;
-                case RectType.Middle:
-                    rect = new Rect(Screen.width * 0.5f, Screen.height * 0.5f, 200, 200);
-                    break;
-                case RectType.MiddleLeft:
-                    rect = new Rect(0, Screen.height * 0.5f, 200, 200);
-                    break;
-                case RectType.MiddleRight:
-                    rect = new Rect(Screen.width - 70, Screen.height * 0.5f, 200, 200);
-                    break;
-                case RectType.DownLeft:
-                    rect = new Rect(0, Screen.height - 20, 200, 200);
-                    break;
-                case RectType.DownMiddle:
-                    rect = new Rect(Screen.width * 0.5f, Screen.height - 20, 200, 200);
-                    break;
-                case RectType.DownRight:
-                    rect = new Rect(Screen.width - 70, Screen.height - 20, 200, 200);
-                    break;
+                UpdateRect();
             }
 
-            GUI.Label(rect, _result);
+            GUI.Label(_rect, _result);
+        }
+
+        private void UpdateRect()
+        {
+            _lastPosition = m_rectPosition;
+            switch (m_rectPosition)
+            {
+                default:
+                case RectPosition.TopLeft:
+                    _rect = new Rect(0, 0, 200, 200);
+                    break;
+                case RectPosition.TopCenter:
+                    _rect = new Rect(Screen.width * 0.5f, 0, 200, 200);
+                    break;
+                case RectPosition.TopRight:
+                    _rect = new Rect(Screen.width - 70, 0, 200, 200);
+                    break;
+                case RectPosition.MiddleLeft:
+                    _rect = new Rect(0, Screen.height * 0.5f, 200, 200);
+                    break;
+                case RectPosition.MiddleCenter:
+                    _rect = new Rect(Screen.width * 0.5f, Screen.height * 0.5f, 200, 200);
+                    break;
+                case RectPosition.MiddleRight:
+                    _rect = new Rect(Screen.width - 70, Screen.height * 0.5f, 200, 200);
+                    break;
+                case RectPosition.BottomLeft:
+                    _rect = new Rect(0, Screen.height - 20, 200, 200);
+                    break;
+                case RectPosition.BottomCenter:
+                    _rect = new Rect(Screen.width * 0.5f, Screen.height - 20, 200, 200);
+                    break;
+                case RectPosition.BottomRight:
+                    _rect = new Rect(Screen.width - 70, Screen.height - 20, 200, 200);
+                    break;
+            }
         }
     }
 }

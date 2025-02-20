@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using NonsensicalKit.Core.Service;
@@ -20,11 +21,14 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
         private List<LogStrategyContext> _strategies;
         private readonly StringBuilder _sb;
         private readonly Queue<LogContext> _buffer;
-
+        private readonly HashSet<string> _ignoreTags;
         private bool _isReady;
 
         public NonsensicalLog()
         {
+            var ignoreStr = PlayerPrefs.GetString("NonsensicalKit_Editor_Ignore_Log_Tag_List", "");
+
+            _ignoreTags = ignoreStr.Split("|", StringSplitOptions.RemoveEmptyEntries).ToHashSet();
             _sb = new StringBuilder();
             _buffer = new Queue<LogContext>();
             UnityEngine.Debug.Log($"NonsensicalLog Init\r\n" +
@@ -91,8 +95,31 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
             }
         }
 
+        private bool CheckTags(string[] tags)
+        {
+            if (tags == null || tags.Length == 0)
+            {
+                return true;
+            }
+
+            foreach (var tag in tags)
+            {
+                if (_ignoreTags.Contains(tag))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private void Log(LogContext info)
         {
+            if (PlatformInfo.IsEditor && CheckTags(info.Tags))
+            {
+                return;
+            }
+
             foreach (var strategy in _strategies)
             {
                 if (info.LogLevel < strategy.LogLevel)
@@ -148,24 +175,36 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
 
                 if (strategy.LogClassInfo)
                 {
-                    _sb.AppendLine($"{info.MemberName}(at {info.FilePath} :{info.LineNumber})");
+                    _sb.AppendLine($"{info.MemberName}( at {info.FilePath} :{info.LineNumber})");
                 }
 
                 switch (strategy.LogStrategy)
                 {
                     case LogPathway.Console:
+                        var logStr = _sb.ToString();
+                        if (PlatformInfo.IsEditor)
+                        {
+                            var bs = Encoding.UTF8.GetBytes(logStr);
+                            UnityEngine.Debug.Log(bs.Length);
+                            if (bs.Length > 15000)
+                            {
+                                Array.Resize(ref bs, 15000);
+                                logStr = Encoding.UTF8.GetString(bs) + "<Cutoff>";
+                            }
+                        }
+
                         switch (info.LogLevel)
                         {
                             case LogLevel.DEBUG:
                             case LogLevel.INFO:
-                                UnityEngine.Debug.Log(_sb.ToString(), info.Context);
+                                UnityEngine.Debug.Log(logStr, info.Context);
                                 break;
                             case LogLevel.WARNING:
-                                UnityEngine.Debug.LogWarning(_sb.ToString(), info.Context);
+                                UnityEngine.Debug.LogWarning(logStr, info.Context);
                                 break;
                             case LogLevel.ERROR:
                             case LogLevel.FATAL:
-                                UnityEngine.Debug.LogError(_sb.ToString(), info.Context);
+                                UnityEngine.Debug.LogError(logStr, info.Context);
                                 break;
                             case LogLevel.OFF:
                                 break;

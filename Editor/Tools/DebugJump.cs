@@ -78,7 +78,6 @@ namespace NonsensicalKit.Core.Editor.Tools
                     {
                         fullPath = path;
                     }
-
                     return InternalEditorUtility.OpenFileAtLineExternal(fullPath.Replace('/', '\\'), line);
                 }
             }
