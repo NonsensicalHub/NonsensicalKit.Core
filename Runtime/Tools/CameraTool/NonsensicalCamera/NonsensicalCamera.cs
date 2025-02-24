@@ -4,6 +4,8 @@ using NonsensicalKit.Tools.EasyTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.CameraTool
@@ -81,14 +83,8 @@ namespace NonsensicalKit.Tools.CameraTool
         /// </summary>
         protected float _TargetZoom
         {
-            get
-            {
-                return _targetZoom;
-            }
-            set
-            {
-                _targetZoom = Mathf.Clamp01(value);
-            }
+            get { return _targetZoom; }
+            set { _targetZoom = Mathf.Clamp01(value); }
         }
 
         /// <summary>
@@ -96,14 +92,8 @@ namespace NonsensicalKit.Tools.CameraTool
         /// </summary>
         protected float _TargetDistance
         {
-            get
-            {
-                return _targetZoom * (m_maxDistance - m_minDistance) + m_minDistance;
-            }
-            set
-            {
-                _targetZoom = Mathf.Clamp01((value - m_minDistance) / (m_maxDistance - m_minDistance));
-            }
+            get { return _targetZoom * (m_maxDistance - m_minDistance) + m_minDistance; }
+            set { _targetZoom = Mathf.Clamp01((value - m_minDistance) / (m_maxDistance - m_minDistance)); }
         }
 
         /// <summary>
@@ -131,7 +121,11 @@ namespace NonsensicalKit.Tools.CameraTool
                     }
                 }
 
-                return !_crtEventSystem.IsPointerOverGameObject();
+#if ENABLE_INPUT_SYSTEM
+                return !((InputSystemUIInputModule)EventSystem.current.currentInputModule).GetLastRaycastResult(Pointer.current.deviceId).isValid;
+#else
+                 return !_crtEventSystem.IsPointerOverGameObject();
+#endif
             }
         }
 
@@ -758,7 +752,10 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void RemoveMobileInputEvent()
         {
-            if (!_fingerEventInitFlag) { return; }
+            if (!_fingerEventInitFlag)
+            {
+                return;
+            }
 
             _fingerEventInitFlag = false;
 

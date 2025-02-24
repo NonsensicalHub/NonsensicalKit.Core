@@ -1,5 +1,6 @@
 using NonsensicalKit.Core;
 using NonsensicalKit.Tools.InputTool;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -18,63 +19,55 @@ namespace NonsensicalKit.Tools.PlayerController
     [RequireComponent(typeof(CharacterController))]
     public class ThirdPersonPlayerController : NonsensicalMono
     {
-        [Header("Player")]
-        [Tooltip("Move speed of the character in m/s||水平移动速度，单位米/秒")]
-        [SerializeField] private float m_moveSpeed = 4;
+        [Header("Player")] [Tooltip("Move speed of the character in m/s||水平移动速度，单位米/秒")] [SerializeField]
+        private float m_moveSpeed = 4;
 
-        [Tooltip("Sprint speed of the character in m/s||冲刺速度，单位米/秒")]
-        [SerializeField] private float m_sprintSpeed = 8;
+        [Tooltip("Sprint speed of the character in m/s||冲刺速度，单位米/秒")] [SerializeField]
+        private float m_sprintSpeed = 8;
 
-        [Tooltip("Acceleration and deceleration||移动加速度")]
-        [SerializeField] private float m_speedChangeRate = 10.0f;
+        [Tooltip("Acceleration and deceleration||移动加速度")] [SerializeField]
+        private float m_speedChangeRate = 10.0f;
 
-        [Tooltip("Rotation speed of the camera||摄像机旋转速度")]
-        [SerializeField] private float m_rotationSpeed = 0.05f;
+        [Tooltip("Rotation speed of the camera||摄像机旋转速度")] [SerializeField]
+        private float m_rotationSpeed = 0.05f;
 
-        [Tooltip("How fast the character turns to face movement direction||角色旋转平滑时间")]
-        [Range(0.0f, 0.3f)]
-        [SerializeField] private float m_rotationSmoothTime = 0.12f;
+        [Tooltip("How fast the character turns to face movement direction||角色旋转平滑时间")] [Range(0.0f, 0.3f)] [SerializeField]
+        private float m_rotationSmoothTime = 0.12f;
 
-        [Space(10)]
-        [Tooltip("The height the player can jump||跳跃高度")]
-        [SerializeField] private float m_jumpHeight = 1.2f;
+        [Space(10)] [Tooltip("The height the player can jump||跳跃高度")] [SerializeField]
+        private float m_jumpHeight = 1.2f;
 
-        [Tooltip("The character uses its own gravity value. The engine default is -9.81f||重力加速度")]
-        [SerializeField] private float m_gravity = -15.0f;
+        [Tooltip("The character uses its own gravity value. The engine default is -9.81f||重力加速度")] [SerializeField]
+        private float m_gravity = -15.0f;
 
-        [Space(10)]
-        [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again||跳跃最低间隔")]
-        [SerializeField] private float m_jumpTimeout = 0.50f;
+        [Space(10)] [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again||跳跃最低间隔")] [SerializeField]
+        private float m_jumpTimeout = 0.50f;
 
-        [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs||坠落延迟")]
-        [SerializeField] private float m_fallTimeout = 0.15f;
+        [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs||坠落延迟")] [SerializeField]
+        private float m_fallTimeout = 0.15f;
 
-        [Header("Player Grounded")]
-        [Tooltip("Useful for rough ground||接地碰撞球偏移量")]
-        [SerializeField] private float m_groundedOffset = -0.14f;
+        [Header("Player Grounded")] [Tooltip("Useful for rough ground||接地碰撞球偏移量")] [SerializeField]
+        private float m_groundedOffset = -0.14f;
 
-        [Tooltip("The radius of the grounded check. Should match the radius of the CharacterController||接地碰撞球尺寸")]
-        [SerializeField] private float m_groundedRadius = 0.28f;
+        [Tooltip("The radius of the grounded check. Should match the radius of the CharacterController||接地碰撞球尺寸")] [SerializeField]
+        private float m_groundedRadius = 0.28f;
 
-        [Tooltip("What layers the character uses as ground||接地检测层")]
-        [SerializeField] private LayerMask m_groundLayers;
+        [Tooltip("What layers the character uses as ground||接地检测层")] [SerializeField]
+        private LayerMask m_groundLayers;
 
-        [Tooltip("旋转控制模式")]
-        [SerializeField] private RotateControlType m_rotateControlType;
+        [Tooltip("旋转控制模式")] [SerializeField] private RotateControlType m_rotateControlType;
 
-        [FormerlySerializedAs("_mainCamera")]
-        [Header("Cinemachine")]
-        [Tooltip("Main Camera||主摄像机")]
-        [SerializeField] private GameObject m_mainCamera;
+        [FormerlySerializedAs("_mainCamera")] [Header("Cinemachine")] [Tooltip("Main Camera||主摄像机")] [SerializeField]
+        private GameObject m_mainCamera;
 
-        [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow||角色的Cinemachine虚拟相机跟随对象")]
-        [SerializeField] private GameObject m_cinemachineCameraTarget;
+        [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow||角色的Cinemachine虚拟相机跟随对象")] [SerializeField]
+        private GameObject m_cinemachineCameraTarget;
 
-        [Tooltip("How far in degrees can you move the camera up||旋转上限角度")]
-        [SerializeField] private float m_topClamp = 70.0f;
+        [Tooltip("How far in degrees can you move the camera up||旋转上限角度")] [SerializeField]
+        private float m_topClamp = 70.0f;
 
-        [Tooltip("How far in degrees can you move the camera down||旋转下限角度")]
-        [SerializeField] private float m_bottomClamp = -30.0f;
+        [Tooltip("How far in degrees can you move the camera down||旋转下限角度")] [SerializeField]
+        private float m_bottomClamp = -30.0f;
 
         /// <summary>
         /// 临界垂直速度，当下落时垂直速度大于此速度时不再加速，以模拟空气阻力
@@ -98,8 +91,18 @@ namespace NonsensicalKit.Tools.PlayerController
             }
         }
 
-        public bool CanMove { get => _canMove; set => _canMove = value; }
-        public bool CanRotate { get => _canRotate; set => _canRotate = value; }
+        public bool CanMove
+        {
+            get => _canMove;
+            set => _canMove = value;
+        }
+
+        public bool CanRotate
+        {
+            get => _canRotate;
+            set => _canRotate = value;
+        }
+
         private bool _canMove = true;
         private bool _canRotate = true;
 
@@ -174,6 +177,19 @@ namespace NonsensicalKit.Tools.PlayerController
         /// </summary>
         private bool _jump;
 
+        protected GameObject MainCamera
+        {
+            get
+            {
+                if (m_mainCamera == null)
+                {
+                    m_mainCamera = GameObject.FindWithTag("MainCamera");
+                }
+
+                return m_mainCamera;
+            }
+        }
+
         protected virtual void Awake()
         {
             Input = InputHub.Instance;
@@ -181,7 +197,7 @@ namespace NonsensicalKit.Tools.PlayerController
 
             if (m_mainCamera == null)
             {
-                m_mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+                m_mainCamera = GameObject.FindWithTag("MainCamera");
             }
         }
 
@@ -303,7 +319,7 @@ namespace NonsensicalKit.Tools.PlayerController
             if (Input.CrtMove != Vector2.zero)
             {
                 _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                                  m_mainCamera.transform.eulerAngles.y;
+                                  MainCamera.transform.eulerAngles.y;
                 float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
                     m_rotationSmoothTime);
 
