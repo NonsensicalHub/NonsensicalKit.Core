@@ -4,8 +4,10 @@ using NonsensicalKit.Tools.EasyTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+#endif
 using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.CameraTool
