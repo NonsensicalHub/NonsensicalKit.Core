@@ -19,8 +19,8 @@ namespace NonsensicalKit.Core
         public float F1 { get => m_f1; set => m_f1 = value; }
         public float F2 { get => m_f2; set => m_f2 = value; }
 
-        [JsonIgnore] public float X => F1;
-        [JsonIgnore] public float Y => F2;
+        [JsonIgnore] public float X { get => m_f1; set => m_f1 = value; }
+        [JsonIgnore] public float Y { get => m_f2; set => m_f2 = value; }
 
         public Float2(float f1, float f2)
         {
@@ -34,7 +34,7 @@ namespace NonsensicalKit.Core
             m_f2 = vector2.y;
         }
 
-        public Vector3 ToVector3()
+        public Vector2 ToVector2()
         {
             return new Vector2(F1, F2);
         }

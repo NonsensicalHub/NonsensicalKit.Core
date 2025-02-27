@@ -29,7 +29,7 @@ namespace NonsensicalKit.Core
             Step0 = length1 * length2;
             Step1 = length2;
         }
-
+    
         public Array3<T> CopyToNewArray(int length0, int length1, int length2)
         {
             Array3<T> newArray3 = new Array3<T>(length0, length1, length2);
@@ -50,7 +50,7 @@ namespace NonsensicalKit.Core
             return newArray3;
         }
 
-        public void Reset(T state)
+        public void Reset(T state = default)
         {
             for (int i = 0; i < m_Array.Length; i++)
             {

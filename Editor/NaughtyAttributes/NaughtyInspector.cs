@@ -35,8 +35,13 @@ namespace NaughtyAttributes.Editor
 
         public override void OnInspectorGUI()
         {
-            GetSerializedProperties(ref _serializedProperties);
+            if (target == null)
+            {
+                DrawDefaultInspector();
+                return;
+            }
 
+            GetSerializedProperties(ref _serializedProperties);
             bool anyNaughtyAttribute = _serializedProperties.Any(p => PropertyUtility.GetAttribute<INaughtyAttribute>(p) != null);
             if (!anyNaughtyAttribute)
             {

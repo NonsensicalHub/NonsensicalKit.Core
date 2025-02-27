@@ -61,6 +61,14 @@ namespace NonsensicalKit.Core
             return Tuple.Create(x, y, z, w);
         }
 
+        public void Reset(T state = default)
+        {
+            for (int i = 0; i < m_Array.Length; i++)
+            {
+                m_Array[i] = state;
+            }
+        }
+
         public int GetIndex(int index0, int index1, int index2, int index3)
         {
             return index0 * Step0 + index1 * Step1 + index2 * Step2 + index3;
