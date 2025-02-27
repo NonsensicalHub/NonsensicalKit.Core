@@ -23,15 +23,15 @@ namespace NonsensicalKit.Core
         public float F3 { get => m_f3; set => m_f3 = value; }
         public float F4 { get => m_f4; set => m_f4 = value; }
 
-        [JsonIgnore] public float X => F1;
-        [JsonIgnore] public float Y => F2;
-        [JsonIgnore] public float Z => F3;
-        [JsonIgnore] public float W => F4;
+        [JsonIgnore] public float X { get => m_f1; set => m_f1 = value; }
+        [JsonIgnore] public float Y { get => m_f2; set => m_f2 = value; }
+        [JsonIgnore] public float Z { get => m_f3; set => m_f3 = value; }
+        [JsonIgnore] public float W { get => m_f4; set => m_f4 = value; }
 
-        [JsonIgnore] public float R => F1;
-        [JsonIgnore] public float G => F2;
-        [JsonIgnore] public float B => F3;
-        [JsonIgnore] public float A => F4;
+        [JsonIgnore] public float R { get => m_f1; set => m_f1 = value; }
+        [JsonIgnore] public float G { get => m_f2; set => m_f2 = value; }
+        [JsonIgnore] public float B { get => m_f3; set => m_f3 = value; }
+        [JsonIgnore] public float A { get => m_f4; set => m_f4 = value; }
 
         public Float4(float f1, float f2, float f3, float f4)
         {

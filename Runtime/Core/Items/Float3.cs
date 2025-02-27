@@ -21,9 +21,9 @@ namespace NonsensicalKit.Core
         public float F2 { get => m_f2; set => m_f2 = value; }
         public float F3 { get => m_f3; set => m_f3 = value; }
 
-        [JsonIgnore] public float X => F1;
-        [JsonIgnore] public float Y => F2;
-        [JsonIgnore] public float Z => F3;
+        [JsonIgnore] public float X { get => m_f1; set => m_f1 = value; }
+        [JsonIgnore] public float Y { get => m_f2; set => m_f2 = value; }
+        [JsonIgnore] public float Z { get => m_f3; set => m_f3 = value; }
 
         public Float3(float f1, float f2, float f3)
         {

@@ -32,7 +32,7 @@ namespace NonsensicalKit.Tools
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
-        public static bool IsPrime(int num)
+        public static bool IsPrimeNumber(int num)
         {
             if (num <= 3)
             {
