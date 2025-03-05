@@ -9,6 +9,26 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class CollectionTool
     {
+        public static IList Clone(this IList list)
+        {
+            IList clonedList = (IList)Activator.CreateInstance(list.GetType());
+            foreach (var obj in list)
+            {
+                clonedList.Add(obj);
+            }
+            return clonedList;
+        }
+        
+        public static List<T> Clone<T>(this List<T> list)
+        {
+            List<T> clonedList = new  List<T>(list.Count);
+            foreach (var obj in list)
+            {
+                clonedList.Add(obj);
+            }
+            return clonedList;
+        }
+        
         public static IList Resize(IList list, Type type, int size)
         {
             int delta = size;
@@ -54,6 +74,14 @@ namespace NonsensicalKit.Tools
             }
 
             return null;
+        }
+
+        public static void Add<T>(this IList<T> list, T value, int count)
+        {
+            for (int i = 0; i <count; i++)
+            {
+                list.Add(value);
+            }
         }
 
         public static void Fill<T>(this IList<T> list, T value)
