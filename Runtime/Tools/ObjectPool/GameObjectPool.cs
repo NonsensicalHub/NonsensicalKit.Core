@@ -394,8 +394,11 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// </summary>
         public void Cache()
         {
+            if (_cache is { Count: > 0 })
+            {
+                Flush();
+            }
             _cache = _actives.Clone();
-            _catchIndex = 0;
             _actives.Clear();
         }
         
@@ -429,6 +432,7 @@ namespace NonsensicalKit.Tools.ObjectPool
                 _queue.Enqueue(_cache[_catchIndex]);
             }
 
+            _catchIndex = 0;
             _cache.Clear();
             _cache = null;
         }
