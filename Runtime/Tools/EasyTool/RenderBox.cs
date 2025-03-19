@@ -73,12 +73,39 @@ namespace NonsensicalKit.Tools.EasyTool
             transform.rotation = qn;
         }
 
-        public bool Contains(Vector3 point)
+        public bool Contains(Vector3 worldPoint)
         {
-            Vector3 localPoint = transform.InverseTransformPoint(point);
-            localPoint = Quaternion.Euler(Rotation) * localPoint;
+            Vector3 localPoint = transform.InverseTransformPoint(worldPoint);
+            var boundsPoint = Quaternion.Euler(Rotation) * localPoint;
             Bounds bounds = new Bounds(Center, Size);
-            return bounds.Contains(localPoint);
+            return bounds.Contains(boundsPoint);
+        }
+
+        /// <summary>
+        /// 盒子内部最近的点位
+        /// </summary>
+        /// <param name="worldPoint"></param>
+        /// <returns></returns>
+        public Vector3 NearestPoint(Vector3 worldPoint)
+        {
+            Vector3 localPoint = transform.InverseTransformPoint(worldPoint);
+            var boundsPoint = Quaternion.Euler(Rotation) * localPoint;
+            Bounds bounds = new Bounds(Center, Size);
+            if (bounds.Contains(boundsPoint))
+            {
+                return worldPoint;
+            }
+            else
+            {
+                boundsPoint.x = Mathf.Clamp(boundsPoint.x, bounds.center.x - bounds.extents.x, bounds.center.x + bounds.extents.x);
+                boundsPoint.y = Mathf.Clamp(boundsPoint.y, bounds.center.y - bounds.extents.y, bounds.center.y + bounds.extents.y);
+                boundsPoint.z = Mathf.Clamp(boundsPoint.z, bounds.center.z - bounds.extents.z, bounds.center.z + bounds.extents.z);
+
+                var resultLocal = Quaternion.Inverse(Quaternion.Euler(Rotation)) * boundsPoint;
+
+                var resultWorld = transform.TransformPoint(resultLocal);
+                return resultWorld;
+            }
         }
     }
 
@@ -101,6 +128,11 @@ namespace NonsensicalKit.Tools.EasyTool
         public void OnSceneGUI()
         {
             _crtRenderBox = target as RenderBox;
+            if (_crtRenderBox == null)
+            {
+                return;
+            }
+
             _crtRotation = _crtRenderBox.transform.rotation;
             _crtRotation *= Quaternion.Euler(_crtRenderBox.Rotation);
 
@@ -157,9 +189,13 @@ namespace NonsensicalKit.Tools.EasyTool
         {
             EditorGUI.BeginChangeCheck();
 
+#if UNITY_6000_0_OR_NEWER
+            Vector3 newHoldPoint = Handles.FreeMoveHandle(holdPoint, HandleUtility.GetHandleSize(holdPoint) * 0.03f,
+                Vector3.one * 0.5f, Handles.DotHandleCap);
+#else
             Vector3 newHoldPoint = Handles.FreeMoveHandle(holdPoint, Quaternion.identity, HandleUtility.GetHandleSize(holdPoint) * 0.03f,
                 Vector3.one * 0.5f, Handles.DotHandleCap);
-
+#endif
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(_crtRenderBox, "Changed Box");

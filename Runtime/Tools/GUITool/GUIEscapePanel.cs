@@ -1,4 +1,5 @@
 using System.Collections;
+using NonsensicalKit.Core;
 using UnityEditor;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
@@ -30,13 +31,19 @@ namespace NonsensicalKit.Tools.GUITool
         {
             if (m_getInput)
             {
-                StartCoroutine(CorUpdate());
+                if (PlatformInfo.IsWebGL==false)
+                {
+                    StartCoroutine(CorUpdate());
+                }
             }
         }
 
         public void ShowEscapePanel()
         {
-            _showEscapePanel = true;
+            if (PlatformInfo.IsWebGL==false)
+            {
+                _showEscapePanel = true;
+            }
         }
 
         private IEnumerator CorUpdate()

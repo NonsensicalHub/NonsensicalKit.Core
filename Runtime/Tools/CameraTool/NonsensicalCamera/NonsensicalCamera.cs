@@ -83,19 +83,24 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <summary>
         /// 目标缩放
         /// </summary>
-        protected float _TargetZoom
+        public float TargetZoom
         {
-            get { return _targetZoom; }
-            set { _targetZoom = Mathf.Clamp01(value); }
+            get => _targetZoom;
+            set => _targetZoom = Mathf.Clamp01(value);
         }
 
         /// <summary>
         /// 目标距离
         /// </summary>
-        protected float _TargetDistance
+        public float TargetDistance
         {
-            get { return _targetZoom * (m_maxDistance - m_minDistance) + m_minDistance; }
-            set { _targetZoom = Mathf.Clamp01((value - m_minDistance) / (m_maxDistance - m_minDistance)); }
+            get => _targetZoom * (m_maxDistance - m_minDistance) + m_minDistance;
+            set => _targetZoom = Mathf.Clamp01((value - m_minDistance) / (m_maxDistance - m_minDistance));
+        }
+
+        public Vector3 TargetPosition
+        {
+            set=>_targetPos=value;
         }
 
         /// <summary>
@@ -262,8 +267,9 @@ namespace NonsensicalKit.Tools.CameraTool
                         AdjustPosition(-_input.CrtMove);
                     }
                 }
-                else if (PlatformInfo.IsMobile)
+                else
                 {
+                    //IsMobile
                     if (_MouseNotInUI == false)
                     {
                         return;
@@ -310,7 +316,7 @@ namespace NonsensicalKit.Tools.CameraTool
             if (m_lerpMove)
             {
                 m_viewPoint.position = Vector3.Lerp(m_viewPoint.position, _targetPos, 0.05f);
-                _crtZoom = _crtZoom * 0.95f + _TargetZoom * 0.05f;
+                _crtZoom = _crtZoom * 0.95f + TargetZoom * 0.05f;
                 float distance = Mathf.Lerp(m_minDistance, m_maxDistance, _crtZoom);
 
                 _crtPitch = _crtPitch * 0.95f + _targetPitch * 0.05f;
@@ -324,7 +330,7 @@ namespace NonsensicalKit.Tools.CameraTool
             else
             {
                 m_viewPoint.position = _targetPos;
-                _crtZoom = _TargetZoom;
+                _crtZoom = TargetZoom;
                 float distance = Mathf.Lerp(m_minDistance, m_maxDistance, _crtZoom);
 
                 _crtPitch = _targetPitch;
@@ -458,7 +464,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 var result = tsf.GetFocus();
                 Focus(result.Item1, immediate);
-                _TargetDistance = result.Item2;
+                TargetDistance = result.Item2;
                 if (immediate)
                 {
                     _crtZoom = _targetZoom;
@@ -477,7 +483,7 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="delta"></param>
         protected void AdjustZoom(float delta)
         {
-            _TargetZoom += delta * m_zoomSpeed * 0.01f;
+            TargetZoom += delta * m_zoomSpeed * 0.01f;
         }
 
         /// <summary>
@@ -505,7 +511,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
         protected void AdjustDragZoom(Vector2 delta)
         {
-            _TargetZoom += (delta.x + delta.y) * m_dragZoomSpeed * 0.001f;
+            TargetZoom += (delta.x + delta.y) * m_dragZoomSpeed * 0.001f;
         }
 
         /// <summary>
@@ -517,12 +523,16 @@ namespace NonsensicalKit.Tools.CameraTool
             Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
             float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * delta.magnitude * Time.deltaTime;
 
-            if (m_limitBox == null || m_limitBox.Contains(_targetPos + direction * distance))
+            if (m_limitBox == null )
             {
                 _targetPos += direction * distance;
             }
+            else 
+            {
+                _targetPos = m_limitBox.NearestPoint(_targetPos + direction * distance);
+            }
         }
-
+        
         /// <summary>
         /// 根据改变量进行位移(使用固定间隔时间)
         /// </summary>
@@ -530,12 +540,16 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="interval"></param>
         protected void AdjustPositionWithFixedInterval(Vector2 delta, float interval = 0.02f)
         {
-            Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
+            Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f);
             float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * delta.magnitude * interval;
 
-            if (m_limitBox == null || m_limitBox.Contains(_targetPos + direction * distance))
+            if (m_limitBox == null )
             {
                 _targetPos += direction * distance;
+            }
+            else 
+            {
+                _targetPos = m_limitBox.NearestPoint(_targetPos + direction * distance);
             }
         }
 

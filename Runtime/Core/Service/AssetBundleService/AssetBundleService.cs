@@ -69,7 +69,7 @@ namespace NonsensicalKit.Core.Service.Asset
         public void Init(string baseUrl)
         {
             if (string.IsNullOrEmpty(baseUrl)) return;
-            _rootUrl = Path.Combine(baseUrl, PlatformInfo.GetPlaformFolderName());
+            _rootUrl = Path.Combine(baseUrl, PlatformInfo.GetPlatformFolderName());
 
             StartCoroutine(InitCor());
         }
@@ -83,7 +83,7 @@ namespace NonsensicalKit.Core.Service.Asset
                     LogCore.Error("未配置编辑时ab包路径");
                 }
 
-                _rootUrl = Path.Combine(Application.dataPath, m_editorBasePath, PlatformInfo.GetPlaformFolderName());
+                _rootUrl = Path.Combine(Application.dataPath, m_editorBasePath, PlatformInfo.GetPlatformFolderName());
                 StartCoroutine(InitCor());
             }
             else if (!m_dynamicUrlBase)
@@ -93,7 +93,7 @@ namespace NonsensicalKit.Core.Service.Asset
                     return;
                 }
 
-                _rootUrl = Path.Combine(m_runtimeBaseUrl, PlatformInfo.GetPlaformFolderName());
+                _rootUrl = Path.Combine(m_runtimeBaseUrl, PlatformInfo.GetPlatformFolderName());
 
                 StartCoroutine(InitCor());
             }
@@ -106,7 +106,7 @@ namespace NonsensicalKit.Core.Service.Asset
         {
             IsReady = false;
 
-            var assetBundleCreateRequest = UnityWebRequestAssetBundle.GetAssetBundle(Path.Combine(_rootUrl, PlatformInfo.GetPlaformFolderName()));
+            var assetBundleCreateRequest = UnityWebRequestAssetBundle.GetAssetBundle(Path.Combine(_rootUrl, PlatformInfo.GetPlatformFolderName()));
             yield return assetBundleCreateRequest.SendWebRequest();
             AssetBundle assetBundle = (assetBundleCreateRequest.downloadHandler as DownloadHandlerAssetBundle)?.assetBundle;
 

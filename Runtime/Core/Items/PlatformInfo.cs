@@ -23,7 +23,7 @@ namespace NonsensicalKit.Core
             IsMobile = Application.isMobilePlatform;
         }
 
-        public static string GetPlaformFolderName()
+        public static string GetPlatformFolderName()
         {
             switch (Platform)
             {
@@ -57,12 +57,14 @@ namespace NonsensicalKit.Core
                     return "tvOS";
                 case RuntimePlatform.Switch:
                     return "Switch";
+#if !UNITY_2022_2_OR_NEWER
                 case RuntimePlatform.Lumin:
                     return "Lumin";
                 case RuntimePlatform.Stadia:
                     return "Stadia";
                 case RuntimePlatform.CloudRendering:
                     return "CloudRendering";
+#endif
                 case RuntimePlatform.GameCoreXboxSeries:
                     return "XboxSeries";
                 case RuntimePlatform.GameCoreXboxOne:
