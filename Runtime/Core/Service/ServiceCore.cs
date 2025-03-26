@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Setting;
 using NonsensicalKit.Tools;
+using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -82,7 +84,21 @@ namespace NonsensicalKit.Core.Service
                         }
                         else
                         {
+#if UNITY_EDITOR
+                            string assetPath = "Assets/Resources/" + prefabAttr.PrefabPath + ".prefab";
+                            string fullPath = Application.dataPath + "/Resources/" + prefabAttr.PrefabPath + ".prefab";
+                            FileTool.EnsureFileDir(fullPath);
+                            gameObject = new GameObject();
+                            gameObject.name = Path.GetFileName(prefabAttr.PrefabPath);
+                            gameObject.AddComponent(type);
+                            PrefabUtility.SaveAsPrefabAssetAndConnect(gameObject, assetPath, InteractionMode.UserAction, out bool success);
+                            if (!success)
+                            {
+                                throw new TODOException($"无法实例化服务[{type}]，Resources路径“{prefabAttr.PrefabPath}”上未找到预制体");
+                            }
+#else
                             throw new TODOException($"无法实例化服务[{type}]，Resources路径“{prefabAttr.PrefabPath}”上未找到预制体");
+#endif
                         }
                     }
 

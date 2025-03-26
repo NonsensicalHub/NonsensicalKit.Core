@@ -27,26 +27,28 @@ namespace NonsensicalKit.Core
 
         public void Reset(T state = default)
         {
+            if (m_Array == null) return;
             for (int i = 0; i < m_Array.Length; i++)
             {
                 m_Array[i] = state;
             }
         }
 
-        public Array2<T> CopyToNewArray(int length0,int length1)
+        public Array2<T> CopyToNewArray(int length0, int length1)
         {
             var newArray = new Array2<T>(length0, length1);
 
             int min0 = length0 < Length0 ? length0 : Length0;
             int min1 = length1 < Length1 ? length1 : Length1;
-            
+
             for (int i = 0; i < min0; i++)
             {
                 for (int j = 0; j < min1; j++)
                 {
-                    newArray[i,j]=this[i,j];
+                    newArray[i, j] = this[i, j];
                 }
             }
+
             return newArray;
         }
 

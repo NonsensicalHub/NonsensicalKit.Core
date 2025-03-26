@@ -1,40 +1,39 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Tools.ObjectPool
 {
-    /// <summary>
-    /// GameObject对象池，只管理缓存对象
-    /// </summary>
-    public class GameObjectPool
+    [Obsolete("Use GameObjectPoolMk2 instead.")]
+    public class GameObjectPool_MK2 : GameObjectPoolMk2
     {
-        public Action<GameObjectPool, GameObject> FirstInitAction
+        public GameObjectPool_MK2(GameObject prefab, Action<GameObject> resetAction = null, Action<GameObject> initAction = null,
+            Action<GameObjectPoolMk2, GameObject> createAction = null) : base(prefab, resetAction, initAction, createAction)
         {
-            set => _createAction = value;
         }
+    }
 
+    /// <summary>
+    /// 除了缓存对象外，还管理了使用中对象
+    /// </summary>
+    public class GameObjectPoolMk2
+    {
         private readonly GameObject _prefab; //预制体
         private readonly Queue<GameObject> _queue; //待使用的对象
+        private readonly List<GameObject> _actives; //使用中的对象
         private readonly Action<GameObject> _resetAction; //返回池中后调用
         private readonly Action<GameObject> _initAction; //取出时调用
-        private Action<GameObjectPool, GameObject> _createAction; //首次生成时调用
+        private readonly Action<GameObjectPoolMk2, GameObject> _createAction; //首次生成时调用
 
-        public GameObjectPool(GameObject prefab)
+        public GameObjectPoolMk2(GameObject prefab,
+            Action<GameObject> resetAction = null,
+            Action<GameObject> initAction = null,
+            Action<GameObjectPoolMk2, GameObject> createAction = null)
         {
-            _prefab = prefab;
+            this._prefab = prefab;
             _queue = new Queue<GameObject>();
-            _resetAction = DefaultReset;
-            _initAction = DefaultInit;
-        }
-
-        public GameObjectPool(GameObject prefab, Action<GameObject> resetAction = null, Action<GameObject> initAction = null,
-            Action<GameObjectPool, GameObject> createAction = null)
-        {
-            _prefab = prefab;
-            _queue = new Queue<GameObject>();
+            _actives = new List<GameObject>();
             _resetAction = resetAction;
             _initAction = initAction;
             _createAction = createAction;
@@ -49,12 +48,14 @@ namespace NonsensicalKit.Tools.ObjectPool
             if (_queue.Count > 0)
             {
                 GameObject t = _queue.Dequeue();
+                _actives.Add(t);
                 _initAction?.Invoke(t);
                 return t;
             }
             else
             {
                 GameObject t = Object.Instantiate(_prefab);
+                _actives.Add(t);
                 _createAction?.Invoke(this, t);
                 _initAction?.Invoke(t);
 
@@ -72,17 +73,22 @@ namespace NonsensicalKit.Tools.ObjectPool
             {
                 _resetAction?.Invoke(obj);
                 _queue.Enqueue(obj);
+                if (_actives.Contains(obj))
+                {
+                    _actives.Remove(obj);
+                }
             }
         }
 
-        public static void DefaultReset(GameObject go)
+        public void Clear()
         {
-            go.SetActive(false);
-        }
+            foreach (var item in _actives)
+            {
+                _resetAction?.Invoke(item);
+                _queue.Enqueue(item);
+            }
 
-        public static void DefaultInit(GameObject go)
-        {
-            go.SetActive(true);
+            _actives.Clear();
         }
     }
 }

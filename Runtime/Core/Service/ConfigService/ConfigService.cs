@@ -24,7 +24,7 @@ namespace NonsensicalKit.Core.Service.Config
         private bool m_jsonMode = true;
 
         [Tooltip("所有管理的配置文件，可以通过右键-Set All Config来快速设置项目内所有配置文件")] [SerializeField]
-        private ConfigObject[] m_configDatas;
+        private ConfigObject[] m_configDatas= Array.Empty<ConfigObject>();
 
         private Dictionary<string, ConfigData> _configs;
 
