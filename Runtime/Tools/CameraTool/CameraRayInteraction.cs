@@ -4,13 +4,23 @@ using UnityEngine.Serialization;
 
 public class CameraRayInteraction : MonoBehaviour
 {
-    [FormerlySerializedAs("layerMask")] [SerializeField] private LayerMask m_layerMask;
-    [FormerlySerializedAs("_camera")] [SerializeField] private Camera m_camera;
-    [FormerlySerializedAs("_maxHitDistance")] [SerializeField] private int m_maxHitDistance = 1000;
-    [FormerlySerializedAs("log")] [SerializeField] private bool m_log;
-    [FormerlySerializedAs("useOnWebGL")] [SerializeField] private bool m_useOnWebGL;
+    [FormerlySerializedAs("layerMask")] [SerializeField]
+    private LayerMask m_layerMask;
 
-    [FormerlySerializedAs("enableRayHit")] [SerializeField] private bool m_enableRayHit;
+    [FormerlySerializedAs("_camera")] [SerializeField]
+    private Camera m_camera;
+
+    [FormerlySerializedAs("_maxHitDistance")] [SerializeField]
+    private int m_maxHitDistance = 1000;
+
+    [FormerlySerializedAs("log")] [SerializeField]
+    private bool m_log;
+
+    [FormerlySerializedAs("useOnWebGL")] [SerializeField]
+    private bool m_useOnWebGL;
+
+    [FormerlySerializedAs("enableRayHit")] [SerializeField]
+    private bool m_enableRayHit;
 
     private void Awake()
     {

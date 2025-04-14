@@ -108,6 +108,10 @@ namespace NonsensicalKit.Tools.ObjectPool
         /// </summary>
         public void Clear()
         {
+            if (_cache!=null)
+            {
+                Flush();
+            }
             foreach (var item in m_using)
             {
                 item.SetActive(false);

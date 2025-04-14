@@ -28,7 +28,7 @@ namespace NonsensicalKit.Tools
         {
             CanvasGroupTweener newTweener = new CanvasGroupTweener(canvasGroup, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -37,7 +37,7 @@ namespace NonsensicalKit.Tools
         {
             TransformMoveTweener newTweener = new TransformMoveTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -46,7 +46,7 @@ namespace NonsensicalKit.Tools
         {
             RectTransformMoveTweener newTweener = new RectTransformMoveTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -55,7 +55,7 @@ namespace NonsensicalKit.Tools
         {
             TransformRotateTweener newTweener = new TransformRotateTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -64,7 +64,7 @@ namespace NonsensicalKit.Tools
         {
             TransformQuaternionRotateTweener newTweener = new TransformQuaternionRotateTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -73,7 +73,7 @@ namespace NonsensicalKit.Tools
         {
             TransformLocalMoveTweener newTweener = new TransformLocalMoveTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -82,7 +82,7 @@ namespace NonsensicalKit.Tools
         {
             TransformLocalMoveXTweener newTweener = new TransformLocalMoveXTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -91,7 +91,7 @@ namespace NonsensicalKit.Tools
         {
             TransformLocalRotateTweener newTweener = new TransformLocalRotateTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -100,7 +100,7 @@ namespace NonsensicalKit.Tools
         {
             TransformQuaternionLocalRotateTweener newTweener = new TransformQuaternionLocalRotateTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -109,7 +109,7 @@ namespace NonsensicalKit.Tools
         {
             TransformLocalScaleTweener newTweener = new TransformLocalScaleTweener(transform, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }
@@ -118,7 +118,7 @@ namespace NonsensicalKit.Tools
         {
             ScrollRectScrollToTweener newTweener = new ScrollRectScrollToTweener(scrollRect, endValue, value);
 
-            Hub.Tweenners.Add(newTweener);
+            Hub.Tweeners.Add(newTweener);
 
             return newTweener;
         }

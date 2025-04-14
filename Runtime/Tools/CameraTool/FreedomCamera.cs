@@ -19,7 +19,7 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] private float m_moveSpeed = 0.1f; //移动速度
         [SerializeField] private float m_shiftMagnification = 3f; //shift加速倍率
 
-        protected  bool CanOperation = true; //是否可以操作
+        protected bool CanOperation = true; //是否可以操作
 
         private void Update()
         {

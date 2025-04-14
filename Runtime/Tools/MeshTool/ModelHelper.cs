@@ -173,13 +173,13 @@ namespace NonsensicalKit.Tools.MeshTool
         {
             MeshBuilder crtMeshBuffer = new MeshBuilder();
 
-            Array4<bool> bool6Side = new Array4<bool>(state.Length0, state.Length1, state.Length2, 6);
+            Array4<bool> bool6Side = new Array4<bool>(state.m_Length0, state.m_Length1, state.m_Length2, 6);
 
-            for (int i = 0; i < state.Length0; i++)
+            for (int i = 0; i < state.m_Length0; i++)
             {
-                for (int j = 0; j < state.Length1; j++)
+                for (int j = 0; j < state.m_Length1; j++)
                 {
-                    for (int k = 0; k < state.Length2; k++)
+                    for (int k = 0; k < state.m_Length2; k++)
                     {
                         if (state[i, j, k])
                         {
@@ -191,7 +191,7 @@ namespace NonsensicalKit.Tools.MeshTool
                                 }
                             }
 
-                            if (i == state.Length0 - 1 || (i < state.Length0 - 1 && state[i + 1, j, k] == false))
+                            if (i == state.m_Length0 - 1 || (i < state.m_Length0 - 1 && state[i + 1, j, k] == false))
                             {
                                 if (bool6Side[i, j, k, 1] == false)
                                 {
@@ -207,7 +207,7 @@ namespace NonsensicalKit.Tools.MeshTool
                                 }
                             }
 
-                            if (j == state.Length1 - 1 || (j < state.Length1 - 1 && state[i, j + 1, k] == false))
+                            if (j == state.m_Length1 - 1 || (j < state.m_Length1 - 1 && state[i, j + 1, k] == false))
                             {
                                 if (bool6Side[i, j, k, 3] == false)
                                 {
@@ -223,7 +223,7 @@ namespace NonsensicalKit.Tools.MeshTool
                                 }
                             }
 
-                            if (k == state.Length2 - 1 || (k < state.Length2 - 1 && state[i, j, k + 1] == false))
+                            if (k == state.m_Length2 - 1 || (k < state.m_Length2 - 1 && state[i, j, k + 1] == false))
                             {
                                 if (bool6Side[i, j, k, 5] == false)
                                 {
@@ -310,10 +310,10 @@ namespace NonsensicalKit.Tools.MeshTool
 
             points.Push(crtPoint);
 
-            Array3<bool> buffer = new Array3<bool>(state.Length0, state.Length1, state.Length2);
-            int arrMax1 = state.Length0 - 1;
-            int arrMax2 = state.Length1 - 1;
-            int arrMax3 = state.Length2 - 1;
+            Array3<bool> buffer = new Array3<bool>(state.m_Length0, state.m_Length1, state.m_Length2);
+            int arrMax1 = state.m_Length0 - 1;
+            int arrMax2 = state.m_Length1 - 1;
+            int arrMax3 = state.m_Length2 - 1;
 
             while (points.Count > 0)
             {
@@ -461,11 +461,11 @@ namespace NonsensicalKit.Tools.MeshTool
                 }
             }
 
-            for (int i = 0; i < state.Length0; i++)
+            for (int i = 0; i < state.m_Length0; i++)
             {
-                for (int j = 0; j < state.Length1; j++)
+                for (int j = 0; j < state.m_Length1; j++)
                 {
-                    for (int k = 0; k < state.Length2; k++)
+                    for (int k = 0; k < state.m_Length2; k++)
                     {
                         if (buffer[i, j, k])
                         {
@@ -517,9 +517,9 @@ namespace NonsensicalKit.Tools.MeshTool
         public static Mesh CreateCustomCubeSimple(Array3<bool> state, float singleSize)
         {
             MeshBuilder meshBuilder = new MeshBuilder();
-            int width = state.Length0;
-            int height = state.Length1;
-            int thickness = state.Length2;
+            int width = state.m_Length0;
+            int height = state.m_Length1;
+            int thickness = state.m_Length2;
 
             Array3<bool> temp = new Array3<bool>(width, height, thickness);
             for (int w = 0; w < width; w++)
@@ -541,9 +541,9 @@ namespace NonsensicalKit.Tools.MeshTool
 
         private static void AddPartCube(MeshBuilder meshbuffer, Array3<bool> state, Array3<bool> temp, int w, int h, int t, float singleSize)
         {
-            int width = state.Length0;
-            int height = state.Length1;
-            int thickness = state.Length2;
+            int width = state.m_Length0;
+            int height = state.m_Length1;
+            int thickness = state.m_Length2;
 
             int left = w;
             int right = left;

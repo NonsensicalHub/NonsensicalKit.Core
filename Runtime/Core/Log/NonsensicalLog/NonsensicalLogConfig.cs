@@ -33,7 +33,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
         public bool WorkInEditor;
         public bool WorkInRuntime;
 
-        public LogLevel LogLevel = LogLevel.DEBUG;
+        public LogLevel LogLevel = LogLevel.Debug;
         public string[] ExcludeTags;
         public string[] LimitedTags;
         public LogPathway LogStrategy = LogPathway.Console;

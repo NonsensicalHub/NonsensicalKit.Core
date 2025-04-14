@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityObject = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Log
 {
@@ -31,7 +31,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Debug(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Debug(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
@@ -40,7 +40,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Info(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Info(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
@@ -49,7 +49,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Warning(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Warning(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
@@ -58,7 +58,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Error(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Error(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
@@ -67,7 +67,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public void Fatal(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Fatal(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))

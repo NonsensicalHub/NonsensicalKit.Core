@@ -20,7 +20,7 @@ namespace NonsensicalKit.Core
             //需要测试是否能正常提前注销
             foreach (var subscribeInfo in _subscribeInfos)
             {
-                bool isint = subscribeInfo.UseInt;
+                bool isInt = subscribeInfo.UseInt;
                 bool useID = subscribeInfo.UseID;
                 Type[] types = subscribeInfo.Types;
                 Type messageAggregator;
@@ -62,7 +62,7 @@ namespace NonsensicalKit.Core
 
                 Type[] ts = new Type[useID ? 3 : 2];
                 object[] os = new object[useID ? 3 : 2];
-                if (isint)
+                if (isInt)
                 {
                     ts[0] = typeof(int);
                     os[0] = subscribeInfo.Index;
@@ -897,11 +897,11 @@ namespace NonsensicalKit.Core
             _registerInfos.Add(temp);
         }
 
-        protected void Register<T>(string name, Func<T> func)
+        protected void Register<T>(string id, Func<T> func)
         {
-            ObjectAggregator<T>.Instance.Register(name, func);
+            ObjectAggregator<T>.Instance.Register(id, func);
 
-            RegisterInfo temp = new RegisterInfo(name, func, typeof(T));
+            RegisterInfo temp = new RegisterInfo(id, func, typeof(T));
             _registerInfos.Add(temp);
         }
 
@@ -936,13 +936,13 @@ namespace NonsensicalKit.Core
             }
         }
 
-        protected void Unregister<T>(string name, Func<T> func)
+        protected void Unregister<T>(string id, Func<T> func)
         {
-            ObjectAggregator<T>.Instance.Unregister(name, func);
+            ObjectAggregator<T>.Instance.Unregister(id, func);
 
             for (int i = 0; i < _registerInfos.Count; i++)
             {
-                if (_registerInfos[i].KeyType == 1 && name == _registerInfos[i].Str && func.Equals(_registerInfos[i].Func as Func<T>))
+                if (_registerInfos[i].KeyType == 1 && id == _registerInfos[i].Str && func.Equals(_registerInfos[i].Func as Func<T>))
                 {
                     _registerInfos.RemoveAt(i);
                     break;
@@ -981,11 +981,11 @@ namespace NonsensicalKit.Core
             _listenerInfos.Add(temp);
         }
 
-        protected void AddListener<T>(string name, Action<T> func)
+        protected void AddListener<T>(string id, Action<T> func)
         {
-            ObjectAggregator<T>.Instance.AddListener(name, func);
+            ObjectAggregator<T>.Instance.AddListener(id, func);
 
-            ListenerInfo temp = new ListenerInfo(name, func, typeof(T));
+            ListenerInfo temp = new ListenerInfo(id, func, typeof(T));
             _listenerInfos.Add(temp);
         }
 
@@ -1020,13 +1020,13 @@ namespace NonsensicalKit.Core
             }
         }
 
-        protected void RemoveListener<T>(string name, Action<T> func)
+        protected void RemoveListener<T>(string id, Action<T> func)
         {
-            ObjectAggregator<T>.Instance.RemoveListener(name, func);
+            ObjectAggregator<T>.Instance.RemoveListener(id, func);
 
             for (int i = 0; i < _listenerInfos.Count; i++)
             {
-                if (_listenerInfos[i].KeyType == 1 && name == _listenerInfos[i].Str && func.Equals(_listenerInfos[i].Func as Func<T>))
+                if (_listenerInfos[i].KeyType == 1 && id == _listenerInfos[i].Str && func.Equals(_listenerInfos[i].Func as Func<T>))
                 {
                     _listenerInfos.RemoveAt(i);
                     break;

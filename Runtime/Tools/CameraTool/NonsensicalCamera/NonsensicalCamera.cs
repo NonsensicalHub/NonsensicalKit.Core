@@ -4,11 +4,11 @@ using NonsensicalKit.Tools.EasyTool;
 using NonsensicalKit.Tools.InputTool;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 #endif
-using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Tools.CameraTool
 {
@@ -100,13 +100,13 @@ namespace NonsensicalKit.Tools.CameraTool
 
         public Vector3 TargetPosition
         {
-            set=>_targetPos=value;
+            set => _targetPos = value;
         }
 
         /// <summary>
         /// 鼠标是否没有放置在UI上
         /// </summary>
-        protected bool _MouseNotInUI
+        protected bool MouseNotInUI
         {
             get
             {
@@ -129,9 +129,17 @@ namespace NonsensicalKit.Tools.CameraTool
                 }
 
 #if ENABLE_INPUT_SYSTEM
-                return !((InputSystemUIInputModule)EventSystem.current.currentInputModule).GetLastRaycastResult(Pointer.current.deviceId).isValid;
+                var inputModule = _crtEventSystem.currentInputModule;
+                if (inputModule != null && inputModule is InputSystemUIInputModule)
+                {
+                    return !((InputSystemUIInputModule)inputModule).GetLastRaycastResult(Pointer.current.deviceId).isValid;
+                }
+                else
+                {
+                    return !_crtEventSystem.IsPointerOverGameObject();
+                }
 #else
-                 return !_crtEventSystem.IsPointerOverGameObject();
+                return !_crtEventSystem.IsPointerOverGameObject();
 #endif
             }
         }
@@ -224,7 +232,7 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 if (PlatformInfo.IsMobile == false)
                 {
-                    if (_MouseNotInUI)
+                    if (MouseNotInUI)
                     {
                         var v = -_input.CrtZoom;
                         if (v > 0) //统一在不同平台中差异较大的滚动值
@@ -270,7 +278,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 else
                 {
                     //IsMobile
-                    if (_MouseNotInUI == false)
+                    if (MouseNotInUI == false)
                     {
                         return;
                     }
@@ -372,7 +380,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
             _targetPitch = 90 - Vector3.Angle(Vector3.up, dir);
             _crtPitch = _targetPitch;
-            if (m_isLimitPith == true)
+            if (m_isLimitPith)
             {
                 while (_targetPitch > 90)
                 {
@@ -523,16 +531,16 @@ namespace NonsensicalKit.Tools.CameraTool
             Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f).normalized;
             float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * delta.magnitude * Time.deltaTime;
 
-            if (m_limitBox == null )
+            if (m_limitBox == null)
             {
                 _targetPos += direction * distance;
             }
-            else 
+            else
             {
                 _targetPos = m_limitBox.NearestPoint(_targetPos + direction * distance);
             }
         }
-        
+
         /// <summary>
         /// 根据改变量进行位移(使用固定间隔时间)
         /// </summary>
@@ -543,11 +551,11 @@ namespace NonsensicalKit.Tools.CameraTool
             Vector3 direction = m_camera.rotation * new Vector3(-delta.x, -delta.y, 0f);
             float distance = Mathf.Lerp(m_moveSpeedMinZoom, m_moveSpeedMaxZoom, _crtZoom) * delta.magnitude * interval;
 
-            if (m_limitBox == null )
+            if (m_limitBox == null)
             {
                 _targetPos += direction * distance;
             }
-            else 
+            else
             {
                 _targetPos = m_limitBox.NearestPoint(_targetPos + direction * distance);
             }
@@ -814,7 +822,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void StartMove()
         {
-            if (_MouseNotInUI)
+            if (MouseNotInUI)
             {
                 _needMove = true;
             }
@@ -827,7 +835,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void StartRotate()
         {
-            if (_MouseNotInUI)
+            if (MouseNotInUI)
             {
                 _needRotate = true;
             }
@@ -840,7 +848,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void StartRoll()
         {
-            if (_MouseNotInUI)
+            if (MouseNotInUI)
             {
                 _needRoll = true;
             }
@@ -853,7 +861,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void StartZoom()
         {
-            if (_MouseNotInUI)
+            if (MouseNotInUI)
             {
                 _needDragZoom = true;
             }

@@ -56,7 +56,7 @@ namespace NonsensicalKit.Tools.CameraTool
         protected float TargetZoom;
         protected EventSystem CrtEventSystem;
         protected InputHub Input;
-        protected  bool IsOn = true;
+        protected bool IsOn = true;
 
         private Vector3 _startPos;
         private Vector3 _startRot;
@@ -189,7 +189,7 @@ namespace NonsensicalKit.Tools.CameraTool
         /// <param name="delta"></param>
         protected void AdjustZoom(float delta)
         {
-            TargetZoom =Mathf.Clamp01(TargetZoom+delta * m_zoomSpeed) ;
+            TargetZoom = Mathf.Clamp01(TargetZoom + delta * m_zoomSpeed);
         }
 
         /// <summary>

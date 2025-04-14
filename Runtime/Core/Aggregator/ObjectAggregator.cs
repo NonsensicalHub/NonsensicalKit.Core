@@ -138,9 +138,9 @@ namespace NonsensicalKit.Core
             {
                 return _intFields[name];
             }
-            else if (_intFallBacks.ContainsKey(name))
+            else if (_intFallBacks.TryGetValue(name, out var back))
             {
-                return _intFallBacks[name]();
+                return back();
             }
             else
             {
@@ -155,9 +155,9 @@ namespace NonsensicalKit.Core
                 value = _intFields[name];
                 return true;
             }
-            else if (_intFallBacks.ContainsKey(name))
+            else if (_intFallBacks.TryGetValue(name, out var back))
             {
-                value = _intFallBacks[name]();
+                value = back();
                 return true;
             }
             else
@@ -170,9 +170,9 @@ namespace NonsensicalKit.Core
         public List<T> GetAll(int name)
         {
             List<T> list = new List<T>();
-            if (_intFallBacks.ContainsKey(name))
+            if (_intFallBacks.TryGetValue(name, out var back))
             {
-                var ds = _intFallBacks[name].GetInvocationList();
+                var ds = back.GetInvocationList();
                 foreach (var delegates in ds)
                 {
                     var item = (Func<T>)delegates;
@@ -193,9 +193,9 @@ namespace NonsensicalKit.Core
                 _intFallBacks[name] += fallback;
             }
 
-            if (_intFieldListeners.ContainsKey(name))
+            if (_intFieldListeners.TryGetValue(name, out var listener))
             {
-                _intFieldListeners[name]?.Invoke(fallback());
+                listener?.Invoke(fallback());
             }
         }
 
@@ -240,9 +240,9 @@ namespace NonsensicalKit.Core
         public void Set([DisallowNull] string name, T value)
         {
             _strFields[name] = value;
-            if (_strFieldListeners.ContainsKey(name))
+            if (_strFieldListeners.TryGetValue(name, out var listener))
             {
-                _strFieldListeners[name]?.Invoke(value);
+                listener?.Invoke(value);
             }
         }
 
@@ -253,9 +253,9 @@ namespace NonsensicalKit.Core
             {
                 return _strFields[name];
             }
-            else if (_strFallBacks.ContainsKey(name))
+            else if (_strFallBacks.TryGetValue(name, out var back))
             {
-                return _strFallBacks[name]();
+                return back();
             }
             else
             {
@@ -270,9 +270,9 @@ namespace NonsensicalKit.Core
                 value = _strFields[name];
                 return true;
             }
-            else if (_strFallBacks.ContainsKey(name))
+            else if (_strFallBacks.TryGetValue(name, out var back))
             {
-                value = _strFallBacks[name]();
+                value = back();
                 return true;
             }
             else
@@ -285,9 +285,9 @@ namespace NonsensicalKit.Core
         public List<T> GetAll([DisallowNull] string name)
         {
             List<T> list = new List<T>();
-            if (_strFallBacks.ContainsKey(name))
+            if (_strFallBacks.TryGetValue(name, out var back))
             {
-                var ds = _strFallBacks[name].GetInvocationList();
+                var ds = back.GetInvocationList();
                 foreach (var delegates in ds)
                 {
                     var item = (Func<T>)delegates;
@@ -308,9 +308,9 @@ namespace NonsensicalKit.Core
                 _strFallBacks[name] += fallback;
             }
 
-            if (_strFieldListeners.ContainsKey(name))
+            if (_strFieldListeners.TryGetValue(name, out var listener))
             {
-                _strFieldListeners[name]?.Invoke(fallback());
+                listener?.Invoke(fallback());
             }
         }
 

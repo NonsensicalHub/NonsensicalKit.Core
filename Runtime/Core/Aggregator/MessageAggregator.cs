@@ -57,9 +57,9 @@ namespace NonsensicalKit.Core
 
         public void Publish(int name, T1 value1, T2 value2, T3 value3)
         {
-            if (_messages.ContainsKey(name))
+            if (_messages.TryGetValue(name, value: out var message))
             {
-                _messages[name](value1, value2, value3);
+                message(value1, value2, value3);
             }
         }
 
@@ -137,9 +137,9 @@ namespace NonsensicalKit.Core
 
         public void Publish([DisallowNull] string name, T1 value1, T2 value2, T3 value3)
         {
-            if (_strMessages.ContainsKey(name))
+            if (_strMessages.TryGetValue(name, out var message))
             {
-                _strMessages[name](value1, value2, value3);
+                message(value1, value2, value3);
             }
         }
 
@@ -233,9 +233,9 @@ namespace NonsensicalKit.Core
 
         public void Publish(int name, T1 value1, T2 value2)
         {
-            if (_messages.ContainsKey(name))
+            if (_messages.TryGetValue(name, out var message))
             {
-                _messages[name](value1, value2);
+                message(value1, value2);
             }
         }
 
@@ -314,9 +314,9 @@ namespace NonsensicalKit.Core
 
         public void Publish([DisallowNull] string name, T1 value1, T2 value2)
         {
-            if (_strMessages.ContainsKey(name))
+            if (_strMessages.TryGetValue(name, out var message))
             {
-                _strMessages[name](value1, value2);
+                message(value1, value2);
             }
         }
 
@@ -410,9 +410,9 @@ namespace NonsensicalKit.Core
 
         public void Publish(int name, T value)
         {
-            if (_messages.ContainsKey(name))
+            if (_messages.TryGetValue(name, out var message))
             {
-                _messages[name](value);
+                message(value);
             }
         }
 
@@ -491,9 +491,9 @@ namespace NonsensicalKit.Core
 
         public void Publish([DisallowNull] string name, T value)
         {
-            if (_strMessages.ContainsKey(name))
+            if (_strMessages.TryGetValue(name, out var message))
             {
-                _strMessages[name](value);
+                message(value);
             }
         }
 
@@ -587,9 +587,9 @@ namespace NonsensicalKit.Core
 
         public void Publish(int name)
         {
-            if (_messages.ContainsKey(name))
+            if (_messages.TryGetValue(name, out var message))
             {
-                _messages[name]();
+                message();
             }
         }
 
@@ -668,9 +668,9 @@ namespace NonsensicalKit.Core
 
         public void Publish([DisallowNull] string name)
         {
-            if (_strMessages.ContainsKey(name))
+            if (_strMessages.TryGetValue(name, out var message))
             {
-                _strMessages[name]();
+                message();
             }
         }
 

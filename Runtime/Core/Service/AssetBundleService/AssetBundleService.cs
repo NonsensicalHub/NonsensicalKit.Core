@@ -226,6 +226,7 @@ namespace NonsensicalKit.Core.Service.Asset
                 }
                 catch (Exception)
                 {
+                    // ignored
                 }
 
                 return;
@@ -285,6 +286,7 @@ namespace NonsensicalKit.Core.Service.Asset
             }
             catch (Exception)
             {
+                // ignored
             }
 
             _assetBundleDic[bundlePath].OnLoaded = null;
@@ -315,10 +317,11 @@ namespace NonsensicalKit.Core.Service.Asset
             try
             {
                 _assetBundleDic[bundlePath].OnLoadCompleted?.Invoke(bundlePath, assetBundle);
-                OnBundleCompleted?.Invoke(bundlePath,assetBundle);
+                OnBundleCompleted?.Invoke(bundlePath, assetBundle);
             }
             catch (Exception)
             {
+                // ignored
             }
 
             _assetBundleDic[bundlePath].OnLoadCompleted = null;
@@ -522,7 +525,7 @@ namespace NonsensicalKit.Core.Service.Asset
             public AssetBundle AssetBundlePack; //ab包
 
             public bool IsLoading; //是否正在进行加载
-            public bool IsLoaded; //是否已经加载完成
+            public bool IsLoaded; //是否已经加载完成，此时依赖包可能并未加载完成
             public bool IsLoadCompleted; //是否已经完全加载完成
             public int LoadCount; //包内对象加载的次数
             public int DependencyCount; //被其他包依赖加载的次数

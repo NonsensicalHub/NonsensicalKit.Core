@@ -24,13 +24,13 @@ namespace NonsensicalKit.Core.Service.Config
         private bool m_jsonMode = true;
 
         [Tooltip("所有管理的配置文件，可以通过右键-Set All Config来快速设置项目内所有配置文件")] [SerializeField]
-        private ConfigObject[] m_configDatas= Array.Empty<ConfigObject>();
+        private ConfigObject[] m_configDatas = Array.Empty<ConfigObject>();
 
         private Dictionary<string, ConfigData> _configs;
 
         private int _count;
 
-        public bool IsReady { get; set; }
+        public bool IsReady { get; private set; }
 
         public Action InitCompleted { get; set; }
 
@@ -50,11 +50,7 @@ namespace NonsensicalKit.Core.Service.Config
                 {
                     var data = item.GetData();
                     string crtID = data.ConfigID;
-                    if (!_configs.ContainsKey(crtID))
-                    {
-                        _configs[crtID] = data;
-                    }
-                    else
+                    if (!_configs.TryAdd(crtID, data))
                     {
                         Debug.LogError("相同类型配置的ID重复:" + crtID);
                         break;
@@ -381,9 +377,9 @@ namespace NonsensicalKit.Core.Service.Config
         private void WriteConfigs()
         {
             _configs = new Dictionary<string, ConfigData>();
-            for (int i = 0; i < m_configDatas.Length; i++)
+            foreach (var t in m_configDatas)
             {
-                var data = m_configDatas[i].GetData();
+                var data = t.GetData();
                 string crtID = data.ConfigID;
                 if (!_configs.ContainsKey(crtID))
                 {

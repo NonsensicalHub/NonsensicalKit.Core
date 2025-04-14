@@ -8,14 +8,14 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
     /// </summary>
     public class LogContext
     {
-        public LogLevel LogLevel;
-        public object Obj;
-        public Object Context;
-        public string[] Tags;
-        public DateTime Time;
-        public string MemberName;
-        public string FilePath;
-        public int LineNumber;
+        public readonly LogLevel LogLevel;
+        public readonly object Obj;
+        public readonly Object Context;
+        public readonly string[] Tags;
+        public readonly DateTime Time;
+        public readonly string MemberName;
+        public readonly string FilePath;
+        public readonly int LineNumber;
 
         public LogContext(LogLevel logLevel, object obj, Object context, string[] tags, string memberName, string filePath,
             int lineNumber)

@@ -27,7 +27,7 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public static bool ApplicationIsQuitting = false;
+        public static bool ApplicationIsQuitting;
 
         private static NonsensicalInstance _instance;
 
@@ -38,12 +38,12 @@ namespace NonsensicalKit.Core
 
         private Queue<string> _messages;
 
-        public List<Tweener> Tweenners;
+        public List<Tweener> Tweeners;
 
         private void Awake()
         {
             _messages = new Queue<string>();
-            Tweenners = new List<Tweener>();
+            Tweeners = new List<Tweener>();
 
 #if UNITY_EDITOR
             int errorCount = 0;
@@ -81,16 +81,16 @@ namespace NonsensicalKit.Core
                 Debug.Log(_messages.Dequeue());
             }
 
-            for (int i = 0; i < Tweenners.Count; i++)
+            for (int i = 0; i < Tweeners.Count; i++)
             {
-                if (Tweenners[i].IsOver)
+                if (Tweeners[i].IsOver)
                 {
-                    Tweenners.RemoveAt(i);
+                    Tweeners.RemoveAt(i);
                     i--;
                 }
-                else if (Tweenners[i].DoIt(Time.deltaTime))
+                else if (Tweeners[i].DoIt(Time.deltaTime))
                 {
-                    Tweenners.RemoveAt(i);
+                    Tweeners.RemoveAt(i);
                     i--;
                 }
             }

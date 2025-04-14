@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using NonsensicalKit.Core.Setting;
 using NonsensicalKit.Tools;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityObject = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Log
 {
@@ -36,7 +36,7 @@ namespace NonsensicalKit.Core.Log
             _logger ??= new DefaultLog();
         }
 
-        public static void Debug(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+        public static void Debug(object obj, string tag, UnityObject context = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -49,7 +49,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Debug(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+        public static void Debug(object obj, UnityObject context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -62,7 +62,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Info(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+        public static void Info(object obj, string tag, UnityObject context = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -75,7 +75,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Info(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+        public static void Info(object obj, UnityObject context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -88,7 +88,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Warning(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+        public static void Warning(object obj, string tag, UnityObject context = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -101,7 +101,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Warning(object obj, Object context = null, string[] tags = null,
+        public static void Warning(object obj, UnityObject context = null, string[] tags = null,
             [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -114,7 +114,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Error(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+        public static void Error(object obj, string tag, UnityObject context = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -127,7 +127,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Error(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+        public static void Error(object obj, UnityObject context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -140,7 +140,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Fatal(object obj, string tag, Object context = null, [CallerMemberName] string callerMemberName = "",
+        public static void Fatal(object obj, string tag, UnityObject context = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)
@@ -153,7 +153,7 @@ namespace NonsensicalKit.Core.Log
             }
         }
 
-        public static void Fatal(object obj, Object context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
+        public static void Fatal(object obj, UnityObject context = null, string[] tags = null, [CallerMemberName] string callerMemberName = "",
             [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
         {
             if (_logger == null)

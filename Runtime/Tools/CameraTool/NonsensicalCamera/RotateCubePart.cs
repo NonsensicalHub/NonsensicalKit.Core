@@ -7,15 +7,19 @@ namespace NonsensicalKit.Tools.CameraTool
 {
     public class RotateCubePart : NonsensicalMono
     {
-        [FormerlySerializedAs("useOnWebGL")] [SerializeField] private bool m_useOnWebGL;
-        [FormerlySerializedAs("enableRayHit")] [SerializeField] private bool m_enableRayHit = false;
+        [FormerlySerializedAs("useOnWebGL")] [SerializeField]
+        private bool m_useOnWebGL;
+
+        [FormerlySerializedAs("enableRayHit")] [SerializeField]
+        private bool m_enableRayHit = false;
+
         [SerializeField] private Vector3 m_dir;
         [SerializeField] private UnityEvent m_onMouseEnter;
         [SerializeField] private UnityEvent m_onMouseExit;
 
         private RotateCube _cube;
 
-        private bool isEntered;
+        private bool _isEntered;
 
         private void Awake()
         {
@@ -56,27 +60,27 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void OnVirtualMouseEnter(string obj)
         {
-            if (obj == this.name)
+            if (obj == name)
             {
-                if (isEntered == false)
+                if (_isEntered == false)
                 {
                     m_onMouseEnter?.Invoke();
-                    isEntered = true;
+                    _isEntered = true;
                 }
             }
             else
             {
-                if (isEntered == true)
+                if (_isEntered)
                 {
                     m_onMouseExit?.Invoke();
-                    isEntered = false;
+                    _isEntered = false;
                 }
             }
         }
 
         private void OnVirtualMouseClick(string obj)
         {
-            if (obj == this.name)
+            if (obj == name)
             {
                 _cube.PartClick(m_dir);
             }

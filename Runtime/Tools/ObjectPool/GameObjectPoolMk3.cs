@@ -134,6 +134,10 @@ namespace NonsensicalKit.Tools.ObjectPool
 
         public void Clear()
         {
+            if (_cache != null)
+            {
+                Flush();
+            }
             foreach (var item in _actives)
             {
                 _resetAction?.Invoke(item);

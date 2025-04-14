@@ -7,7 +7,7 @@ using NonsensicalKit.Core.Service;
 using NonsensicalKit.Core.Service.Config;
 using NonsensicalKit.Tools;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityObject = UnityEngine.Object;
 
 namespace NonsensicalKit.Core.Log.NonsensicalLog
 {
@@ -31,12 +31,12 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
             _sb = new StringBuilder();
             _buffer = new Queue<LogContext>();
             UnityEngine.Debug.Log($"NonsensicalLog Init\r\n" +
-                                  $"DateTime:{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}\r\n" +
+                                  $"DateTime:{DateTime.Now:yyyy-MM-dd HH:mm:ss}\r\n" +
                                   $"Device Model:{SystemInfo.deviceModel}\r\n" +
                                   $"Device Name:{SystemInfo.deviceName}\r\n" +
                                   $"Operating System:{SystemInfo.operatingSystem}");
 
-            ServiceCore.AfterServiceCoreInit += OnServiceCoreInit;
+            ServiceCore.AfterServiceCoreInit += OnServiceCoreInit; //LogCore在ServiceCore之前初始化，所以需要等待
         }
 
         ~NonsensicalLog()
@@ -52,34 +52,34 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
             }
         }
 
-        public void Debug(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Debug(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.DEBUG, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.Debug, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Info(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Info(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.INFO, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.Info, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Warning(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Warning(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.WARNING, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.Warning, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Error(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Error(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.ERROR, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.Error, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
-        public void Fatal(object obj, Object context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
+        public void Fatal(object obj, UnityObject context = null, string[] tags = null, string callerMemberName = "", string callerFilePath = "",
             int callerLineNumber = 0)
         {
-            TryLog(new LogContext(LogLevel.FATAL, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
+            TryLog(new LogContext(LogLevel.Fatal, obj, context, tags, callerMemberName, callerFilePath, callerLineNumber));
         }
 
         private void TryLog(LogContext info)
@@ -114,7 +114,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
 
         private void Log(LogContext info)
         {
-            if (PlatformInfo.IsEditor && CheckTags(info.Tags))
+            if (PlatformInfo.IsEditor && !CheckTags(info.Tags))
             {
                 return;
             }
@@ -155,7 +155,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
                 _sb.Append(": ");
                 _sb.AppendLine(info.Obj != null ? info.Obj.ToString() : "null");
 
-                if (info.Tags != null && info.Tags.Length > 0)
+                if (info.Tags is { Length: > 0 })
                 {
                     _sb.Append("Tags:[");
                     foreach (var tag in info.Tags)
@@ -169,7 +169,7 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
 
                 if (strategy.LogDateTime)
                 {
-                    _sb.AppendLine($"DateTime:{info.Time.ToString("yyyy-MM-dd HH:mm:ss")}");
+                    _sb.AppendLine($"DateTime:{info.Time:yyyy-MM-dd HH:mm:ss}");
                 }
 
                 if (strategy.LogClassInfo)
@@ -184,7 +184,6 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
                         if (PlatformInfo.IsEditor)
                         {
                             var bs = Encoding.UTF8.GetBytes(logStr);
-                            UnityEngine.Debug.Log(bs.Length);
                             if (bs.Length > 15000)
                             {
                                 Array.Resize(ref bs, 15000);
@@ -194,18 +193,18 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
 
                         switch (info.LogLevel)
                         {
-                            case LogLevel.DEBUG:
-                            case LogLevel.INFO:
+                            case LogLevel.Debug:
+                            case LogLevel.Info:
                                 UnityEngine.Debug.Log(logStr, info.Context);
                                 break;
-                            case LogLevel.WARNING:
+                            case LogLevel.Warning:
                                 UnityEngine.Debug.LogWarning(logStr, info.Context);
                                 break;
-                            case LogLevel.ERROR:
-                            case LogLevel.FATAL:
+                            case LogLevel.Error:
+                            case LogLevel.Fatal:
                                 UnityEngine.Debug.LogError(logStr, info.Context);
                                 break;
-                            case LogLevel.OFF:
+                            case LogLevel.Off:
                                 break;
                         }
 
@@ -255,15 +254,17 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
                         continue;
                     }
 
-                    LogStrategyContext strategy = new LogStrategyContext();
-                    strategy.LogLevel = strategyConfig.LogLevel;
-                    strategy.LogStrategy = strategyConfig.LogStrategy;
-                    strategy.LogArgument = strategyConfig.LogArgument;
-                    strategy.LogDateTime = strategyConfig.LogDateTime;
-                    strategy.LogClassInfo = strategyConfig.LogCallerInfo;
-                    strategy.TagCheck = (strategyConfig.ExcludeTags.Length > 0) || (strategyConfig.LimitedTags.Length > 0);
-                    strategy.ExcludeTags = strategyConfig.ExcludeTags;
-                    strategy.LimitedTags = strategyConfig.LimitedTags;
+                    LogStrategyContext strategy = new LogStrategyContext
+                    {
+                        LogLevel = strategyConfig.LogLevel,
+                        LogStrategy = strategyConfig.LogStrategy,
+                        LogArgument = strategyConfig.LogArgument,
+                        LogDateTime = strategyConfig.LogDateTime,
+                        LogClassInfo = strategyConfig.LogCallerInfo,
+                        TagCheck = strategyConfig.ExcludeTags.Length > 0 || strategyConfig.LimitedTags.Length > 0,
+                        ExcludeTags = strategyConfig.ExcludeTags,
+                        LimitedTags = strategyConfig.LimitedTags
+                    };
 
                     switch (strategy.LogStrategy)
                     {

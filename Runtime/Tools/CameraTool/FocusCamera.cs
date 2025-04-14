@@ -20,12 +20,12 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private float _oneMinusLerpValue;
 
-        private Vector3 _targetPostion;
+        private Vector3 _targetPosition;
         private float _targetRotation;
         private float _targetElevation;
         private float _targetDistance;
 
-        private Vector3 _crtPostion;
+        private Vector3 _crtPosition;
         private float _crtRotation;
         private float _crtElevation;
         private float _crtDistance;
@@ -61,18 +61,18 @@ namespace NonsensicalKit.Tools.CameraTool
         {
             if (m_target != null)
             {
-                _targetPostion = m_target.position;
+                _targetPosition = m_target.position;
             }
 
-            _crtPostion = _targetPostion;
+            _crtPosition = _targetPosition;
 
-            Vector3 offset = transform.position - _crtPostion;
+            Vector3 offset = transform.position - _crtPosition;
             _targetElevation = 90 - Vector3.Angle(offset, Vector3.up);
             _crtElevation = _targetElevation;
             offset.y = 0;
             _targetRotation = Vector3.SignedAngle(-Vector3.forward, offset, Vector3.up);
             _crtRotation = _targetRotation;
-            _targetDistance = Vector3.Distance(_crtPostion, transform.position);
+            _targetDistance = Vector3.Distance(_crtPosition, transform.position);
             _crtDistance = _targetDistance;
         }
 
@@ -100,7 +100,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
             if (m_target != null)
             {
-                _targetPostion = m_target.position;
+                _targetPosition = m_target.position;
             }
         }
 
@@ -111,7 +111,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void Lerp()
         {
-            _crtPostion = Vector3.Lerp(_crtPostion, _targetPostion, m_lerpValue);
+            _crtPosition = Vector3.Lerp(_crtPosition, _targetPosition, m_lerpValue);
             _crtRotation = _crtRotation * _oneMinusLerpValue + _targetRotation * m_lerpValue;
             _crtElevation = _crtElevation * _oneMinusLerpValue + _targetElevation * m_lerpValue;
             _crtDistance = _crtDistance * _oneMinusLerpValue + _targetDistance * m_lerpValue;
@@ -120,8 +120,8 @@ namespace NonsensicalKit.Tools.CameraTool
         private void Move()
         {
             //通过将旋转负z轴获得新坐标（不使用正z轴因为其正旋时向下）
-            transform.position = _crtPostion + Quaternion.Euler(_crtElevation, _crtRotation, 0) * new Vector3(0, 0, -_crtDistance);
-            transform.LookAt(_crtPostion);
+            transform.position = _crtPosition + Quaternion.Euler(_crtElevation, _crtRotation, 0) * new Vector3(0, 0, -_crtDistance);
+            transform.LookAt(_crtPosition);
         }
     }
 }

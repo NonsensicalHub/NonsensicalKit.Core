@@ -29,13 +29,18 @@ namespace NonsensicalKit.Tools.CameraTool
 
         private void OnLeftMouseButtonDown()
         {
-            Ray ray = Camera.main.ScreenPointToRay(_input.CrtMousePos);
-
-            Physics.Raycast(ray, out _hit, 100);
-            if (_hit.transform != null)
+            if (Camera.main != null)
             {
-                _camera.Focus(_hit.transform, m_immediate, m_setDistance);
+                Ray ray = Camera.main.ScreenPointToRay(_input.CrtMousePos);
+
+                Physics.Raycast(ray, out _hit, 100);
+                
+                if (_hit.transform != null)
+                {
+                    _camera.Focus(_hit.transform, m_immediate, m_setDistance);
+                }
             }
+
         }
     }
 }
