@@ -17,6 +17,20 @@ namespace NonsensicalKit.Tools
 
         #region PublicMethod
 
+        public static string GetNumAlphabet(int num)
+        {
+            string result = string.Empty;
+            while (num > 0)
+            {
+                num--; // 调整num，使余数0对应'A'
+                int remainder = num % 26;
+                result = (char)(65 + remainder) + result;
+                num /= 26;
+            }
+
+            return result;
+        }
+
         ///<summary>
         /// 判断输入的字符串是否只包含数字和英文字母  
         /// </summary>

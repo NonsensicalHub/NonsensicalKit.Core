@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace NonsensicalKit.Core
 {
     /// <summary>
-    /// 使用一维数组实现三维数组
+    /// 使用一维数组实现可序列化三维数组
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
@@ -60,11 +61,14 @@ namespace NonsensicalKit.Core
             }
         }
 
+
         public void Reset()
         {
+            if (m_Array == null) return;
             var type = typeof(T);
             var hasEmptyConstr = type.GetConstructor(Type.EmptyTypes) != null;
-            if (hasEmptyConstr)
+            var isMonoBehaviour = type.IsSubclassOf(typeof(MonoBehaviour));
+            if (hasEmptyConstr && !isMonoBehaviour)
             {
                 for (int i = 0; i < m_Array.Length; i++)
                 {
@@ -79,6 +83,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
 
         public T this[int index0, int index1, int index2]
         {

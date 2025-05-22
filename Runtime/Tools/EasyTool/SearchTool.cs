@@ -49,7 +49,7 @@ namespace NonsensicalKit.Tools.EasyTool
             {
                 if (node.Children.TryGetValue(c, out StringSearchTreeNode child) == false)
                 {
-                    return new int[0];
+                    return Array.Empty<int>();
                 }
 
                 node = child;

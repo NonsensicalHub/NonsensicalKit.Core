@@ -1,10 +1,11 @@
 using System;
-using UnityEngine.Serialization;
+using NonsensicalKit.Tools;
+using UnityEngine;
 
 namespace NonsensicalKit.Core
 {
     /// <summary>
-    /// 使用一维数组实现二维数组
+    /// 使用一维数组实现可序列化二维数组
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
@@ -37,9 +38,11 @@ namespace NonsensicalKit.Core
 
         public void Reset()
         {
+            if (m_Array == null) return;
             var type = typeof(T);
             var hasEmptyConstr = type.GetConstructor(Type.EmptyTypes) != null;
-            if (hasEmptyConstr)
+            var isMonoBehaviour = type.IsSubclassOf(typeof(MonoBehaviour));
+            if (hasEmptyConstr && !isMonoBehaviour)
             {
                 for (int i = 0; i < m_Array.Length; i++)
                 {
@@ -83,6 +86,17 @@ namespace NonsensicalKit.Core
         {
             get => m_Array[index];
             set => m_Array[index] = value;
+        }
+
+        public bool TryGet(int index0, int index1, out T value)
+        {
+            value = default;
+            if (index0<0||index1<0||index0>=m_Length0||index1>=m_Length1)
+            {
+                return false;
+            }
+            value=this[index0 * m_Step0 + index1];
+            return true;
         }
 
         public Tuple<int, int> GetIndexTuple(int index)

@@ -130,6 +130,8 @@ namespace NonsensicalKit.Core.Service.Asset
 
             string[] bundles = assetBundleManifest.GetAllAssetBundles();
 
+            LogCore.Info($"从 {_rootUrl} 加载AssetBundles完成,共有{bundles.Length}个文件" );
+            
             foreach (var item in bundles)
             {
                 _assetBundleDic.Add(item, new AssetBundleContext(item, assetBundleManifest.GetDirectDependencies(item)));

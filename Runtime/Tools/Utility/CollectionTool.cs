@@ -9,26 +9,38 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class CollectionTool
     {
-        public static IList Clone(this IList list)
+        public static T Clone<T>(this T list) where T :IList
         {
-            IList clonedList = (IList)Activator.CreateInstance(list.GetType());
+            T clonedList = (T)Activator.CreateInstance(list.GetType());
             foreach (var obj in list)
             {
                 clonedList.Add(obj);
             }
+
             return clonedList;
         }
-        
+
+        public static T[] Clone<T>(this T[] array)
+        {
+            T[] clonedArray = new T[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                clonedArray[i] = array[i];
+            }
+
+            return clonedArray;
+        }
         public static List<T> Clone<T>(this List<T> list)
         {
-            List<T> clonedList = new  List<T>(list.Count);
+            List<T> clonedList = new List<T>(list.Count);
             foreach (var obj in list)
             {
                 clonedList.Add(obj);
             }
+        
             return clonedList;
         }
-        
+
         public static IList Resize(IList list, Type type, int size)
         {
             int delta = size;
@@ -78,7 +90,7 @@ namespace NonsensicalKit.Tools
 
         public static void Add<T>(this IList<T> list, T value, int count)
         {
-            for (int i = 0; i <count; i++)
+            for (int i = 0; i < count; i++)
             {
                 list.Add(value);
             }
@@ -89,6 +101,14 @@ namespace NonsensicalKit.Tools
             for (int i = 0; i < list.Count; i++)
             {
                 list[i] = value;
+            }
+        }
+
+        public static void FillNew<T>(this IList<T> list) where T : new()
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i] = new T();
             }
         }
 

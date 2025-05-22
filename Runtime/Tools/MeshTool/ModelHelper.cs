@@ -238,6 +238,21 @@ namespace NonsensicalKit.Tools.MeshTool
             return crtMeshBuffer.ToMesh();
         }
 
+        private static int GetPointValue(Int3 a, Int3 b)
+        {
+            if (a.I1 != 0)
+            {
+                return b.I1;
+            }
+
+            if (a.I2 != 0)
+            {
+                return b.I2;
+            }
+
+            return a.I3 != 0 ? b.I3 : 0;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -319,8 +334,8 @@ namespace NonsensicalKit.Tools.MeshTool
             {
                 Int3 point = points.Pop();
 
-                int dir1Value = point.GetValue(dir1);
-                int dir2Value = point.GetValue(dir2);
+                int dir1Value = GetPointValue(dir1, point);
+                int dir2Value = GetPointValue(dir2, point);
 
                 if (dir1Value < minDir1Limit || dir1Value > maxDir1Limit
                                              || dir2Value < minDir2Limit || dir2Value > maxDir2Limit)
@@ -470,8 +485,8 @@ namespace NonsensicalKit.Tools.MeshTool
                         if (buffer[i, j, k])
                         {
                             Int3 point = new Int3(i, j, k);
-                            int dir1Value = point.GetValue(dir1);
-                            int dir2Value = point.GetValue(dir2);
+                            int dir1Value = GetPointValue(dir1, point);
+                            int dir2Value = GetPointValue(dir2, point);
 
                             if (dir1Value < minDir1Limit || dir1Value > maxDir1Limit
                                                          || dir2Value < minDir2Limit || dir2Value > maxDir2Limit)
@@ -494,10 +509,10 @@ namespace NonsensicalKit.Tools.MeshTool
             Vector3 dir1V3 = new Vector3(dir1.I1, dir1.I2, dir1.I3);
             Vector3 dir2V3 = new Vector3(dir2.I1, dir2.I2, dir2.I3);
 
-            Vector3 dir1MinOffset = (minDir1Limit - crtPoint.GetValue(dir1)) * dir1V3 * step;
-            Vector3 dir1MaxOffset = (maxDir1Limit - crtPoint.GetValue(dir1)) * dir1V3 * step;
-            Vector3 dir2MinOffset = (minDir2Limit - crtPoint.GetValue(dir2)) * dir2V3 * step;
-            Vector3 dir2MaxOffset = (maxDir2Limit - crtPoint.GetValue(dir2)) * dir2V3 * step;
+            Vector3 dir1MinOffset = (minDir1Limit - GetPointValue(dir1, crtPoint)) * step * dir1V3;
+            Vector3 dir1MaxOffset = (maxDir1Limit - GetPointValue(dir1, crtPoint)) * step * dir1V3;
+            Vector3 dir2MinOffset = (minDir2Limit - GetPointValue(dir2, crtPoint)) * step * dir2V3;
+            Vector3 dir2MaxOffset = (maxDir2Limit - GetPointValue(dir2, crtPoint)) * step * dir2V3;
 
             point4[0] = faceCenterPoint + dir1MinOffset + dir2MinOffset + -dir1V3 * distance + -dir2V3 * distance;
             point4[1] = faceCenterPoint + dir1MaxOffset + dir2MinOffset + dir1V3 * distance + -dir2V3 * distance;
@@ -712,7 +727,7 @@ namespace NonsensicalKit.Tools.MeshTool
             for (int i = 0; i < all; i++)
             {
                 float x = (float)row / count;
-                float y =  (float)column / count;
+                float y = (float)column / count;
                 meshbuffer.AddQuad(
                     new[]
                     {

@@ -14,12 +14,7 @@ namespace NonsensicalKit.Core
         {
             get
             {
-                if (_instance == null)
-                {
-                    _instance = Activator.CreateInstance(typeof(T), true) as T;
-                }
-
-                return _instance;
+                return _instance ??= Activator.CreateInstance(typeof(T), true) as T;
             }
         }
 
