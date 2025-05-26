@@ -149,7 +149,7 @@ namespace NonsensicalKit.Core.Service.Config
         /// <typeparam name="T">配置类的类型</typeparam>
         /// <param name="values">out值，获取不到时为默认值</param>
         /// <returns>是否获取成功</returns>
-        public bool TryGetConfigs<T>(out IList<T> values) where T : ConfigData
+        public bool TryGetConfigs<T>(out List<T> values) where T : ConfigData
         {
             values = new List<T>();
             foreach (var configData in _configs.Values)
