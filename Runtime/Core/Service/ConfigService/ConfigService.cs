@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using NaughtyAttributes;
+using Newtonsoft.Json.Linq;
 using NonsensicalKit.Tools;
 using NonsensicalKit.Tools.NetworkTool;
 using UnityEngine;
@@ -22,6 +24,9 @@ namespace NonsensicalKit.Core.Service.Config
 
         [Tooltip("生成和读取json文件")] [SerializeField]
         private bool m_jsonMode = true;
+        
+        [Tooltip("将所有配置json合并到一个文件，减少文件请求次数")] [SerializeField]
+        private bool m_singleJsonMode = true;
 
         [Tooltip("所有管理的配置文件，可以通过右键-Set All Config来快速设置项目内所有配置文件")] [SerializeField]
         private ConfigObject[] m_configDatas = Array.Empty<ConfigObject>();
@@ -60,15 +65,23 @@ namespace NonsensicalKit.Core.Service.Config
             else
             {
                 //发布出去后读取json文件，而不是直接使用序列化对象
-                _count = m_configDatas.Length;
-                foreach (var item in m_configDatas)
-                {
-                    StartCoroutine(StartGet(item));
-                }
 
-                while (_count != 0)
+                if (m_singleJsonMode)
                 {
-                    yield return null;
+                    yield return GetSingleConfig();
+                }
+                else
+                {
+                    _count = m_configDatas.Length;
+                    foreach (var item in m_configDatas)
+                    {
+                        StartCoroutine(StartGet(item));
+                    }
+
+                    while (_count != 0)
+                    {
+                        yield return null;
+                    }
                 }
             }
 
@@ -231,6 +244,44 @@ namespace NonsensicalKit.Core.Service.Config
 
         #region private method
 
+        private IEnumerator GetSingleConfig()
+        {
+            string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs.json");
+            
+            UnityWebRequest unityWebRequest = new UnityWebRequest();
+            yield return unityWebRequest.Get(configFilePath);
+
+            if (unityWebRequest.result == UnityWebRequest.Result.Success)
+            {
+                string str = unityWebRequest.downloadHandler.text;
+                
+                JArray arr = JArray.Parse(str);
+
+                if (arr.Count != m_configDatas.Length)
+                {
+                    Debug.LogError("获取的配置文件不匹配：" + configFilePath);
+                    yield break;
+                }
+
+                for (int i = 0; i < arr.Count; i++)
+                {
+                    ConfigObject obj = m_configDatas[i];
+                    var data= arr[i].ToObject( obj.GetData().GetType()) as ConfigData;
+                    
+                    obj.BeforeSetData();
+                    obj.SetData(data);
+                    obj.AfterSetData();
+                    string crtID = data.ConfigID;
+                    _configs[crtID] = obj.GetData();
+                }
+            }
+            else
+            {
+                Debug.LogError("获取配置文件失败：" + configFilePath);
+            }
+        }
+
+        
         private IEnumerator StartGet(ConfigObject obj)
         {
             var data = obj.GetData();
@@ -333,13 +384,41 @@ namespace NonsensicalKit.Core.Service.Config
                     return;
                 }
 
-                for (int i = 0; i < m_configDatas.Length; i++)
+                if (m_singleJsonMode)
                 {
-                    var data = m_configDatas[i].GetData();
-                    string path = GetFilePath(data);
-                    string str = FileTool.ReadAllText(path);
-                    SetData(str, data.GetType(), m_configDatas[i]);
-                    EditorUtility.SetDirty(m_configDatas[i]);
+                    
+                    string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs.json");
+
+                    string str = FileTool.ReadAllText(configFilePath);
+                    
+                    JArray arr = JArray.Parse(str);
+
+                    if (arr.Count != m_configDatas.Length)
+                    {
+                        Debug.LogError("获取的配置文件不匹配：" + configFilePath);
+                        return;
+                    }
+
+                    for (int i = 0; i < arr.Count; i++)
+                    {
+                        ConfigObject obj = m_configDatas[i];
+                        var data= arr[i].ToObject( obj.GetData().GetType()) as ConfigData;
+                        obj.BeforeSetData();
+                        obj.SetData(data);
+                        obj.AfterSetData();
+                        EditorUtility.SetDirty(m_configDatas[i]);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < m_configDatas.Length; i++)
+                    {
+                        var data = m_configDatas[i].GetData();
+                        string path = GetFilePath(data);
+                        string str = FileTool.ReadAllText(path);
+                        SetData(str, data.GetType(), m_configDatas[i]);
+                        EditorUtility.SetDirty(m_configDatas[i]);
+                    }
                 }
             }
         }
@@ -347,6 +426,7 @@ namespace NonsensicalKit.Core.Service.Config
         /// <summary>
         /// 打包前调用
         /// </summary>
+        [ContextMenu("Create Json")]
         public void OnBeforeBuild()
         {
             if (m_autoMode)
@@ -372,30 +452,45 @@ namespace NonsensicalKit.Core.Service.Config
         }
 
         /// <summary>
-        /// Build时会调用此方法，将序列化序列化对象写入StreamingAssets文件夹里的json文件
+        /// Build时会自动调用此方法，将序列化序列化对象写入StreamingAssets文件夹里的json文件
         /// </summary>
         private void WriteConfigs()
         {
-            _configs = new Dictionary<string, ConfigData>();
-            foreach (var t in m_configDatas)
+            if (m_singleJsonMode)
             {
-                var data = t.GetData();
-                string crtID = data.ConfigID;
-                if (!_configs.ContainsKey(crtID))
+                JArray arr = new JArray();
+                
+                string configFilePath = Path.Combine(Application.streamingAssetsPath, "Configs.json");
+                foreach (var t in m_configDatas)
                 {
-                    try
-                    {
-                        string json = JsonTool.SerializeObject(data);
-                        FileTool.WriteTxt(GetFilePath(data), json);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new BuildFailedException($"配置{data.ConfigID}json文件写入{GetFilePath(data)}失败\r\n{e.Message}");
-                    }
+                    arr.Add(JObject.FromObject(t.GetData()));
                 }
-                else
+                
+                FileTool.WriteTxt(configFilePath, arr.ToString());
+            }
+            else
+            {
+                var configs = new HashSet<string>();
+                foreach (var t in m_configDatas)
                 {
-                    throw new BuildFailedException($"相同类型配置的ID重复: {crtID}");
+                    var data = t.GetData();
+                    string crtID = data.ConfigID;
+                    if (configs.Add(crtID))
+                    {
+                        try
+                        {
+                            string json = JsonTool.SerializeObject(data);
+                            FileTool.WriteTxt(GetFilePath(data), json);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new BuildFailedException($"配置{data.ConfigID}json文件写入{GetFilePath(data)}失败\r\n{e.Message}");
+                        }
+                    }
+                    else
+                    {
+                        throw new BuildFailedException($"相同类型配置的ID重复: {crtID}");
+                    }
                 }
             }
         }

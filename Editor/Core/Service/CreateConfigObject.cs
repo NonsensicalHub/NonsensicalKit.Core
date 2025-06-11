@@ -9,7 +9,7 @@ namespace NonsensicalKit.Core.Editor.Service.Config
 {
     public class CreateConfigObject : EndNameEditAction
     {
-        [MenuItem("Assets/Create/NonsensicalKit/ConfigConfigObject", false, 100)]
+        [MenuItem("Assets/Create/NonsensicalKit/CreateConfigObject", false, -100)]
         private static void ShowWindow()
         {
             Create();
@@ -20,7 +20,7 @@ namespace NonsensicalKit.Core.Editor.Service.Config
             //参数为传递给CreateEventCSScriptAsset类action方法的参数
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0,
                 CreateInstance<CreateConfigObject>(),
-                GetSelectPathOrFallback() + $"/NewConfig.cs", null, "");
+                GetSelectPathOrFallback() + $"/NewConfigObject.cs", null, "");
         }
 
         /// <summary>
@@ -63,8 +63,8 @@ namespace NonsensicalKit.Core.Editor.Service.Config
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = ""#CLASSNAME#Config"", menuName = ""ScriptableObjects/#CLASSNAME#Config"")]
-public class #CLASSNAME#Config : ConfigObject
+[CreateAssetMenu(fileName = ""#CLASSNAME#"", menuName = ""ScriptableObjects/#CLASSNAME#"")]
+public class #CLASSNAME# : ConfigObject
 {
     public #CLASSNAME#Data data;
     public override ConfigData GetData()

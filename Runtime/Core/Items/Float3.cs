@@ -39,6 +39,27 @@ namespace NonsensicalKit.Core
             m_f3 = vector3.z;
         }
 
+        public float this[int index]
+        {
+            get
+            {
+                return index switch
+                {
+                    1 => m_f2,
+                    2 => m_f3,
+                    _ => m_f1
+                };
+            }
+            set
+            {
+                switch (index)
+                {
+                    default: m_f1 = value; break;
+                    case 1: m_f2 = value; break;
+                    case 2: m_f3 = value; break;
+                }
+            }
+        }
         public Vector3 ToVector3()
         {
             return new Vector3(F1, F2, F3);

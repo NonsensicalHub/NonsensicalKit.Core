@@ -12,7 +12,7 @@ namespace NonsensicalKit.Core
     {
         public static readonly Int3 Zero = new Int3(0, 0, 0);
         public static readonly Int3 One = new Int3(1, 1, 1);
-        
+
         [SerializeField] private int m_i1;
         [SerializeField] private int m_i2;
         [SerializeField] private int m_i3;
@@ -50,6 +50,29 @@ namespace NonsensicalKit.Core
             if (float3.F3 - m_i3 >= 0.5f)
             {
                 m_i3++;
+            }
+        }
+
+
+        public int this[int index]
+        {
+            get
+            {
+                return index switch
+                {
+                    1 => m_i2,
+                    2 => m_i3,
+                    _ => m_i1
+                };
+            }
+            set
+            {
+                switch (index)
+                {
+                    default: m_i1 = value; break;
+                    case 1: m_i2 = value; break;
+                    case 2: m_i3 = value; break;
+                }
             }
         }
 

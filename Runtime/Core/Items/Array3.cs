@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace NonsensicalKit.Core
 {
@@ -14,13 +13,17 @@ namespace NonsensicalKit.Core
     {
         public T[] m_Array;
 
-        public int m_Length0;
-        public int m_Length1;
-        public int m_Length2;
+        [FormerlySerializedAs("Length0")] public int m_Length0;
+        [FormerlySerializedAs("Length1")] public int m_Length1;
+        [FormerlySerializedAs("Length2")] public int m_Length2;
 
-        public int m_Step0;
-        public int m_Step1;
+        [FormerlySerializedAs("Step0")] public int m_Step0;
+        [FormerlySerializedAs("Step1")] public int m_Step1;
 
+        public int Length0 => m_Length0;
+        public int Length1 => m_Length1;
+        public int Length2 => m_Length2;
+        
         public Array3(int length0, int length1, int length2)
         {
             m_Array = new T[length0 * length1 * length2];
@@ -130,6 +133,10 @@ namespace NonsensicalKit.Core
             }
         }
 
+        public T SafeGet(Int3 int3)
+        {
+            return SafeGet(int3.X, int3.Y, int3.Z);
+        }
         public T SafeGet(int index0, int index1, int index2)
         {
             if (index0 < 0 || index1 < 0 || index2 < 0)

@@ -72,6 +72,17 @@ namespace NonsensicalKit.Tools.NetworkTool
             yield return unityWebRequest.SendWebRequest();
         }
 
+        public static IEnumerator Post(this UnityWebRequest unityWebRequest, string url, string json, Dictionary<string, string> header)
+        {
+            unityWebRequest.method = "Post";
+            unityWebRequest.url = url;
+            IncreaseHeader(unityWebRequest, header);
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+            unityWebRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            yield return unityWebRequest.SendWebRequest();
+        }
+
         public static IEnumerator GetAudio(this UnityWebRequest unityWebRequest, string url)
         {
             AudioType audioType;
