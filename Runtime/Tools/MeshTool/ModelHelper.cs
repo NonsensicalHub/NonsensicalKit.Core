@@ -828,7 +828,7 @@ namespace NonsensicalKit.Tools.MeshTool
         {
             MeshBuilder meshbuffer = new MeshBuilder();
 
-            var v = BezierTool.GetThreePowerBezierListWithSlope(start, p1, p2, end, segmentNum);
+            var v = BezierTool.GetCubicBezierListWithSlope(start, p1, p2, end, segmentNum);
 
             var point = v[0];
             var slopes = v[1];
@@ -862,7 +862,7 @@ namespace NonsensicalKit.Tools.MeshTool
         {
             MeshBuilder meshBuilder = new MeshBuilder();
 
-            var v = BezierTool.GetThreePowerBezierListWithSlope(start, p1, p2, end, segmentNum);
+            var v = BezierTool.GetCubicBezierListWithSlope(start, p1, p2, end, segmentNum);
 
             var point = v[0];
             var slopes = v[1];
@@ -898,7 +898,7 @@ namespace NonsensicalKit.Tools.MeshTool
             MeshBuilder meshbuffer = new MeshBuilder();
 
             rotate = Quaternion.Inverse(rotate);
-            var v = BezierTool.GetThreePowerBezierListWithSlope(rotate * start, rotate * p1, rotate * p2, rotate * end, segmentNum);
+            var v = BezierTool.GetCubicBezierListWithSlope(rotate * start, rotate * p1, rotate * p2, rotate * end, segmentNum);
 
             var point = v[0];
             var slopes = v[1];

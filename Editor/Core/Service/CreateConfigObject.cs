@@ -15,19 +15,20 @@ namespace NonsensicalKit.Core.Editor.Service.Config
             Create();
         }
 
-        public static void Create()
+        private static void Create()
         {
             //参数为传递给CreateEventCSScriptAsset类action方法的参数
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0,
                 CreateInstance<CreateConfigObject>(),
-                GetSelectPathOrFallback() + $"/NewConfigObject.cs", null, "");
+                $"NewConfigObject.cs", null, "");
+                //GetSelectPathOrFallback() + $"/NewConfigObject.cs", null, "");
         }
 
         /// <summary>
         /// 取得要创建文件的路径
         /// </summary>
         /// <returns></returns>
-        public static string GetSelectPathOrFallback()
+        private static string GetSelectPathOrFallback()
         {
             string path = "Assets";
             //遍历选中的资源以获得路径
@@ -41,7 +42,6 @@ namespace NonsensicalKit.Core.Editor.Service.Config
                     break;
                 }
             }
-
             return path;
         }
 

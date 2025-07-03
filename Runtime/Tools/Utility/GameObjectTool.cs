@@ -53,6 +53,23 @@ namespace NonsensicalKit.Tools
             return GetOrAddComponent<T>(t.gameObject);
         }
 
+        public static T GetNearestObject<T>(this IEnumerable<T> list, Vector3 pos) where T : Component
+        {
+            T nearest = null;
+            float nearestDistance = float.MaxValue;
+            foreach (var item in list)
+            {
+                var distance = Vector3.Distance(pos, item.transform.position);
+                if (distance < nearestDistance)
+                {
+                    nearest = item;
+                    nearestDistance = distance;
+                }
+            }
+
+            return nearest;
+        }
+
         /// <summary>
         /// 获取对象上的所有组件名称
         /// </summary>

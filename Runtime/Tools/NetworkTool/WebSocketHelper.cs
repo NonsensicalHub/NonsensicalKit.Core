@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
-using NonsensicalKit.Core;
+using NonsensicalKit.Core.Log;
 using UnityEngine;
 
 namespace NonsensicalKit.Tools.NetworkTool
 {
-    public class WebSocketHelper : MonoSingleton<WebSocketHelper>
+    public class WebSocketHelper : MonoBehaviour
     {
         /// <summary>
         /// 发送消息回调Action
@@ -24,19 +25,15 @@ namespace NonsensicalKit.Tools.NetworkTool
         private bool _reConnect; //线程重连用
         private bool _isQuitting; //是否正在退出应用，用于防止在退出时尝试实例化新物体
 
-        private Thread _heartbeatThread; //心跳线程
+        public float ReconnectionInterval { get; set; } = 2f; //重连间隔
 
-        private float _reconnectionInterval; //重连间隔
-        private float _heartbeatInterval; //心跳间隔
+        public float HeartbeatInterval { get; set; } = -1; //心跳间隔
+
+        public string HeartbeatMessage { get; set; } = string.Empty; //心跳消息
 
         private string _uri;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            _reconnectionInterval = 2f;
-            _heartbeatInterval = 29f;
-        }
+        private   Coroutine _heartbeatCoroutine;
 
         protected void Update()
         {
@@ -47,14 +44,13 @@ namespace NonsensicalKit.Tools.NetworkTool
             }
         }
 
-        protected override void OnDestroy()
+        private void OnDestroy()
         {
-            base.OnDestroy();
             _isQuitting = true;
 
-            if (_heartbeatThread != null)
+            if (_heartbeatCoroutine != null)
             {
-                _heartbeatThread.Abort();
+                StopCoroutine(_heartbeatCoroutine);
             }
 
             if (_ws != null)
@@ -69,9 +65,9 @@ namespace NonsensicalKit.Tools.NetworkTool
         /// </summary>
         public void Abort()
         {
-            if (_heartbeatThread != null)
+            if (_heartbeatCoroutine != null)
             {
-                _heartbeatThread.Abort();
+                StopCoroutine(_heartbeatCoroutine);
             }
 
             if (_ws != null)
@@ -84,7 +80,7 @@ namespace NonsensicalKit.Tools.NetworkTool
         /// <summary>
         /// 初始化websocket并连接
         /// </summary>
-        public void WebsocketConnect(string uri)
+        public void Connect(string uri, Dictionary<string, string> headers = null)
         {
             this._uri = uri;
             _ws = new WebSocketWrap();
@@ -94,22 +90,22 @@ namespace NonsensicalKit.Tools.NetworkTool
             _ws.OnMessage += OnMessage;
 
             _ws.OnWebSocketState += OnWebSocketState;
-            _ws.Connect(uri);
-            if (_heartbeatThread != null)
+            _ws.Connect(uri, headers);
+            if (_heartbeatCoroutine != null)
             {
-                _heartbeatThread.Abort();
+                StopCoroutine(_heartbeatCoroutine);
             }
 
-            StartCoroutine(StartHeartbeat());
+            _heartbeatCoroutine = StartCoroutine(StartHeartbeat());
         }
 
         /// <summary>
         /// 向服务器发送消息
         /// </summary>
         /// <param name="msg"></param>
-        public void SendMessageToServer(string msg)
+        public void Send(string msg)
         {
-            _ws.Send(msg);
+            _ws.SendMessage(msg);
         }
 
         /// <summary>
@@ -118,8 +114,8 @@ namespace NonsensicalKit.Tools.NetworkTool
         /// <returns></returns>
         private IEnumerator ReConnect()
         {
-            yield return new WaitForSeconds(_reconnectionInterval);
-            WebsocketConnect(_uri);
+            yield return new WaitForSeconds(ReconnectionInterval);
+            Connect(_uri);
         }
 
         /// <summary>
@@ -128,26 +124,23 @@ namespace NonsensicalKit.Tools.NetworkTool
         /// <returns></returns>
         private IEnumerator StartHeartbeat()
         {
+            if (HeartbeatInterval<=0)
+            {
+                yield break;
+            }
+            
             while (_ws.IsConnected == false)
             {
                 yield return new WaitForSeconds(0.5f);
             }
 
-            _heartbeatThread = new Thread(Heartbeat);
-            _heartbeatThread.Start();
-        }
-
-        /// <summary>
-        /// 心跳线程方法
-        /// </summary>
-        private void Heartbeat()
-        {
-            while (_ws != null)
+            while (true)
             {
-                SendMessageToServer("");
-                Thread.Sleep((int)(_heartbeatInterval * 1000));
+                yield return new WaitForSeconds(HeartbeatInterval);
+                _ws.SendMessage(string.Empty);
             }
         }
+
 
         private void OnMessage(string msg)
         {
@@ -167,7 +160,6 @@ namespace NonsensicalKit.Tools.NetworkTool
                     {
                         _reConnect = true;
                     }
-
                     break;
                 case WebSocketState.CloseReceived:
                     break;
@@ -194,24 +186,31 @@ namespace NonsensicalKit.Tools.NetworkTool
         //连接失败
         public Action OnConnectError { get; set; }
 
-        //数据返回
+        //收到消息
         public Action<string> OnMessage { get; set; }
 
         public bool IsConnected => _ws.State == WebSocketState.Open;
 
         private ClientWebSocket _ws;
 
-        private CancellationToken _ct;
+        private CancellationTokenSource _ct;
 
-        public async void Connect(string uri)
+        public async void Connect(string uri, Dictionary<string, string> headers = null)
         {
             try
             {
-                Debug.LogFormat("[WebSocket] 开始连接 {0}", uri);
                 _ws = new ClientWebSocket();
-                _ct = new CancellationToken();
+                if (headers != null)
+                {
+                    foreach (var header in headers)
+                    {
+                        _ws.Options.SetRequestHeader(header.Key, header.Value);
+                    }
+                }
+
+                _ct = new CancellationTokenSource();
                 Uri url = new Uri(uri);
-                await _ws.ConnectAsync(url, _ct);
+                await _ws.ConnectAsync(url, _ct.Token);
 
                 if (OnWebSocketState != null)
                     OnWebSocketState(_ws.State);
@@ -219,7 +218,7 @@ namespace NonsensicalKit.Tools.NetworkTool
                 while (true)
                 {
                     var result = new byte[1024];
-                    await _ws.ReceiveAsync(new ArraySegment<byte>(result), new CancellationToken()); //接受数据
+                    await _ws.ReceiveAsync(new ArraySegment<byte>(result), _ct.Token); //接受数据
                     var str = Encoding.UTF8.GetString(result, 0, result.Length);
                     str = str.Replace("\0", ""); //去掉尾部空字符
 
@@ -241,25 +240,16 @@ namespace NonsensicalKit.Tools.NetworkTool
             }
         }
 
-        // 发送心跳
-        public void SendHeartBeat()
-        {
-            if (_ws == null || _ws.State != WebSocketState.Open)
-                return;
-
-            _ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes("{\"id\":101}")), WebSocketMessageType.Text, true, _ct);
-        }
-
         // 发送数据
-        public void Send(string data)
+        public void SendMessage(string msg)
         {
             if (_ws == null || _ws.State != WebSocketState.Open)
             {
-                Debug.LogErrorFormat("[WebSocket] 发送数据失败，未连接上服务器。");
+                LogCore.Warning("[WebSocket] 发送数据失败，未连接上websocket服务端。");
                 return;
             }
 
-            _ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(data)), WebSocketMessageType.Text, true, _ct);
+            _ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg)), WebSocketMessageType.Text, true, _ct.Token);
         }
 
         //中止WebSocket连接并取消任何挂起的IO操作
@@ -267,6 +257,7 @@ namespace NonsensicalKit.Tools.NetworkTool
         {
             if (_ws == null)
                 return;
+            _ct.Cancel();
             _ws.Abort();
         }
     }

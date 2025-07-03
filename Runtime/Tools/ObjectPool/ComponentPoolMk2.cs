@@ -23,6 +23,8 @@ namespace NonsensicalKit.Tools.ObjectPool
         private readonly Action<TComponent> _initAction; //取出时调用
         private readonly Action<ComponentPoolMk2<TComponent>, TComponent> _createAction; //首次生成时调用
 
+        public List<TComponent> Actives=>_actives;
+        
         public ComponentPoolMk2(TComponent prefab,
             Action<TComponent> resetAction = null,
             Action<TComponent> initAction = null,
