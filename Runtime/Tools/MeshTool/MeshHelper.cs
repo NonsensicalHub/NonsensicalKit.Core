@@ -76,6 +76,23 @@ namespace NonsensicalKit.Tools.MeshTool
             mesh.normals = normals.ToArray();
         }
 
+        public static Vector3 GetPointClosestLine(Vector3 linePoint1, Vector3 linePoint2, Transform model, Mesh mesh)
+        {
+            float minDistance = float.MaxValue;
+            Vector3 closestPoint = Vector3.zero;
+            foreach (var point in mesh.vertices)
+            {
+                var worldPoint = model.TransformPoint(point);
+                var distance = VectorTool.CalculatePointToLineDistance(worldPoint, linePoint1, linePoint2);
+                if (distance < minDistance)
+                {
+                    closestPoint = worldPoint;
+                }
+            }
+
+            return closestPoint;
+        }
+
         /// <summary>
         /// 根据顶点数组求出质点并返回回偏移量
         /// </summary>

@@ -620,15 +620,17 @@ namespace NonsensicalKit.Tools
                                 (linePoint2.y - linePoint1.y) * (linePoint2.y - linePoint1.y) +
                                 (linePoint2.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
 
-            if (denominator == 0)
+            if (denominator < Mathf.Epsilon)
             {
-                return Vector3.zero;
+                //Debug.LogWarning("直线点重合");
+                return linePoint1;
             }
 
-            float numerator = (linePoint1.x - singlePoint.x) * (linePoint2.x - linePoint1.x)
-                              + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
-                              + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
-            float k = -numerator / denominator;
+            float numerator = (singlePoint.x - linePoint1.x) * (linePoint2.x - linePoint1.x)
+                              + (singlePoint.y - linePoint1.y) * (linePoint2.y - linePoint1.y)
+                              + (singlePoint.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
+            
+            float k = numerator / denominator;
             Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y,
                 k * (linePoint2.z - linePoint1.z) + linePoint1.z);
 
@@ -639,11 +641,21 @@ namespace NonsensicalKit.Tools
         /// 获取点与直线的距离
         /// </summary>
         /// <returns></returns>
-        public static float GetFootDropDistance(Vector3 singlePoint, Vector3 linePoint1, Vector3 linePoint2)
+        public static float CalculatePointToLineDistance(Vector3 singlePoint, Vector3 linePoint1, Vector3 linePoint2)
         {
-            var v = GetFootDrop(singlePoint, linePoint1, linePoint2);
+            Vector3 bc = linePoint2 - linePoint1;
+            float magnitudeBC = bc.magnitude;
 
-            return Vector3.Distance(v, singlePoint);
+            // 处理B和C重合的情况
+            if (magnitudeBC < Mathf.Epsilon)
+            {
+                //Debug.LogWarning("点B和点C重合，直线无效。返回点A到点B的距离。");
+                return Vector3.Distance(singlePoint, linePoint1);
+            }
+
+            Vector3 ba = singlePoint - linePoint1;
+            Vector3 cross = Vector3.Cross(ba, bc); // 叉积
+            return cross.magnitude / magnitudeBC; // 距离
         }
 
         /// <summary>
@@ -711,19 +723,21 @@ namespace NonsensicalKit.Tools
         /// <returns>垂足不在线段上时返回null</returns>
         public static Vector3? GetFootDropInLineSegment(Vector3 singlePoint, Vector3 linePoint1, Vector3 linePoint2)
         {
-            float numerator = (linePoint1.x - singlePoint.x) * (linePoint2.x - linePoint1.x)
-                              + (linePoint1.y - singlePoint.y) * (linePoint2.y - linePoint1.y)
-                              + (linePoint1.z - singlePoint.z) * (linePoint2.z - linePoint1.z);
             float denominator = (linePoint2.x - linePoint1.x) * (linePoint2.x - linePoint1.x) +
                                 (linePoint2.y - linePoint1.y) * (linePoint2.y - linePoint1.y) +
                                 (linePoint2.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
 
-            if (denominator == 0)
+            if (denominator < Mathf.Epsilon)
             {
-                return null;
+                //Debug.LogWarning("直线点重合");
+                return linePoint1;
             }
 
-            float k = -numerator / denominator;
+            float numerator = (singlePoint.x - linePoint1.x) * (linePoint2.x - linePoint1.x)
+                              + (singlePoint.y - linePoint1.y) * (linePoint2.y - linePoint1.y)
+                              + (singlePoint.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
+
+            float k = numerator / denominator;
             if (k < 0 || k > 1)
             {
                 return null;
@@ -822,7 +836,7 @@ namespace NonsensicalKit.Tools
         /// <param name="dir1"></param>
         /// <param name="dir2"></param>
         /// <returns></returns>
-        public static bool IsParallel(Vector3 dir1, Vector3 dir2)
+        public static bool IsParallel(this Vector3 dir1, Vector3 dir2)
         {
             return Vector3.Cross(dir1, dir2) == Vector3.zero;
         }
@@ -833,27 +847,45 @@ namespace NonsensicalKit.Tools
         /// <param name="dir1"></param>
         /// <param name="dir2"></param>
         /// <returns></returns>
-        public static bool IsVertical(Vector3 dir1, Vector3 dir2)
+        public static bool IsVertical(this Vector3 dir1, Vector3 dir2)
         {
             return Vector3.Dot(dir1, dir2) == 0;
+        }
+
+        public static float GetSkewLinesDistance(Vector3 dir1, Vector3 dir2, Vector3 point1, Vector3 point2)
+        {
+            return CalculateLineToLineDistance(point1, dir1, point2, dir2);
         }
 
         /// <summary>
         /// 获取异面直线的距离
         /// </summary>
         /// <returns></returns>
-        public static float GetSkewLinesDistance(Vector3 dir1, Vector3 dir2, Vector3 point1, Vector3 point2)
+        public static float CalculateLineToLineDistance(
+            Vector3 point1, Vector3 dir1, Vector3 point2, Vector3 dir2)
         {
-            if (IsParallel(dir1, dir2))
+            // 处理方向向量为零的情况
+            if (dir1.sqrMagnitude < Mathf.Epsilon || dir2.sqrMagnitude < Mathf.Epsilon)
             {
-                return GetFootDropDistance(point1, point2, point2 + dir2);
+                //Debug.LogWarning("方向向量长度为零，使用点对点距离计算");
+                return Vector3.Distance(point1, point2);
             }
-            else
+
+            // 计算方向向量的叉积
+            Vector3 crossDir = Vector3.Cross(dir1, dir2);
+            float crossMagnitude = crossDir.magnitude;
+
+            // 判断是否平行
+            if (crossMagnitude < Mathf.Epsilon)
             {
-                Vector3 normal = GetCommonVerticalLine(dir1, dir2);
-                Vector3 m = point1 - point2;
-                return Mathf.Abs(Vector3.Dot(m, normal)) / normal.magnitude;
+                // 平行直线：使用点P到直线2的距离
+                return CalculatePointToLineDistance(point1, point2, dir2);
             }
+
+            // 异面直线：使用点积公式
+            Vector3 link = point2 - point1;
+            float dotProduct = Mathf.Abs(Vector3.Dot(link, crossDir));
+            return dotProduct / crossMagnitude;
         }
 
         /// <summary>
