@@ -294,5 +294,10 @@ namespace NonsensicalKit.Tools
 
             return newArray;
         }
+
+        public static float SmoothX(float t)
+        {
+            return 0.5f + 0.5f * Mathf.Pow(t, 1f / 3);
+        }
     }
 }
