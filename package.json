@@ -35,6 +35,11 @@
       "displayName": "Timer",
       "description": "定时器工具",
       "path": "Samples~/Timer"
+    },
+    {
+      "displayName": "ProjectMemo",
+      "description": "项目备忘录工具",
+      "path": "Samples~/ProjectMemo"
     }
   ]
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using NaughtyAttributes;
 using NonsensicalKit.Core;
 using UnityEditor;
 using UnityEngine;
@@ -12,11 +13,18 @@ namespace NonsensicalKit.Tools.GUITool
     {
         [SerializeField] private bool m_getInput;
 
+        [SerializeField] private bool m_unUseDefaultKey;
+
+
         private bool _showEscapePanel;
         private GUIStyle _labelStyle;
 
 #if ENABLE_INPUT_SYSTEM
         private Keyboard _keyboard;
+        [SerializeField, ShowIf("m_unUseDefaultKey")]
+        private Key m_escapeKey = Key.Escape;
+#else
+        [SerializeField,ShowIf("m_unUseDefaultKey")] private KeyCode m_escapeKeyCode = KeyCode.Escape;
 #endif
 
         private void Awake()
@@ -31,7 +39,7 @@ namespace NonsensicalKit.Tools.GUITool
         {
             if (m_getInput)
             {
-                if (PlatformInfo.IsWebGL==false)
+                if (PlatformInfo.IsWebGL == false)
                 {
                     StartCoroutine(CorUpdate());
                 }
@@ -40,7 +48,7 @@ namespace NonsensicalKit.Tools.GUITool
 
         public void ShowEscapePanel()
         {
-            if (PlatformInfo.IsWebGL==false)
+            if (PlatformInfo.IsWebGL == false)
             {
                 _showEscapePanel = true;
             }
@@ -58,13 +66,13 @@ namespace NonsensicalKit.Tools.GUITool
 
                 if (_keyboard != null)
                 {
-                    if (_keyboard.escapeKey.wasPressedThisFrame)
+                    if (_keyboard[m_escapeKey].wasPressedThisFrame)
                     {
                         _showEscapePanel = true;
                     }
                 }
 #else
-                if (Input.GetKeyDown(KeyCode.Escape))
+                if (Input.GetKeyDown(m_escapeKeyCode))
                 {
                     _showEscapePanel = true;
                 }
