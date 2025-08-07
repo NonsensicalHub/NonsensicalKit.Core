@@ -16,8 +16,6 @@ namespace NonsensicalKit.Tools.EasyTool
 
         private Dictionary<string, RaycastHitsInfo> _hitsInfo;
         private Dictionary<string, RaycastHitInfo> _hitInfo;
-        private RaycastHitsInfo _raycastHitsInfo = new();
-        private RaycastHitInfo _raycastHitInfo = new();
 
         private void Awake()
         {
@@ -71,37 +69,39 @@ namespace NonsensicalKit.Tools.EasyTool
 
         private RaycastHitsInfo CheckAll(string mask)
         {
-            _raycastHitsInfo.FrameCount = Time.frameCount;
+            var raycastHitsInfo = new RaycastHitsInfo();
+            raycastHitsInfo.FrameCount = Time.frameCount;
             Ray ray = m_raycastCamera.ScreenPointToRay(Input.mousePosition);
 
             if (mask == "NULL")
             {
-                _raycastHitsInfo.RaycastHits = Physics.RaycastAll(ray, m_distance);
+                raycastHitsInfo.RaycastHits = Physics.RaycastAll(ray, m_distance);
             }
             else
             {
-                _raycastHitsInfo.RaycastHits = Physics.RaycastAll(ray, m_distance, LayerMask.GetMask(mask));
+                raycastHitsInfo.RaycastHits = Physics.RaycastAll(ray, m_distance, LayerMask.GetMask(mask));
             }
 
-            return _raycastHitsInfo;
+            return raycastHitsInfo;
         }
 
         private RaycastHitInfo CheckFirst(string mask)
         {
-            _raycastHitInfo.FrameCount = Time.frameCount;
+            var raycastHitInfo = new RaycastHitInfo();
+            raycastHitInfo.FrameCount = Time.frameCount;
 
             Ray ray = m_raycastCamera.ScreenPointToRay(Input.mousePosition);
 
             if (mask == "NULL")
             {
-                Physics.Raycast(ray, out _raycastHitInfo.RaycastHit, m_distance);
+                Physics.Raycast(ray, out raycastHitInfo.RaycastHit, m_distance);
             }
             else
             {
-                Physics.Raycast(ray, out _raycastHitInfo.RaycastHit, m_distance, LayerMask.GetMask(mask));
+                Physics.Raycast(ray, out raycastHitInfo.RaycastHit, m_distance, LayerMask.GetMask(mask));
             }
 
-            return _raycastHitInfo;
+            return raycastHitInfo;
         }
     }
 
