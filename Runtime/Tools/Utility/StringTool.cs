@@ -229,6 +229,10 @@ namespace NonsensicalKit.Tools
         {
             return $"({v3.x},{v3.y},{v3.z})";
         }
+        public static string ToRealCopyString(this Vector3 v3)
+        {
+            return $"Vector3({v3.x},{v3.y},{v3.z})";
+        }
 
         public static bool CheckBom(byte[] data)
         {
