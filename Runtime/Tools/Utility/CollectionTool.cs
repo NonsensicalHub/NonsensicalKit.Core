@@ -9,7 +9,7 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class CollectionTool
     {
-        public static T Clone<T>(this T list) where T :IList
+        public static T Clone<T>(this T list) where T : IList
         {
             T clonedList = (T)Activator.CreateInstance(list.GetType());
             foreach (var obj in list)
@@ -30,6 +30,7 @@ namespace NonsensicalKit.Tools
 
             return clonedArray;
         }
+
         public static List<T> Clone<T>(this List<T> list)
         {
             List<T> clonedList = new List<T>(list.Count);
@@ -37,7 +38,7 @@ namespace NonsensicalKit.Tools
             {
                 clonedList.Add(obj);
             }
-        
+
             return clonedList;
         }
 
@@ -122,6 +123,12 @@ namespace NonsensicalKit.Tools
             {
                 return list[index];
             }
+        }
+
+
+        public static bool ListContains<TKey, TValue>(this Dictionary<TKey, List<TValue>> dictionary, TKey key, TValue value)
+        {
+            return dictionary.TryGetValue(key, out var value1) && value1.Contains(value);
         }
 
         public static void ListAdd<TKey, TValue>(this Dictionary<TKey, List<TValue>> dictionary, TKey key, TValue value)

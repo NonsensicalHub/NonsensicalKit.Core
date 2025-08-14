@@ -25,6 +25,14 @@ namespace NonsensicalKit.Core
             DrawArrow(TargetType.Handle, pos, direction, color, arrowHeadLength, arrowHeadAngle);
 #endif
         }
+        public static void DrawBezierArrowHandle(in Vector3 p0, in Vector3 p1, in Vector3 p2, in Vector3 p3, int smoothness, in Color color,
+            float arrowHeadLength = 0.25f,
+            float arrowHeadAngle = 20.0f)
+        {
+#if UNITY_EDITOR
+            DrawBezierArrow(TargetType.Handle, p0, p1, p2, p3, smoothness, color, arrowHeadLength, arrowHeadAngle);
+#endif
+        }
 
         public static void DrawArrowGizmo(in Vector3 pos, in Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
         {
@@ -130,7 +138,6 @@ namespace NonsensicalKit.Core
             switch (targetType)
             {
                 case TargetType.Gizmo:
-
                     Mesh triangle = Triangles.New();
                     while (triangle == null) //每次构建后，已经创建好的网格会被unity销毁，此时需要清理这些已销毁网格
                     {
@@ -166,6 +173,10 @@ namespace NonsensicalKit.Core
         private static void DrawArrow(TargetType targetType, in Vector3 pos, in Vector3 direction, in Color color, float arrowHeadLength = 0.25f,
             float arrowHeadAngle = 20.0f)
         {
+            if (direction==Vector3.zero)
+            {
+                return;
+            }
             Camera c = Camera.current;
             if (c == null) return;
 

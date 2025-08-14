@@ -276,6 +276,11 @@ namespace NonsensicalKit.Tools
             _arcLength = _sampleArcLengths[_samples.Length - 1];
         }
 
+        public Vector3 GetPointByT(float t)
+        {
+            return BezierTool.CalculateCubicBezierPoint(t, _p0, _c0, _c1, _p1);
+        }
+
         /// <summary>根据弧长比例（0到1）获取曲线上的点位</summary>
         public Vector3 GetPointByArcLengthRadio(float radio)
         {
@@ -284,13 +289,31 @@ namespace NonsensicalKit.Tools
         }
 
         /// <summary>根据弧长比例（0到1）获取曲线上的点位和切线</summary>
-        public (Vector3, Vector3) GetPointAndTangentByArcLengthRadio(float radio)
+        public (Vector3 point, Vector3 derivative) GetPointAndTangentByArcLengthRadio(float radio)
         {
             var t = GetTByArcLengthRadio(radio);
 
             return (BezierTool.CalculateCubicBezierPoint(t, _p0, _c0, _c1, _p1), BezierTool.CalculateCubicBezierDerivative(t, _p0, _c0, _c1, _p1));
         }
+        
+        public (Vector3 point, Vector3 derivative) GetPointAndTangentByArcLength(float length)
+        {
+            var radio=Mathf.Clamp01(length/_arcLength);
 
+            return GetPointAndTangentByArcLengthRadio(radio);
+        }
+        
+        public (Vector3 point, Vector3 derivative) GetPointAndTangentByT(float t)
+        {
+            return (BezierTool.CalculateCubicBezierPoint(t, _p0, _c0, _c1, _p1), BezierTool.CalculateCubicBezierDerivative(t, _p0, _c0, _c1, _p1));
+        }
+
+        public float GetTByArcLength(float length)
+        {
+            var radio=Mathf.Clamp01(length/_arcLength);
+            return GetTByArcLengthRadio(radio);
+        }
+        
         /// <summary>根据弧长比例（0到1）获取曲线上的点位对应的t</summary>
         public float GetTByArcLengthRadio(float radio)
         {
@@ -340,6 +363,25 @@ namespace NonsensicalKit.Tools
             return t;
         }
 
+        /// <summary>根据 t 获取该位置的弧长</summary>
+        public float GetArcLengthByT(float t)
+        {
+            // 限制 t 范围
+            t = Mathf.Clamp01(t);
+
+            // 找到 t 对应的采样区间
+            float exactIndex = t * (_samples.Length - 1);
+            int index = Mathf.FloorToInt(exactIndex);
+            float frac = exactIndex - index;
+
+            if (index <= 0) return 0f;
+            if (index >= _sampleArcLengths.Length - 1) return _arcLength;
+
+            // 区间弧长插值
+            float startLength = _sampleArcLengths[index];
+            float endLength = _sampleArcLengths[index + 1];
+            return Mathf.Lerp(startLength, endLength, frac);
+        }
 
         /// <summary>获取曲线上最近的点和此时的t以及距离的平方</summary>
         public (Vector3 point, float t, float distSqr) GetClosestInfo(Vector3 point, int refineSteps = 4, int refineSamples = 16)
