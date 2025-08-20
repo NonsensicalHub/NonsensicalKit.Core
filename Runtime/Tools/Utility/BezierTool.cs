@@ -250,7 +250,7 @@ namespace NonsensicalKit.Tools
     public class CubicBezierCurve
     {
         public float ArcLength => _arcLength;
-        public  Vector3[] Samples=> _samples;
+        public Vector3[] Samples => _samples;
 
         private readonly Vector3 _p0;
         private readonly Vector3 _c0;
@@ -295,73 +295,119 @@ namespace NonsensicalKit.Tools
 
             return (BezierTool.CalculateCubicBezierPoint(t, _p0, _c0, _c1, _p1), BezierTool.CalculateCubicBezierDerivative(t, _p0, _c0, _c1, _p1));
         }
-        
+
         public (Vector3 point, Vector3 derivative) GetPointAndTangentByArcLength(float length)
         {
-            var radio=Mathf.Clamp01(length/_arcLength);
+            var radio = Mathf.Clamp01(length / _arcLength);
 
             return GetPointAndTangentByArcLengthRadio(radio);
         }
-        
+
         public (Vector3 point, Vector3 derivative) GetPointAndTangentByT(float t)
         {
             return (BezierTool.CalculateCubicBezierPoint(t, _p0, _c0, _c1, _p1), BezierTool.CalculateCubicBezierDerivative(t, _p0, _c0, _c1, _p1));
         }
 
+        /// <summary>根据 t 获取对应位置的弧长比例（0..1）</summary>
+        public float GetRadioByT(float t)
+        {
+            // 限制 t 范围
+            t = Mathf.Clamp01(t);
+
+            // 找到 t 对应的采样区间
+            float exactIndex = t * (_samples.Length - 1);
+            int index = Mathf.FloorToInt(exactIndex);
+            float frac = exactIndex - index;
+
+            if (index <= 0) return 0f;
+            if (index >= _sampleArcLengths.Length - 1) return 1f;
+
+            // 区间弧长插值
+            float startLength = _sampleArcLengths[index];
+            float endLength = _sampleArcLengths[index + 1];
+            float lengthAtT = Mathf.Lerp(startLength, endLength, frac);
+
+            return _arcLength > 0f ? lengthAtT / _arcLength : 0f;
+        }
+
+
         public float GetTByArcLength(float length)
         {
-            var radio=Mathf.Clamp01(length/_arcLength);
+            var radio = Mathf.Clamp01(length / _arcLength);
             return GetTByArcLengthRadio(radio);
         }
-        
+
         /// <summary>根据弧长比例（0到1）获取曲线上的点位对应的t</summary>
         public float GetTByArcLengthRadio(float radio)
         {
+            radio = Mathf.Clamp01(radio);
             float targetLength = radio * _arcLength;
 
-            // 二分查找找到目标弧长所在的区间
             int low = 0;
-            int high = _samples.Length;
-            int index = 0;
-
+            int high = _sampleArcLengths.Length - 1;
             while (low < high)
             {
-                index = (low + high) / 2;
+                int mid = (low + high) / 2;
+                if (_sampleArcLengths[mid] < targetLength) low = mid + 1;
+                else high = mid;
+            }
 
-                if (_sampleArcLengths[index] < targetLength)
+            int index = low;
+            if (index <= 0) return 0f;
+            if (index >= _sampleArcLengths.Length) return 1f;
+
+            float segStart = _sampleArcLengths[index - 1];
+            float segEnd = _sampleArcLengths[index];
+            float segFrac = (segEnd - segStart) > 1e-9f ? (targetLength - segStart) / (segEnd - segStart) : 0f;
+
+            float denom = (_samples.Length - 1);
+            float tStart = (index - 1) / denom;
+            float tEnd = index / denom;
+            float t = Mathf.Lerp(tStart, tEnd, segFrac);
+
+            float tLow = tStart;
+            float tHigh = tEnd;
+            const int maxIter = 10;
+            const float lengthTol = 1e-5f;
+            const float tTol = 1e-7f;
+
+            for (int iter = 0; iter < maxIter; iter++)
+            {
+                // 注意：如果 Cubic 类没有实现 GetArcLengthByT，可直接
+                // 复制 Quadratic 的 GetArcLengthByT 实现（基于 _sampleArcLengths 插值）
+                float s = /* call an equivalent GetArcLengthByT(t) for cubic */ GetArcLengthByT(t);
+                float f = s - targetLength;
+                if (Mathf.Abs(f) <= lengthTol) break;
+
+                Vector3 deriv = BezierTool.CalculateCubicBezierDerivative(t, _p0, _c0, _c1, _p1);
+                float speed = deriv.magnitude;
+
+                float tNew;
+                if (speed > 1e-8f)
                 {
-                    low = index + 1;
+                    tNew = t - f / speed;
+                    if (float.IsNaN(tNew) || tNew <= tLow || tNew >= tHigh) tNew = 0.5f * (tLow + tHigh);
                 }
                 else
                 {
-                    high = index;
+                    tNew = 0.5f * (tLow + tHigh);
+                }
+
+                float sNew = GetArcLengthByT(Mathf.Clamp01(tNew));
+                if (sNew > targetLength) tHigh = tNew;
+                else tLow = tNew;
+
+                t = Mathf.Clamp01(tNew);
+                if (tHigh - tLow < tTol)
+                {
+                    t = 0.5f * (tLow + tHigh);
+                    break;
                 }
             }
 
-            float t;
-            // 处理边界情况
-            if (index <= 0)
-            {
-                t = 0;
-            }
-            else if (index >= _samples.Length)
-            {
-                t = 1;
-            }
-            else
-            {
-                // 线性插值计算精确的t值
-                float segmentStart = _sampleArcLengths[index - 1];
-                float segmentEnd = _sampleArcLengths[index];
-                float segmentFraction = (targetLength - segmentStart) / (segmentEnd - segmentStart);
-
-                float tStart = (index - 1) / (float)_samples.Length;
-                float tEnd = index / (float)_samples.Length;
-                t = Mathf.Lerp(tStart, tEnd, segmentFraction);
-            }
-
-            return t;
+            return Mathf.Clamp01(t);
         }
+
 
         /// <summary>根据 t 获取该位置的弧长</summary>
         public float GetArcLengthByT(float t)
@@ -419,8 +465,8 @@ namespace NonsensicalKit.Tools
 
                 interval *= 0.5f;
             }
-          
-            return (  BezierTool.CalculateCubicBezierPoint(bestT, _p0, _c0, _c1, _p1),bestT, bestDistSqr);
+
+            return (BezierTool.CalculateCubicBezierPoint(bestT, _p0, _c0, _c1, _p1), bestT, bestDistSqr);
         }
     }
 }

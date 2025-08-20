@@ -431,7 +431,11 @@ namespace NonsensicalKit.Tools
             File.WriteAllText(path, text);
         }
 
-        public static void AutoWriteTxt(string text)
+        /// <summary>
+        /// 自动往StreamingAsset中写入文本，用于快速测试
+        /// </summary>
+        /// <param name="text"></param>
+        public static void AutoWriteTxtToStreaming(string text)
         {
             EnsureDir(Application.streamingAssetsPath);
             string path = Path.Combine(Application.streamingAssetsPath, StringTool.GetDateTimeString() + ".txt");
