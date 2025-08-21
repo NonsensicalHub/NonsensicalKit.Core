@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -60,6 +61,7 @@ namespace NonsensicalKit.Core
                 }
             }
         }
+
         public Vector3 ToVector3()
         {
             return new Vector3(F1, F2, F3);
@@ -123,6 +125,45 @@ namespace NonsensicalKit.Core
         public override string ToString()
         {
             return $"({F1},{F2},{F3})";
+        }
+
+        public static explicit operator Float3(string input)
+        {
+            string pattern = @"^\((-?\d+\.\d+),(-?\d+\.\d+),(-?\d+\.\d+)\)$";
+
+            Match match = Regex.Match(input, pattern);
+
+            if (match.Success && match.Groups.Count == 4)
+            {
+                float[] result = new float[3];
+                for (int i = 0; i < 3; i++)
+                {
+                    if (float.TryParse(match.Groups[i + 1].Value, out float value))
+                    {
+                        result[i] = value;
+                    }
+                    else
+                    {
+                        return Zero;
+                    }
+                }
+
+                return new Float3(result[0], result[1], result[2]);
+            }
+            else
+            {
+                return Zero;
+            }
+        }
+
+        public static Float3 FromObject(object input) {
+            return input switch
+            {
+                Vector3 vector3 => (Float3)vector3,
+                Float3 float3 => float3,
+                string => (Float3)input.ToString(),
+                _ => Zero
+            };
         }
 
         public static explicit operator Float3(Vector3 v)
