@@ -1,3 +1,4 @@
+using System;
 using NaughtyAttributes;
 using NonsensicalKit.Core;
 using NonsensicalKit.Tools.EasyTool;
@@ -77,7 +78,8 @@ namespace NonsensicalKit.Tools.CameraTool
         [SerializeField] [FormerlySerializedAs("m_renderBox")]
         protected RenderBox m_limitBox;
 
-        public bool IsOn { get; set; } = true;
+
+        public Func<bool> CanControl;
         public Quaternion CrtRotate { get; set; }
 
         /// <summary>
@@ -227,8 +229,8 @@ namespace NonsensicalKit.Tools.CameraTool
             {
                 _crtEventSystem = EventSystem.current;
             }
-
-            if (IsOn)
+            
+            if (CanControl==null||CanControl())
             {
                 if (PlatformInfo.IsMobile == false)
                 {
