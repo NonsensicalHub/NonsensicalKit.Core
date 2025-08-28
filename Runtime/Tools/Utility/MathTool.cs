@@ -7,6 +7,15 @@ namespace NonsensicalKit.Tools
     public static class MathTool
     {
         /// <summary>
+        /// 开三次方
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static float CubeRoot(float value)
+        {
+            return value >= 0 ? Mathf.Pow(value, 1f / 3f) : -Mathf.Pow(-value, 1f / 3f);
+        }
+        /// <summary>
         /// 计算枚举改变
         /// </summary>
         /// <param name="oldEnum">原始枚举</param>
