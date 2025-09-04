@@ -23,12 +23,20 @@ namespace NonsensicalKit.Tools.NetworkTool
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
             yield return unityWebRequest.SendWebRequest();
         }
-
         public static IEnumerator GetWithArgs(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> fields)
         {
             unityWebRequest.method = "GET";
             unityWebRequest.url = GetArgsStr(url, fields);
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            yield return unityWebRequest.SendWebRequest();
+        }
+
+        public static IEnumerator GetWithArgs(this UnityWebRequest unityWebRequest, string url, Dictionary<string, string> fields,Dictionary<string, string> header)
+        {
+            unityWebRequest.method = "GET";
+            unityWebRequest.url = GetArgsStr(url, fields);
+            unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+            IncreaseHeader(unityWebRequest, header);
             yield return unityWebRequest.SendWebRequest();
         }
 
@@ -317,6 +325,15 @@ namespace NonsensicalKit.Tools.NetworkTool
         {
             string uri = GetArgsStr(url, fields);
             using UnityWebRequest unityWebRequest = UnityWebRequest.Post(uri, new WWWForm());
+            yield return SendRequest(unityWebRequest, callback, iHandleWebError);
+        }
+        
+        public static IEnumerator PostWithArgs(string url, Dictionary<string, string> fields, Dictionary<string, string> header, Action<UnityWebRequest> callback,
+            IHandleWebError iHandleWebError = null)
+        {
+            string uri = GetArgsStr(url, fields);
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(uri, new WWWForm());
+            IncreaseHeader(unityWebRequest, header);
             yield return SendRequest(unityWebRequest, callback, iHandleWebError);
         }
 
