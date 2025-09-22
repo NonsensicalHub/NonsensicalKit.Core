@@ -1,78 +1,87 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Tools.ObjectPool
 {
     public class ComponentPool<TComponent> where TComponent : Component
     {
-        private readonly TComponent _prefab; //预制体
-        private readonly Queue<TComponent> _queue; //待使用的对象
-        private readonly Action<TComponent> _resetAction; //返回池中后调用
-        private readonly Action<TComponent> _initAction; //取出时调用
-        private readonly Action<ComponentPool<TComponent>, TComponent> _createAction; //首次生成时调用
+        protected readonly TComponent Prefab; //预制体
+        protected readonly Queue<TComponent> Queue = new(); //待使用的对象
+        public Action<TComponent> ResetAction { protected get; set; } //返回池中后调用
+        public Action<TComponent> InitAction { protected get; set; } //取出时调用
+        public Action<ComponentPool<TComponent>, TComponent> CreateAction { protected get; set; } //首次生成时调用
 
-        public ComponentPool(TComponent prefab)
+        public ComponentPool(TComponent prefab, Action<ComponentPool<TComponent>, TComponent> createAction)
         {
-            this._prefab = prefab;
-            _queue = new Queue<TComponent>();
-            _resetAction = DefaultReset;
-            _initAction = DefaultInit;
+            Prefab = prefab;
+            ResetAction = DefaultReset;
+            InitAction = DefaultInit;
+            CreateAction = createAction;
         }
 
-        public ComponentPool(TComponent prefab, Action<TComponent> resetAction = null, Action<TComponent> initAction = null,
+        public ComponentPool(TComponent prefab, Action<TComponent> resetAction = null,
+            Action<TComponent> initAction = null,
             Action<ComponentPool<TComponent>, TComponent> createAction = null)
         {
-            this._prefab = prefab;
-            _queue = new Queue<TComponent>();
-            _resetAction = resetAction;
-            _initAction = initAction;
-            _createAction = createAction;
+            Prefab = prefab;
+            ResetAction = resetAction;
+            InitAction = initAction;
+            CreateAction = createAction;
         }
 
         /// <summary>
         /// 取出对象
         /// </summary>
         /// <returns></returns>
-        public TComponent New()
+        public virtual TComponent New()
         {
-            if (_queue.Count > 0)
+            TComponent newComponent;
+            if (Queue.Count > 0)
             {
-                TComponent t = _queue.Dequeue();
-                _initAction?.Invoke(t);
-                return t;
+                newComponent = Queue.Dequeue();
             }
             else
             {
-                TComponent t = Object.Instantiate(_prefab);
-                _createAction?.Invoke(this, t);
-                _initAction?.Invoke(t);
-
-                return t;
+                newComponent = Object.Instantiate(Prefab);
+                CreateAction?.Invoke(this, newComponent);
             }
+
+            InitAction?.Invoke(newComponent);
+            OnNew(newComponent);
+            return newComponent;
         }
 
         /// <summary>
         /// 放回对象
         /// </summary>
         /// <param name="obj"></param>
-        public void Store(TComponent obj)
+        public virtual void Store(TComponent obj)
         {
-            if (_queue.Contains(obj) == false)
+            if (Queue.Contains(obj) == false)
             {
-                _resetAction?.Invoke(obj);
-                _queue.Enqueue(obj);
+                ResetAction?.Invoke(obj);
+                Queue.Enqueue(obj);
+
+                OnStore(obj);
             }
         }
 
-        public static void DefaultReset(TComponent go)
+        protected virtual void OnNew(TComponent obj)
+        {
+        }
+
+        protected virtual void OnStore(TComponent obj)
+        {
+        }
+
+        private static void DefaultReset(TComponent go)
         {
             go.gameObject.SetActive(false);
         }
 
-        public static void DefaultInit(TComponent go)
+        private static void DefaultInit(TComponent go)
         {
             go.gameObject.SetActive(true);
         }

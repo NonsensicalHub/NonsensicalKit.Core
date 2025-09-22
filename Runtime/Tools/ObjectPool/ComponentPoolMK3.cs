@@ -1,99 +1,64 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Tools.ObjectPool
 {
-    [Obsolete("Use ComponentPoolMk3<TComponent> instead.")]
-    public class ComponentPool_MK3<TComponent> : ComponentPoolMk3<TComponent> where TComponent : Component
-    {
-        public ComponentPool_MK3(TComponent prefab, Action<TComponent> resetAction = null, Action<TComponent> initAction = null,
-            Action<TComponent> reinitAction = null, Action<ComponentPoolMk3<TComponent>, TComponent> createAction = null) : base(prefab, resetAction,
-            initAction, reinitAction, createAction)
-        {
-        }
-    }
-
     /// <summary>
-    /// 添加缓冲-使用-回收逻辑
+    /// 添加缓冲-使用-回收逻辑，优化大批量使用时重复的（回收-获取）的逻辑
     /// </summary>
     /// <typeparam name="TComponent"></typeparam>
-    public class ComponentPoolMk3<TComponent> where TComponent : Component
+    public class ComponentPoolMk3<TComponent> : ComponentPoolMk2<TComponent> where TComponent : Component
     {
-        private readonly TComponent _prefab; //预制体
-        private readonly Queue<TComponent> _queue; //待使用的对象
-        private readonly List<TComponent> _actives; //使用中的对象
-        private readonly Action<TComponent> _resetAction; //返回池中后调用
-        private readonly Action<TComponent> _initAction; //取出时调用
-        private readonly Action<TComponent> _reinitAction; //不返回池中直接重新使用时调用
-        private readonly Action<ComponentPoolMk3<TComponent>, TComponent> _createAction; //首次生成时调用
+        public Action<TComponent> ReinitAction { private get; set; } //不返回池中直接重新使用时调用
 
         private List<TComponent> _cache;
         private int _catchIndex;
 
-        public ComponentPoolMk3(TComponent prefab,
-            Action<TComponent> resetAction = null,
-            Action<TComponent> initAction = null,
-            Action<TComponent> reinitAction = null,
-            Action<ComponentPoolMk3<TComponent>, TComponent> createAction = null)
+        public ComponentPoolMk3(TComponent prefab, Action<ComponentPool<TComponent>, TComponent> createAction) : base(
+            prefab, createAction)
         {
-            this._prefab = prefab;
-            _queue = new Queue<TComponent>();
-            _actives = new List<TComponent>();
-            _resetAction = resetAction;
-            _initAction = initAction;
-            _reinitAction = reinitAction;
-            _createAction = createAction;
+        }
+
+        public ComponentPoolMk3(TComponent prefab, Action<TComponent> resetAction = null,
+            Action<TComponent> initAction = null, Action<TComponent> reinitAction = null,
+            Action<ComponentPool<TComponent>, TComponent> createAction = null) : base(prefab, resetAction, initAction,
+            createAction)
+        {
+            ReinitAction = reinitAction;
         }
 
         /// <summary>
         /// 取出对象
         /// </summary>
         /// <returns></returns>
-        public TComponent New()
+        public override TComponent New()
         {
             TComponent newC;
             if ((_cache != null) && (_catchIndex < _cache.Count))
             {
                 newC = _cache[_catchIndex];
                 _catchIndex++;
-                _reinitAction?.Invoke(newC);
+                ReinitAction?.Invoke(newC);
             }
-            else if (_queue.Count > 0)
+            else if (Queue.Count > 0)
             {
-                newC = _queue.Dequeue();
-                _initAction?.Invoke(newC);
+                newC = Queue.Dequeue();
+                InitAction?.Invoke(newC);
             }
             else
             {
-                newC = Object.Instantiate(_prefab);
-                _createAction?.Invoke(this, newC);
-                _initAction?.Invoke(newC);
+                newC = Object.Instantiate(Prefab);
+                CreateAction?.Invoke(this, newC);
+                InitAction?.Invoke(newC);
             }
 
-            _actives.Add(newC);
+            Actives.Add(newC);
 
             return newC;
         }
 
-        /// <summary>
-        /// 放回对象
-        /// </summary>
-        /// <param name="obj"></param>
-        public void Store(TComponent obj)
-        {
-            if (_queue.Contains(obj) == false)
-            {
-                _resetAction?.Invoke(obj);
-                _queue.Enqueue(obj);
-                if (_actives.Contains(obj))
-                {
-                    _actives.Remove(obj);
-                }
-            }
-        }
 
         /// <summary>
         /// 和Flush配套使用
@@ -107,8 +72,8 @@ namespace NonsensicalKit.Tools.ObjectPool
                 Flush();
             }
 
-            _cache = _actives.Clone();
-            _actives.Clear();
+            _cache = Actives.Clone();
+            Actives.Clear();
         }
 
         /// <summary>
@@ -123,7 +88,7 @@ namespace NonsensicalKit.Tools.ObjectPool
             }
 
             _cache.Add(obj);
-            _actives.Remove(obj);
+            Actives.Remove(obj);
         }
 
         /// <summary>
@@ -138,8 +103,8 @@ namespace NonsensicalKit.Tools.ObjectPool
 
             for (; _catchIndex < _cache.Count; _catchIndex++)
             {
-                _resetAction?.Invoke(_cache[_catchIndex]);
-                _queue.Enqueue(_cache[_catchIndex]);
+                ResetAction?.Invoke(_cache[_catchIndex]);
+                Queue.Enqueue(_cache[_catchIndex]);
             }
 
             _catchIndex = 0;
@@ -147,19 +112,14 @@ namespace NonsensicalKit.Tools.ObjectPool
             _cache = null;
         }
 
-        public void Clear()
+        public override void Clear()
         {
-            if (_cache!=null)
+            if (_cache != null)
             {
                 Flush();
             }
-            foreach (var item in _actives)
-            {
-                _resetAction?.Invoke(item);
-                _queue.Enqueue(item);
-            }
 
-            _actives.Clear();
+            base.Clear();
         }
     }
 }

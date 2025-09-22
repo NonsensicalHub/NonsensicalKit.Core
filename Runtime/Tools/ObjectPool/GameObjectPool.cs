@@ -1,86 +1,87 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using Object = UnityEngine.Object;
 
 namespace NonsensicalKit.Tools.ObjectPool
 {
-    /// <summary>
-    /// GameObject对象池，只管理缓存对象
-    /// </summary>
     public class GameObjectPool
     {
-        public Action<GameObjectPool, GameObject> FirstInitAction
+        protected readonly GameObject Prefab; //预制体
+        protected readonly Queue<GameObject> Queue = new(); //待使用的对象
+        public Action<GameObject> ResetAction { protected get; set; } //返回池中后调用
+        public Action<GameObject> InitAction { protected get; set; } //取出时调用
+        public Action<GameObjectPool, GameObject> CreateAction { protected get; set; } //首次生成时调用
+
+        public GameObjectPool(GameObject prefab, Action<GameObjectPool, GameObject> createAction)
         {
-            set => _createAction = value;
+            Prefab = prefab;
+            ResetAction = DefaultReset;
+            InitAction = DefaultInit;
+            CreateAction = createAction;
         }
 
-        private readonly GameObject _prefab; //预制体
-        private readonly Queue<GameObject> _queue; //待使用的对象
-        private readonly Action<GameObject> _resetAction; //返回池中后调用
-        private readonly Action<GameObject> _initAction; //取出时调用
-        private Action<GameObjectPool, GameObject> _createAction; //首次生成时调用
-
-        public GameObjectPool(GameObject prefab)
-        {
-            _prefab = prefab;
-            _queue = new Queue<GameObject>();
-            _resetAction = DefaultReset;
-            _initAction = DefaultInit;
-        }
-
-        public GameObjectPool(GameObject prefab, Action<GameObject> resetAction = null, Action<GameObject> initAction = null,
+        public GameObjectPool(GameObject prefab, Action<GameObject> resetAction = null,
+            Action<GameObject> initAction = null,
             Action<GameObjectPool, GameObject> createAction = null)
         {
-            _prefab = prefab;
-            _queue = new Queue<GameObject>();
-            _resetAction = resetAction;
-            _initAction = initAction;
-            _createAction = createAction;
+            Prefab = prefab;
+            ResetAction = resetAction;
+            InitAction = initAction;
+            CreateAction = createAction;
         }
 
         /// <summary>
         /// 取出对象
         /// </summary>
         /// <returns></returns>
-        public GameObject New()
+        public virtual GameObject New()
         {
-            if (_queue.Count > 0)
+            GameObject newComponent;
+            if (Queue.Count > 0)
             {
-                GameObject t = _queue.Dequeue();
-                _initAction?.Invoke(t);
-                return t;
+                newComponent = Queue.Dequeue();
             }
             else
             {
-                GameObject t = Object.Instantiate(_prefab);
-                _createAction?.Invoke(this, t);
-                _initAction?.Invoke(t);
-
-                return t;
+                newComponent = Object.Instantiate(Prefab);
+                CreateAction?.Invoke(this, newComponent);
             }
+
+            InitAction?.Invoke(newComponent);
+            OnNew(newComponent);
+            return newComponent;
         }
 
         /// <summary>
         /// 放回对象
         /// </summary>
         /// <param name="obj"></param>
-        public void Store(GameObject obj)
+        public virtual void Store(GameObject obj)
         {
-            if (_queue.Contains(obj) == false)
+            if (Queue.Contains(obj) == false)
             {
-                _resetAction?.Invoke(obj);
-                _queue.Enqueue(obj);
+                ResetAction?.Invoke(obj);
+                Queue.Enqueue(obj);
+
+                OnStore(obj);
             }
         }
 
-        public static void DefaultReset(GameObject go)
+        protected virtual void OnNew(GameObject obj)
+        {
+        }
+
+        protected virtual void OnStore(GameObject obj)
+        {
+        }
+
+        private static void DefaultReset(GameObject go)
         {
             go.SetActive(false);
         }
 
-        public static void DefaultInit(GameObject go)
+        private static void DefaultInit(GameObject go)
         {
             go.SetActive(true);
         }
