@@ -466,7 +466,7 @@ namespace NonsensicalKit.Core.Service.Config
                     arr.Add(JObject.FromObject(t.GetData()));
                 }
                 
-                FileTool.WriteTxt(configFilePath, arr.ToString());
+                FileTool.WriteText(configFilePath, arr.ToString());
             }
             else
             {
@@ -480,7 +480,7 @@ namespace NonsensicalKit.Core.Service.Config
                         try
                         {
                             string json = JsonTool.SerializeObject(data);
-                            FileTool.WriteTxt(GetFilePath(data), json);
+                            FileTool.WriteText(GetFilePath(data), json);
                         }
                         catch (Exception e)
                         {

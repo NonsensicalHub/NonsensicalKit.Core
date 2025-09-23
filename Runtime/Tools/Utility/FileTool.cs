@@ -57,6 +57,188 @@ namespace NonsensicalKit.Tools
             fs.Close();
         }
 
+        public static void FileSave(byte[] data, string fullPath)
+        {
+            string dirPath = StringTool.GetDirPathByPath(fullPath);
+
+            EnsureDir(dirPath);
+
+            using FileStream fs = new FileStream(fullPath, FileMode.Create);
+            fs.Write(data, 0, data.Length);
+        }
+
+        public static bool TransferData(string filepath1, string filepath2)
+        {
+            if (!File.Exists(filepath1) || !File.Exists(filepath1))
+            {
+                return false;
+            }
+
+            try
+            {
+                using var f1 = new FileStream(filepath1, FileMode.Open);
+                using var f2 = new FileStream(filepath2, FileMode.OpenOrCreate);
+                byte[] buffer = new byte[1024];
+                int realRead;
+                while ((realRead = f1.Read(buffer, 0, 1024)) > 0)
+                {
+                    f2.Write(buffer, 0, realRead);
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 创建或读取一个txt文件并往其中写入文本(覆盖)
+        /// </summary>
+        /// <param name="path">文件路径</param>
+        /// <param name="text">写入的文本</param>
+        public static void WriteText(string path, string text)
+        {
+            string dirPath = StringTool.GetDirPathByPath(path);
+            EnsureDir(dirPath);
+            File.WriteAllText(path, text);
+        }
+
+        /// <summary>
+        /// 自动往StreamingAsset中写入文本，用于快速测试
+        /// </summary>
+        /// <param name="text"></param>
+        public static void AutoWriteTextToStreaming(string text)
+        {
+            EnsureDir(Application.streamingAssetsPath);
+            string path = Path.Combine(Application.streamingAssetsPath, StringTool.GetDateTimeString() + ".txt");
+            File.WriteAllText(path, text);
+            Debug.Log("文件已写入：" + path);
+        }
+
+        public static bool AppendText(string fullPath, string text)
+        {
+            return AppendText(Path.GetDirectoryName(fullPath), Path.GetFileName(fullPath), text);
+        }
+
+        public static bool AppendText(string path, string name, string text)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            string pathStr = Path.Combine(path, name);
+            try
+            {
+                using FileStream fs = new FileStream(pathStr, FileMode.Append, FileAccess.Write, FileShare.Write);
+                using StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
+                sw.Write(text);
+                sw.Flush();
+                sw.Close();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                LogCore.Warning("文件写入错误");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取当前工作目录的完全限定路径
+        /// </summary>
+        /// <returns>当前工作目录的完全限定路径</returns>
+        public static string GetCurrentPath()
+        {
+            string path;
+            if (Environment.CurrentDirectory == AppDomain.CurrentDomain.BaseDirectory) //Windows应用程序则相等  
+            {
+                path = AppDomain.CurrentDomain.BaseDirectory;
+            }
+            else
+            {
+                path = AppDomain.CurrentDomain.BaseDirectory + "Bin\\";
+            }
+
+            return path;
+        }
+
+        /// <summary>
+        /// 获取文件内容字符串
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string GetFileString(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            using StreamReader file = File.OpenText(path);
+            string fileContent = file.ReadToEnd();
+            return fileContent;
+        }
+
+        /// <summary>
+        /// 删除文件
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static bool DeleteFile(string path)
+        {
+            try
+            {
+                File.Delete(path);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 确保文件夹路径存在
+        /// </summary>
+        /// <param name="filePath"></param>
+        public static void EnsureFileDir(string filePath)
+        {
+            var dirPath = Path.GetDirectoryName(filePath);
+            if (Directory.Exists(dirPath) == false)
+            {
+                Directory.CreateDirectory(dirPath);
+            }
+        }
+
+        /// <summary>
+        /// 确保文件夹路径存在
+        /// </summary>
+        /// <param name="dirPath"></param>
+        public static void EnsureDir(string dirPath)
+        {
+            if (Directory.Exists(dirPath) == false)
+            {
+                Directory.CreateDirectory(dirPath);
+            }
+        }
+
+        public static string ReadAllText(string fullPath)
+        {
+            if (File.Exists(fullPath) == false)
+            {
+                return null;
+            }
+
+            string data = File.ReadAllText(fullPath);
+            return data;
+        }
+
+        #region WindowsSelector
+
         public static string DirSelector()
         {
             string directoryPath = "null";
@@ -261,11 +443,8 @@ namespace NonsensicalKit.Tools
             }
             else
             {
-                string typeStr1;
-                string typeStr2;
-
-                typeStr1 = "*." + filter[0];
-                typeStr2 = "*." + filter[0];
+                var typeStr1 = "*." + filter[0];
+                var typeStr2 = "*." + filter[0];
 
                 for (int i = 1; i < filter.Length; i++)
                 {
@@ -381,188 +560,6 @@ namespace NonsensicalKit.Tools
             {
                 return null;
             }
-        }
-
-        public static void FileSave(byte[] data, string fullpath)
-        {
-            string dirpath = StringTool.GetDirPathByPath(fullpath);
-
-            EnsureDir(dirpath);
-
-            using FileStream fs = new FileStream(fullpath, FileMode.Create);
-            fs.Write(data, 0, data.Length);
-        }
-
-        public static bool TransferData(string filepath1, string filepath2)
-        {
-            if (!File.Exists(filepath1) || !File.Exists(filepath1))
-            {
-                return false;
-            }
-
-            try
-            {
-                using var f1 = new FileStream(filepath1, FileMode.Open);
-                using var f2 = new FileStream(filepath2, FileMode.OpenOrCreate);
-                byte[] buffer = new byte[1024];
-                int realRead;
-                while ((realRead = f1.Read(buffer, 0, 1024)) > 0)
-                {
-                    f2.Write(buffer, 0, realRead);
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 创建或读取一个txt文件并往其中写入文本(覆盖)
-        /// </summary>
-        /// <param name="path">文件路径</param>
-        /// <param name="text">写入的文本</param>
-        public static void WriteTxt(string path, string text)
-        {
-            string dirPath = StringTool.GetDirPathByPath(path);
-            EnsureDir(dirPath);
-            File.WriteAllText(path, text);
-        }
-
-        /// <summary>
-        /// 自动往StreamingAsset中写入文本，用于快速测试
-        /// </summary>
-        /// <param name="text"></param>
-        public static void AutoWriteTxtToStreaming(string text)
-        {
-            EnsureDir(Application.streamingAssetsPath);
-            string path = Path.Combine(Application.streamingAssetsPath, StringTool.GetDateTimeString() + ".txt");
-            File.WriteAllText(path, text);
-            Debug.Log("文件已写入：" + path);
-        }
-
-        public static bool FileAppendWrite(string fullPath, string text)
-        {
-            return FileAppendWrite(Path.GetDirectoryName(fullPath), Path.GetFileName(fullPath), text);
-        }
-
-        public static bool FileAppendWrite(string path, string name, string text)
-        {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-
-            string pathStr = Path.Combine(path, name);
-            try
-            {
-                using FileStream fs = new FileStream(pathStr, FileMode.Append, FileAccess.Write, FileShare.Write);
-                using StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-                sw.Write(text);
-                sw.Flush();
-                sw.Close();
-
-                return true;
-            }
-            catch (Exception)
-            {
-                LogCore.Warning("文件写入错误");
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 获取当前工作目录的完全限定路径
-        /// </summary>
-        /// <returns>当前工作目录的完全限定路径</returns>
-        public static string GetCurrentPath()
-        {
-            string path;
-            if (Environment.CurrentDirectory == AppDomain.CurrentDomain.BaseDirectory) //Windows应用程序则相等  
-            {
-                path = AppDomain.CurrentDomain.BaseDirectory;
-            }
-            else
-            {
-                path = AppDomain.CurrentDomain.BaseDirectory + "Bin\\";
-            }
-
-            return path;
-        }
-
-        /// <summary>
-        /// 获取文件内容字符串
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static string GetFileString(string path)
-        {
-            if (!File.Exists(path))
-            {
-                return null;
-            }
-
-            using (StreamReader file = File.OpenText(path))
-            {
-                string fileContent = file.ReadToEnd();
-                return fileContent;
-            }
-        }
-
-        /// <summary>
-        /// 删除文件
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static bool DeleteFile(string path)
-        {
-            try
-            {
-                File.Delete(path);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 确保文件夹路径存在
-        /// </summary>
-        /// <param name="filePath"></param>
-        public static void EnsureFileDir(string filePath)
-        {
-            var dirPath = Path.GetDirectoryName(filePath);
-            if (Directory.Exists(dirPath) == false)
-            {
-                Directory.CreateDirectory(dirPath);
-            }
-        }
-
-        /// <summary>
-        /// 确保文件夹路径存在
-        /// </summary>
-        /// <param name="dirPath"></param>
-        public static void EnsureDir(string dirPath)
-        {
-            if (Directory.Exists(dirPath) == false)
-            {
-                Directory.CreateDirectory(dirPath);
-            }
-        }
-
-        public static string ReadAllText(string fullPath)
-        {
-            if (File.Exists(fullPath) == false)
-            {
-                return null;
-            }
-
-            string data = File.ReadAllText(fullPath);
-            return data;
         }
 
         class Win32API
@@ -736,5 +733,7 @@ namespace NonsensicalKit.Tools
                 return true;
             }
         }
+
+        #endregion
     }
 }

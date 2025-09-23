@@ -120,24 +120,48 @@ namespace NonsensicalKit.Core.Editor.Tools
         [MenuItem("NonsensicalKit/Items/根据名称排序")]
         private static void NameSort()
         {
-            GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+            if (SelectTransform==null)
+            {  
+                GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
 
-            for (int i = 0; i < roots.Length - 1; i++)
-            {
-                for (int j = i + 1; j < roots.Length; j++)
+                for (int i = 0; i < roots.Length - 1; i++)
                 {
-                    if (String.CompareOrdinal(roots[i].name, roots[j].name) > 0)
+                    for (int j = i + 1; j < roots.Length; j++)
                     {
-                        (roots[i], roots[j]) = (roots[j], roots[i]);
+                        if (String.CompareOrdinal(roots[i].name, roots[j].name) > 0)
+                        {
+                            (roots[i], roots[j]) = (roots[j], roots[i]);
+                        }
                     }
                 }
-            }
 
-            foreach (var item in roots)
+                foreach (var item in roots)
+                {
+                    item.transform.SetAsLastSibling();
+                }
+
+            }
+            else
             {
-                item.transform.SetAsLastSibling();
-            }
+                List<Transform> children = SelectTransform.GetChildren();
 
+                for (int i = 0; i < children.Count - 1; i++)
+                {
+                    for (int j = i + 1; j < children.Count; j++)
+                    {
+                        if (String.CompareOrdinal(children[i].name, children[j].name) > 0)
+                        {
+                            (children[i], children[j]) = (children[j], children[i]);
+                        }
+                    }
+                }
+
+                foreach (var item in children)
+                {
+                    item.transform.SetAsLastSibling();
+                }
+            }
+          
             Debug.Log("排序完成");
         }
 

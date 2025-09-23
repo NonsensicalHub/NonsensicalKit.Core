@@ -85,7 +85,7 @@ namespace NonsensicalKit.Tools
 
             FileTool.EnsureDir(Path.Combine(Application.streamingAssetsPath, "SaveJsonFiles"));
 
-            FileTool.WriteTxt(Path.Combine(Application.streamingAssetsPath, "SaveJsonFiles", fileName + ".json"), dataJson);
+            FileTool.WriteText(Path.Combine(Application.streamingAssetsPath, "SaveJsonFiles", fileName + ".json"), dataJson);
         }
 
         /// <summary>
