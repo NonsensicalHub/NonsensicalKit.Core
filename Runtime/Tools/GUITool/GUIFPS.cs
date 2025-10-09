@@ -28,6 +28,7 @@ namespace NonsensicalKit.Tools.GUITool
         private RectPosition m_rectPosition;
 
         [SerializeField] private float m_calculateInterval = 0.5f;
+        [SerializeField] private int m_fontSize = 20;
 
         private int _frameCount;
         private float _timer;
@@ -35,6 +36,8 @@ namespace NonsensicalKit.Tools.GUITool
 
         private RectPosition _lastPosition;
         private Rect _rect;
+
+        private GUIStyle _Style;
 
         private void Awake()
         {
@@ -68,12 +71,17 @@ namespace NonsensicalKit.Tools.GUITool
 
         private void OnGUI()
         {
+            if (_Style==null)
+            {
+                _Style = GUI.skin.label;
+                _Style.fontSize = m_fontSize;
+            }
             if (_lastPosition != m_rectPosition)
             {
                 UpdateRect();
             }
 
-            GUI.Label(_rect, _result);
+            GUI.Label(_rect, _result,_Style);
         }
 
         private void UpdateRect()

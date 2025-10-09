@@ -140,9 +140,9 @@ namespace NonsensicalKit.Tools
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                LogCore.Warning("文件写入错误");
+                LogCore.Warning("文件写入错误:" + e);
                 return false;
             }
         }
