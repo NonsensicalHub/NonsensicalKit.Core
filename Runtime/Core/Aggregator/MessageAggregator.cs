@@ -19,9 +19,11 @@ namespace NonsensicalKit.Core
     /// <typeparam name="T3"></typeparam>
     public class MessageAggregator<T1, T2, T3>
     {
-        public static MessageAggregator<T1, T2, T3> Instance => _instance ??= new MessageAggregator<T1, T2, T3>();
+        public static MessageAggregator<T1, T2, T3> Instance => LazyInstance.Value;
 
-        private static MessageAggregator<T1, T2, T3> _instance;
+        //线程安全
+        private static readonly Lazy<MessageAggregator<T1, T2, T3>> LazyInstance =
+            new(() => new MessageAggregator<T1, T2, T3>());
 
         private readonly Dictionary<int, Action<T1, T2, T3>> _messages = new();
         private readonly Dictionary<int, Dictionary<string, Action<T1, T2, T3>>> _idMessages = new();
@@ -143,7 +145,8 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2, T3> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] string id,
+            [DisallowNull] Action<T1, T2, T3> handler)
         {
             if (!_strIDMessages.ContainsKey(name))
             {
@@ -160,7 +163,8 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2, T3> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id,
+            [DisallowNull] Action<T1, T2, T3> handler)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -195,9 +199,11 @@ namespace NonsensicalKit.Core
 
     public class MessageAggregator<T1, T2>
     {
-        public static MessageAggregator<T1, T2> Instance => _instance ??= new MessageAggregator<T1, T2>();
+        public static MessageAggregator<T1, T2> Instance => LazyInstance.Value;
 
-        private static MessageAggregator<T1, T2> _instance;
+        //线程安全
+        private static readonly Lazy<MessageAggregator<T1, T2>> LazyInstance =
+            new(() => new MessageAggregator<T1, T2>());
 
         private readonly Dictionary<int, Action<T1, T2>> _messages = new();
         private readonly Dictionary<int, Dictionary<string, Action<T1, T2>>> _idMessages = new();
@@ -320,7 +326,8 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Subscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2> handler)
+        public void Subscribe([DisallowNull] string name, [DisallowNull] string id,
+            [DisallowNull] Action<T1, T2> handler)
         {
             if (!_strIDMessages.ContainsKey(name))
             {
@@ -337,7 +344,8 @@ namespace NonsensicalKit.Core
             }
         }
 
-        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Action<T1, T2> handler)
+        public void Unsubscribe([DisallowNull] string name, [DisallowNull] string id,
+            [DisallowNull] Action<T1, T2> handler)
         {
             if (_strIDMessages.ContainsKey(name))
             {
@@ -372,9 +380,11 @@ namespace NonsensicalKit.Core
 
     public class MessageAggregator<T>
     {
-        public static MessageAggregator<T> Instance => _instance ??= new MessageAggregator<T>();
+        public static MessageAggregator<T> Instance => LazyInstance.Value;
 
-        private static MessageAggregator<T> _instance;
+        //线程安全
+        private static readonly Lazy<MessageAggregator<T>> LazyInstance =
+            new(() => new MessageAggregator<T>());
 
         private readonly Dictionary<int, Action<T>> _messages = new();
         private readonly Dictionary<int, Dictionary<string, Action<T>>> _idMessages = new();
@@ -549,14 +559,21 @@ namespace NonsensicalKit.Core
 
     public class MessageAggregator
     {
-        public static MessageAggregator Instance => _instance ??= new MessageAggregator();
+        public static MessageAggregator Instance => LazyInstance.Value;
 
-        private static MessageAggregator _instance;
+        //线程安全
+        private static readonly Lazy<MessageAggregator> LazyInstance =
+            new(() => new MessageAggregator());
 
         private readonly Dictionary<int, Action> _messages = new Dictionary<int, Action>();
-        private readonly Dictionary<int, Dictionary<string, Action>> _idMessages = new Dictionary<int, Dictionary<string, Action>>();
+
+        private readonly Dictionary<int, Dictionary<string, Action>> _idMessages =
+            new Dictionary<int, Dictionary<string, Action>>();
+
         private readonly Dictionary<string, Action> _strMessages = new Dictionary<string, Action>();
-        private readonly Dictionary<string, Dictionary<string, Action>> _strIDMessages = new Dictionary<string, Dictionary<string, Action>>();
+
+        private readonly Dictionary<string, Dictionary<string, Action>> _strIDMessages =
+            new Dictionary<string, Dictionary<string, Action>>();
 
         private MessageAggregator()
         {

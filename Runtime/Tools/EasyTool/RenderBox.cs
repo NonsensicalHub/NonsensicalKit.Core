@@ -189,7 +189,7 @@ namespace NonsensicalKit.Tools.EasyTool
         {
             EditorGUI.BeginChangeCheck();
 
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_2022_1_OR_NEWER
             Vector3 newHoldPoint = Handles.FreeMoveHandle(holdPoint, HandleUtility.GetHandleSize(holdPoint) * 0.03f,
                 Vector3.one * 0.5f, Handles.DotHandleCap);
 #else

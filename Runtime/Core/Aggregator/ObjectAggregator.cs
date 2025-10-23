@@ -9,8 +9,10 @@ namespace NonsensicalKit.Core
     /// </summary>
     public class ObjectAggregator<T>
     {
-        public static ObjectAggregator<T> Instance => _instance ??= new ObjectAggregator<T>();
-        private static ObjectAggregator<T> _instance;
+        public static ObjectAggregator<T> Instance => LazyInstance.Value;
+
+        //线程安全
+        private static readonly Lazy<ObjectAggregator<T>> LazyInstance = new(() => new ObjectAggregator<T>());
 
         private T _field;
         private Func<T> _fallBack;
