@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 
 namespace NonsensicalKit.Core
@@ -18,235 +19,207 @@ namespace NonsensicalKit.Core
         protected virtual void OnDestroy()
         {
             //TODO:或许可以不使用反射，而是动态管理一个Action来进行自动注销（需要测试是否能正常提前注销）
-            foreach (var subscribeInfo in _subscribeInfos)
+
+            foreach (var info in _subscribeInfos)
             {
-                bool isInt = subscribeInfo.UseInt;
-                bool useID = subscribeInfo.UseID;
-                Type[] types = subscribeInfo.Types;
-                Type messageAggregator;
-                object instance;
-                Type action;
-                switch (types.Length)
+                // 根据参数数量选择聚合器泛型版本
+                Type baseType = info.Types.Length switch
                 {
-                    case 0:
-                    {
-                        messageAggregator = typeof(MessageAggregator);
-                        instance = messageAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        action = typeof(Action);
-                    }
-                        break;
-                    case 1:
-                    {
-                        messageAggregator = typeof(MessageAggregator<>).MakeGenericType(types);
-                        instance = messageAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        action = typeof(Action<>).MakeGenericType(types);
-                    }
-                        break;
-                    case 2:
-                    {
-                        messageAggregator = typeof(MessageAggregator<,>).MakeGenericType(types);
-                        instance = messageAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        action = typeof(Action<,>).MakeGenericType(types);
-                    }
-                        break;
-                    case 3:
-                    {
-                        messageAggregator = typeof(MessageAggregator<,,>).MakeGenericType(types);
-                        instance = messageAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        action = typeof(Action<,,>).MakeGenericType(types);
-                    }
-                        break;
-                    default:
-                        continue;
-                }
+                    0 => typeof(MessageAggregator),
+                    1 => typeof(MessageAggregator<>),
+                    2 => typeof(MessageAggregator<,>),
+                    3 => typeof(MessageAggregator<,,>),
+                    _ => null
+                };
 
-                Type[] ts = new Type[useID ? 3 : 2];
-                object[] os = new object[useID ? 3 : 2];
-                if (isInt)
+                Type funcType = info.Types.Length switch
                 {
-                    ts[0] = typeof(int);
-                    os[0] = subscribeInfo.Index;
+                    0 => typeof(Action),
+                    1 => typeof(Action<>).MakeGenericType(info.Types),
+                    2 => typeof(Action<,>).MakeGenericType(info.Types),
+                    3 => typeof(Action<,,>).MakeGenericType(info.Types),
+                    _ => null
+                };
+                Type[] ts;
+                object[] os;
+
+                if (info.UseInt)
+                {
+                    if (info.UseID)
+                    {
+                        ts = new[] { typeof(int), typeof(string), funcType };
+                        os = new[] { info.Index, info.ID, info.Func };
+                    }
+                    else
+                    {
+                        ts = new[] { typeof(int), funcType };
+                        os = new[] { info.Index, info.Func };
+                    }
                 }
                 else
                 {
-                    ts[0] = typeof(string);
-                    os[0] = subscribeInfo.Str;
+                    if (info.UseID)
+                    {
+                        ts = new[] { typeof(string), typeof(string), funcType };
+                        os = new[] { info.Str, info.ID, info.Func };
+                    }
+                    else
+                    {
+                        ts = new[] { typeof(string), funcType };
+                        os = new[] { info.Str, info.Func };
+                    }
                 }
 
-                if (useID)
-                {
-                    ts[1] = typeof(string);
-                    ts[2] = action;
-                    os[1] = subscribeInfo.ID;
-                    os[2] = subscribeInfo.Func;
-                }
-                else
-                {
-                    ts[1] = action;
-                    os[1] = subscribeInfo.Func;
-                }
+                if (baseType == null) continue;
 
-                MethodInfo unsubMethod = messageAggregator.GetMethod("Unsubscribe", ts);
-                unsubMethod.Invoke(instance, os);
+                AggregatorInvoker.Invoke(
+                    baseType,
+                    "Unsubscribe",
+                    info.Types,
+                    ts,
+                    os
+                );
             }
 
             _subscribeInfos.Clear();
-            foreach (var registerInfo in _registerInfos)
+
+            foreach (var info in _registerInfos)
             {
-                int keytype = registerInfo.KeyType;
-                Type type = registerInfo.Type;
+                Type[] ts;
+                object[] os;
 
-                var objectAggregator = typeof(ObjectAggregator<>).MakeGenericType(type);
-                var instance = objectAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                    .GetValue(null);
-                var func = typeof(Func<>).MakeGenericType(type);
-
-                Type[] ts = new Type[keytype == 0 ? 1 : 2];
-                object[] os = new object[keytype == 0 ? 1 : 2];
-                if (keytype == 0)
+                switch (info.KeyType)
                 {
-                    ts[0] = func;
-                    os[0] = registerInfo.Func;
-                }
-                else if (keytype == 1)
-                {
-                    ts[0] = typeof(string);
-                    os[0] = registerInfo.Str;
-
-                    ts[1] = func;
-                    os[1] = registerInfo.Func;
-                }
-                else
-                {
-                    ts[0] = typeof(int);
-                    os[0] = registerInfo.Index;
-
-                    ts[1] = func;
-                    os[1] = registerInfo.Func;
-                }
-
-                MethodInfo unregister = objectAggregator.GetMethod("Unregister", ts);
-                unregister.Invoke(instance, os);
-            }
-
-            _registerInfos.Clear();
-            foreach (var listenerInfo in _listenerInfos)
-            {
-                int keytype = listenerInfo.KeyType;
-                Type type = listenerInfo.Type;
-
-                var objectAggregator = typeof(ObjectAggregator<>).MakeGenericType(type);
-                var instance = objectAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                    .GetValue(null);
-                var action = typeof(Action<>).MakeGenericType(type);
-
-                Type[] ts = new Type[keytype == 0 ? 1 : 2];
-                object[] os = new object[keytype == 0 ? 1 : 2];
-                if (keytype == 0)
-                {
-                    ts[0] = action;
-                    os[0] = listenerInfo.Func;
-                }
-                else if (keytype == 1)
-                {
-                    ts[0] = typeof(string);
-                    os[0] = listenerInfo.Str;
-
-                    ts[1] = action;
-                    os[1] = listenerInfo.Func;
-                }
-                else
-                {
-                    ts[0] = typeof(int);
-                    os[0] = listenerInfo.Index;
-
-                    ts[1] = action;
-                    os[1] = listenerInfo.Func;
-                }
-
-                MethodInfo removeListener = objectAggregator.GetMethod("RemoveListener", ts);
-                removeListener.Invoke(instance, os);
-            }
-
-            _listenerInfos.Clear();
-            foreach (var handlerInfos in _handlerInfos)
-            {
-                bool isInt = handlerInfos.UseInt;
-                bool useID = handlerInfos.UseID;
-                Type[] types = handlerInfos.Types;
-                Type methodAggregator;
-                object instance;
-                Type func;
-                switch (types.Length)
-                {
-                    case 1:
-                    {
-                        methodAggregator = typeof(MethodAggregator<>).MakeGenericType(types);
-                        instance = methodAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        func = typeof(Func<>).MakeGenericType(types);
-                    }
+                    case 0: // 类型键
+                        ts = new[] { typeof(Func<>).MakeGenericType(info.Type) };
+                        os = new[] { info.Func };
                         break;
-                    case 2:
-                    {
-                        methodAggregator = typeof(MethodAggregator<,>).MakeGenericType(types);
-                        instance = methodAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        func = typeof(Func<,>).MakeGenericType(types);
-                    }
+
+                    case 1: // 字符串键
+                        ts = new[] { typeof(string), typeof(Func<>).MakeGenericType(info.Type) };
+                        os = new[] { info.Str, info.Func };
                         break;
-                    case 3:
-                    {
-                        methodAggregator = typeof(MethodAggregator<,,>).MakeGenericType(types);
-                        instance = methodAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        func = typeof(Func<,,>).MakeGenericType(types);
-                    }
+
+                    case 2: // 数字键
+                        ts = new[] { typeof(int), typeof(Func<>).MakeGenericType(info.Type) };
+                        os = new[] { info.Index, info.Func };
                         break;
-                    case 4:
-                    {
-                        methodAggregator = typeof(MethodAggregator<,,,>).MakeGenericType(types);
-                        instance = methodAggregator.GetField("Instance", BindingFlags.Static | BindingFlags.Public)
-                            .GetValue(null);
-                        func = typeof(Func<,,,>).MakeGenericType(types);
-                    }
-                        break;
+
                     default:
                         continue;
                 }
 
-                Type[] ts = new Type[useID ? 3 : 2];
-                object[] os = new object[useID ? 3 : 2];
-                if (isInt)
+                AggregatorInvoker.Invoke(
+                    typeof(ObjectAggregator<>),
+                    "Unregister",
+                    new[] { info.Type },
+                    ts,
+                    os
+                );
+            }
+
+            _registerInfos.Clear();
+
+            foreach (var info in _listenerInfos)
+            {
+                Type[] ts;
+                object[] os;
+
+                switch (info.KeyType)
                 {
-                    ts[0] = typeof(int);
-                    os[0] = handlerInfos.Index;
+                    case 0: // 类型键
+                        ts = new[] { typeof(Action<>).MakeGenericType(info.Type) };
+                        os = new[] { info.Func };
+                        break;
+
+                    case 1: // 字符串键
+                        ts = new[] { typeof(string), typeof(Action<>).MakeGenericType(info.Type) };
+                        os = new[] { info.Str, info.Func };
+                        break;
+
+                    case 2: // 数字键
+                        ts = new[] { typeof(int), typeof(Action<>).MakeGenericType(info.Type) };
+                        os = new[] { info.Index, info.Func };
+                        break;
+
+                    default:
+                        continue;
+                }
+
+                AggregatorInvoker.Invoke(
+                    typeof(ObjectAggregator<>),
+                    "RemoveListener",
+                    new[] { info.Type },
+                    ts,
+                    os
+                );
+            }
+
+            _listenerInfos.Clear();
+
+            foreach (var info in _handlerInfos)
+            {
+                Type[] genericArgs = info.Types;
+                int argCount = genericArgs.Length;
+
+                Type baseAggregatorType;
+                switch (argCount)
+                {
+                    case 1: baseAggregatorType = typeof(MethodAggregator<>); break;
+                    case 2: baseAggregatorType = typeof(MethodAggregator<,>); break;
+                    case 3: baseAggregatorType = typeof(MethodAggregator<,,>); break;
+                    case 4: baseAggregatorType = typeof(MethodAggregator<,,,>); break;
+                    default: continue;
+                }
+
+                // 构造 Func<...> 类型
+                Type funcType;
+                if (argCount == 1)
+                    funcType = typeof(Func<>).MakeGenericType(genericArgs);
+                else if (argCount == 2)
+                    funcType = typeof(Func<,>).MakeGenericType(genericArgs);
+                else if (argCount == 3)
+                    funcType = typeof(Func<,,>).MakeGenericType(genericArgs);
+                else
+                    funcType = typeof(Func<,,,>).MakeGenericType(genericArgs);
+
+                Type[] ts;
+                object[] os;
+
+                if (info.UseInt)
+                {
+                    if (info.UseID)
+                    {
+                        ts = new[] { typeof(int), typeof(string), funcType };
+                        os = new[] { info.Index, info.ID, info.Func };
+                    }
+                    else
+                    {
+                        ts = new[] { typeof(int), funcType };
+                        os = new[] { info.Index, info.Func };
+                    }
                 }
                 else
                 {
-                    ts[0] = typeof(string);
-                    os[0] = handlerInfos.Str;
+                    if (info.UseID)
+                    {
+                        ts = new[] { typeof(string), typeof(string), funcType };
+                        os = new[] { info.Str, info.ID, info.Func };
+                    }
+                    else
+                    {
+                        ts = new[] { typeof(string), funcType };
+                        os = new[] { info.Str, info.Func };
+                    }
                 }
 
-                if (useID)
-                {
-                    ts[1] = typeof(string);
-                    ts[2] = func;
-                    os[1] = handlerInfos.ID;
-                    os[2] = handlerInfos.Func;
-                }
-                else
-                {
-                    ts[1] = func;
-                    os[1] = handlerInfos.Func;
-                }
-
-                MethodInfo removeMethod = methodAggregator.GetMethod("RemoveHandler", ts);
-                removeMethod.Invoke(instance, os);
+                AggregatorInvoker.Invoke(
+                    baseAggregatorType,
+                    "RemoveHandler",
+                    genericArgs,
+                    ts,
+                    os
+                );
             }
 
             _handlerInfos.Clear();
@@ -271,7 +244,6 @@ namespace NonsensicalKit.Core
         {
             _handlerInfos.Add(info);
         }
-
 
         protected class SubscribeInfo
         {
@@ -457,38 +429,32 @@ namespace NonsensicalKit.Core
 
         #region Subscribe
 
+        // --- Subscribe (int key)
         protected void Subscribe<T1, T2, T3>(int index, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(index, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, func, typeof(T1), typeof(T2), typeof(T3));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(index, func, typeof(T1), typeof(T2), typeof(T3)));
         }
 
         protected void Subscribe<T1, T2>(int index, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(index, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, func, typeof(T1), typeof(T2));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(index, func, typeof(T1), typeof(T2)));
         }
 
         protected void Subscribe<T>(int index, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(index, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, func, typeof(T));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(index, func, typeof(T)));
         }
 
         protected void Subscribe(int index, Action func)
         {
             MessageAggregator.Instance.Subscribe(index, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, func);
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(index, func));
         }
 
+        // --- Subscribe (Enum)
         protected void Subscribe<T1, T2, T3>(Enum index, Action<T1, T2, T3> func)
         {
             Subscribe(Convert.ToInt32(index), func);
@@ -509,41 +475,29 @@ namespace NonsensicalKit.Core
             Subscribe(Convert.ToInt32(index), func);
         }
 
+        // --- Subscribe with ID (int)
         protected void Subscribe<T1, T2, T3>(int index, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(index, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, id, func, typeof(T1), typeof(T2), typeof(T3));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func, typeof(T1), typeof(T2), typeof(T3)));
         }
 
         protected void Subscribe<T1, T2>(int index, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(index, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, id, func, typeof(T1), typeof(T2));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func, typeof(T1), typeof(T2)));
         }
 
         protected void Subscribe<T>(int index, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(index, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, id, func, typeof(T));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func, typeof(T)));
         }
 
         protected void Subscribe(int index, string id, Action func)
         {
             MessageAggregator.Instance.Subscribe(index, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(index, id, func);
-            _subscribeInfos.Add(temp);
-        }
-
-        protected void Subscribe(Enum index, string id, Action func)
-        {
-            Subscribe(Convert.ToInt32(index), id, func);
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func));
         }
 
         protected void Subscribe<T1, T2, T3>(Enum index, string id, Action<T1, T2, T3> func)
@@ -561,68 +515,60 @@ namespace NonsensicalKit.Core
             Subscribe(Convert.ToInt32(index), id, func);
         }
 
+        protected void Subscribe(Enum index, string id, Action func)
+        {
+            Subscribe(Convert.ToInt32(index), id, func);
+        }
+
+
+        // --- Subscribe (string key)
         protected void Subscribe<T1, T2, T3>(string str, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(str, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, func, typeof(T1), typeof(T2), typeof(T3));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, func, typeof(T1), typeof(T2), typeof(T3)));
         }
 
         protected void Subscribe<T1, T2>(string str, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(str, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, func, typeof(T1), typeof(T2));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, func, typeof(T1), typeof(T2)));
         }
 
         protected void Subscribe<T>(string str, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(str, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, func, typeof(T));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, func, typeof(T)));
         }
 
         protected void Subscribe(string str, Action func)
         {
             MessageAggregator.Instance.Subscribe(str, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, func);
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, func));
         }
 
+        // --- Subscribe (string + id)
         protected void Subscribe<T1, T2, T3>(string str, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(str, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, id, func, typeof(T1), typeof(T2), typeof(T3));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func, typeof(T1), typeof(T2), typeof(T3)));
         }
 
         protected void Subscribe<T1, T2>(string str, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(str, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, id, func, typeof(T1), typeof(T2));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func, typeof(T1), typeof(T2)));
         }
 
         protected void Subscribe<T>(string str, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(str, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, id, func, typeof(T));
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func, typeof(T)));
         }
 
         protected void Subscribe(string str, string id, Action func)
         {
             MessageAggregator.Instance.Subscribe(str, id, func);
-
-            SubscribeInfo temp = new SubscribeInfo(str, id, func);
-            _subscribeInfos.Add(temp);
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func));
         }
 
         #endregion
@@ -632,61 +578,29 @@ namespace NonsensicalKit.Core
         protected void Unsubscribe<T1, T2, T3>(int index, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(index, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index && func == (Action<T1, T2, T3>)info.Func);
         }
 
         protected void Unsubscribe<T1, T2>(int index, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(index, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index && func == (Action<T1, T2>)info.Func);
         }
 
         protected void Unsubscribe<T>(int index, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(index, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action<T>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index && func == (Action<T>)info.Func);
         }
 
         protected void Unsubscribe(int index, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(index, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index && func == (Action)info.Func);
         }
 
         protected void Unsubscribe<T1, T2, T3>(Enum index, Action<T1, T2, T3> func)
@@ -712,65 +626,30 @@ namespace NonsensicalKit.Core
         protected void Unsubscribe<T1, T2, T3>(int index, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(index, id, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id &&
+                func == (Action<T1, T2, T3>)info.Func);
         }
 
         protected void Unsubscribe<T1, T2>(int index, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(index, id, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id && func == (Action<T1, T2>)info.Func);
         }
 
         protected void Unsubscribe<T>(int index, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(index, id, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action<T>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id && func == (Action<T>)info.Func);
         }
 
         protected void Unsubscribe(int index, string id, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(index, id, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    index == _subscribeInfos[i].Index &&
-                    func == (_subscribeInfos[i].Func as Action))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id && func == (Action)info.Func);
         }
 
         protected void Unsubscribe<T1, T2, T3>(Enum index, string id, Action<T1, T2, T3> func)
@@ -796,123 +675,68 @@ namespace NonsensicalKit.Core
         protected void Unsubscribe<T1, T2, T3>(string str, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(str, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && func == (Action<T1, T2, T3>)info.Func);
         }
 
         protected void Unsubscribe<T1, T2>(string str, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(str, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && func == (Action<T1, T2>)info.Func);
         }
 
         protected void Unsubscribe<T>(string str, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(str, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action<T>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && func == (Action<T>)info.Func);
         }
 
         protected void Unsubscribe(string str, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(str, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (!_subscribeInfos[i].UseInt && !_subscribeInfos[i].UseID && str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && func == (Action)info.Func);
         }
 
         protected void Unsubscribe<T1, T2, T3>(string str, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(str, id, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2, T3>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id &&
+                func == (Action<T1, T2, T3>)info.Func);
         }
 
         protected void Unsubscribe<T1, T2>(string str, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Unsubscribe(str, id, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action<T1, T2>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id && func == (Action<T1, T2>)info.Func);
         }
 
         protected void Unsubscribe<T>(string str, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(str, id, func);
-
-            for (int i = 0; i < _subscribeInfos.Count; i++)
-            {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action<T>))
-                {
-                    _subscribeInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id && func == (Action<T>)info.Func);
         }
 
         protected void Unsubscribe(string str, string id, Action func)
         {
             MessageAggregator.Instance.Unsubscribe(str, id, func);
+            RemoveSubscribeInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id && func == (Action)info.Func);
+        }
 
+        private void RemoveSubscribeInfoMatch(Predicate<SubscribeInfo> match)
+        {
             for (int i = 0; i < _subscribeInfos.Count; i++)
             {
-                if (!_subscribeInfos[i].UseInt && _subscribeInfos[i].UseID && id == _subscribeInfos[i].ID &&
-                    str == _subscribeInfos[i].Str &&
-                    func == (_subscribeInfos[i].Func as Action))
+                if (match(_subscribeInfos[i]))
                 {
                     _subscribeInfos.RemoveAt(i);
-                    return;
+                    break;
                 }
             }
         }
@@ -961,26 +785,6 @@ namespace NonsensicalKit.Core
             MessageAggregator.Instance.Publish(Convert.ToInt32(index));
         }
 
-        protected void PublishWithID<T1, T2, T3>(int index, string id, T1 data1, T2 data2, T3 data3)
-        {
-            MessageAggregator<T1, T2, T3>.Instance.PublishWithID(index, id, data1, data2, data3);
-        }
-
-        protected void PublishWithID<T1, T2>(int index, string id, T1 data1, T2 data2)
-        {
-            MessageAggregator<T1, T2>.Instance.PublishWithID(index, id, data1, data2);
-        }
-
-        protected void PublishWithID<T>(int index, string id, T data)
-        {
-            MessageAggregator<T>.Instance.PublishWithID(index, id, data);
-        }
-
-        protected void PublishWithID(int index, string id)
-        {
-            MessageAggregator.Instance.PublishWithID(index, id);
-        }
-
         protected void PublishWithID<T1, T2, T3>(Enum index, string id, T1 data1, T2 data2, T3 data3)
         {
             MessageAggregator<T1, T2, T3>.Instance.PublishWithID(Convert.ToInt32(index), id, data1, data2, data3);
@@ -999,6 +803,26 @@ namespace NonsensicalKit.Core
         protected void PublishWithID(Enum index, string id)
         {
             MessageAggregator.Instance.PublishWithID(Convert.ToInt32(index), id);
+        }
+
+        protected void PublishWithID<T1, T2, T3>(int index, string id, T1 data1, T2 data2, T3 data3)
+        {
+            MessageAggregator<T1, T2, T3>.Instance.PublishWithID(index, id, data1, data2, data3);
+        }
+
+        protected void PublishWithID<T1, T2>(int index, string id, T1 data1, T2 data2)
+        {
+            MessageAggregator<T1, T2>.Instance.PublishWithID(index, id, data1, data2);
+        }
+
+        protected void PublishWithID<T>(int index, string id, T data)
+        {
+            MessageAggregator<T>.Instance.PublishWithID(index, id, data);
+        }
+
+        protected void PublishWithID(int index, string id)
+        {
+            MessageAggregator.Instance.PublishWithID(index, id);
         }
 
         protected void Publish<T1, T2, T3>(string str, T1 data1, T2 data2, T3 data3)
@@ -1043,30 +867,24 @@ namespace NonsensicalKit.Core
 
         #endregion
 
-        #region Register
+        #region Register / Unregister (ObjectAggregator)
 
         protected void Register<T>(Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(func);
-
-            RegisterInfo temp = new RegisterInfo(func, typeof(T));
-            _registerInfos.Add(temp);
+            _registerInfos.Add(new RegisterInfo(func, typeof(T)));
         }
 
-        protected void Register<T>(string id, Func<T> func)
+        protected void Register<T>(string str, Func<T> func)
         {
-            ObjectAggregator<T>.Instance.Register(id, func);
-
-            RegisterInfo temp = new RegisterInfo(id, func, typeof(T));
-            _registerInfos.Add(temp);
+            ObjectAggregator<T>.Instance.Register(str, func);
+            _registerInfos.Add(new RegisterInfo(str, func, typeof(T)));
         }
 
         protected void Register<T>(int index, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(index, func);
-
-            RegisterInfo temp = new RegisterInfo(index, func, typeof(T));
-            _registerInfos.Add(temp);
+            _registerInfos.Add(new RegisterInfo(index, func, typeof(T)));
         }
 
         protected void Register<T>(Enum index, Func<T> func)
@@ -1074,52 +892,24 @@ namespace NonsensicalKit.Core
             Register(Convert.ToInt32(index), func);
         }
 
-        #endregion
-
-        #region Unregister
-
         protected void Unregister<T>(Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(func);
-
-            for (int i = 0; i < _registerInfos.Count; i++)
-            {
-                if (_registerInfos[i].KeyType == 0 && func.Equals(_registerInfos[i].Func as Func<T>))
-                {
-                    _registerInfos.RemoveAt(i);
-                    break;
-                }
-            }
+            RemoveRegisterInfoMatch(info => info.KeyType == 0 && info.Type == typeof(T) && (Func<T>)info.Func == func);
         }
 
-        protected void Unregister<T>(string id, Func<T> func)
+        protected void Unregister<T>(string str, Func<T> func)
         {
-            ObjectAggregator<T>.Instance.Unregister(id, func);
-
-            for (int i = 0; i < _registerInfos.Count; i++)
-            {
-                if (_registerInfos[i].KeyType == 1 && id == _registerInfos[i].Str &&
-                    func.Equals(_registerInfos[i].Func as Func<T>))
-                {
-                    _registerInfos.RemoveAt(i);
-                    break;
-                }
-            }
+            ObjectAggregator<T>.Instance.Unregister(str, func);
+            RemoveRegisterInfoMatch(info =>
+                info.KeyType == 1 && info.Type == typeof(T) && info.Str == str && (Func<T>)info.Func == func);
         }
 
         protected void Unregister<T>(int index, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(index, func);
-
-            for (int i = 0; i < _registerInfos.Count; i++)
-            {
-                if (_registerInfos[i].KeyType == 2 && index == _registerInfos[i].Index &&
-                    func.Equals(_registerInfos[i].Func as Func<T>))
-                {
-                    _registerInfos.RemoveAt(i);
-                    break;
-                }
-            }
+            RemoveRegisterInfoMatch(info =>
+                info.KeyType == 2 && info.Type == typeof(T) && info.Index == index && (Func<T>)info.Func == func);
         }
 
         protected void Unregister<T>(Enum index, Func<T> func)
@@ -1127,144 +917,112 @@ namespace NonsensicalKit.Core
             Unregister(Convert.ToInt32(index), func);
         }
 
-        #endregion
-
-        #region AddListener
-
-        protected void AddListener<T>(Action<T> func)
+        private void RemoveRegisterInfoMatch(Predicate<RegisterInfo> match)
         {
-            ObjectAggregator<T>.Instance.AddListener(func);
-
-            ListenerInfo temp = new ListenerInfo(func, typeof(T));
-            _listenerInfos.Add(temp);
-        }
-
-        protected void AddListener<T>(string id, Action<T> func)
-        {
-            ObjectAggregator<T>.Instance.AddListener(id, func);
-
-            ListenerInfo temp = new ListenerInfo(id, func, typeof(T));
-            _listenerInfos.Add(temp);
-        }
-
-        protected void AddListener<T>(int index, Action<T> func)
-        {
-            ObjectAggregator<T>.Instance.AddListener(index, func);
-
-            ListenerInfo temp = new ListenerInfo(index, func, typeof(T));
-            _listenerInfos.Add(temp);
-        }
-
-        protected void AddListener<T>(Enum index, Action<T> func)
-        {
-            AddListener(Convert.ToInt32(index), func);
+            for (int i = 0; i < _registerInfos.Count; i++)
+            {
+                if (match(_registerInfos[i]))
+                {
+                    _registerInfos.RemoveAt(i);
+                    break;
+                }
+            }
         }
 
         #endregion
 
-        #region RemoveListener
+        #region AddListener / RemoveListener (ObjectAggregator)
 
-        protected void RemoveListener<T>(Action<T> func)
+        protected void AddListener<T>(Action<T> listener)
         {
-            ObjectAggregator<T>.Instance.RemoveListener(func);
+            ObjectAggregator<T>.Instance.AddListener(listener);
+            _listenerInfos.Add(new ListenerInfo(listener, typeof(T)));
+        }
 
+        protected void AddListener<T>(string str, Action<T> listener)
+        {
+            ObjectAggregator<T>.Instance.AddListener(str, listener);
+            _listenerInfos.Add(new ListenerInfo(str, listener, typeof(T)));
+        }
+
+        protected void AddListener<T>(int index, Action<T> listener)
+        {
+            ObjectAggregator<T>.Instance.AddListener(index, listener);
+            _listenerInfos.Add(new ListenerInfo(index, listener, typeof(T)));
+        }
+
+        protected void AddListener<T>(Enum index, Action<T> listener)
+        {
+            AddListener(Convert.ToInt32(index), listener);
+        }
+
+        protected void RemoveListener<T>(Action<T> listener)
+        {
+            ObjectAggregator<T>.Instance.RemoveListener(listener);
+            RemoveListenerInfoMatch(info =>
+                info.KeyType == 0 && info.Type == typeof(T) && (Action<T>)info.Func == listener);
+        }
+
+        protected void RemoveListener<T>(string str, Action<T> listener)
+        {
+            ObjectAggregator<T>.Instance.RemoveListener(str, listener);
+            RemoveListenerInfoMatch(info =>
+                info.KeyType == 1 && info.Type == typeof(T) && info.Str == str && (Action<T>)info.Func == listener);
+        }
+
+        protected void RemoveListener<T>(int index, Action<T> listener)
+        {
+            ObjectAggregator<T>.Instance.RemoveListener(index, listener);
+            RemoveListenerInfoMatch(info =>
+                info.KeyType == 2 && info.Type == typeof(T) && info.Index == index && (Action<T>)info.Func == listener);
+        }
+
+        protected void RemoveListener<T>(Enum index, Action<T> listener)
+        {
+            RemoveListener(Convert.ToInt32(index), listener);
+        }
+
+        private void RemoveListenerInfoMatch(Predicate<ListenerInfo> match)
+        {
             for (int i = 0; i < _listenerInfos.Count; i++)
             {
-                if (_listenerInfos[i].KeyType == 0 && func.Equals(_listenerInfos[i].Func as Action<T>))
+                if (match(_listenerInfos[i]))
                 {
                     _listenerInfos.RemoveAt(i);
                     break;
                 }
             }
-        }
-
-        protected void RemoveListener<T>(string id, Action<T> func)
-        {
-            ObjectAggregator<T>.Instance.RemoveListener(id, func);
-
-            for (int i = 0; i < _listenerInfos.Count; i++)
-            {
-                if (_listenerInfos[i].KeyType == 1 && id == _listenerInfos[i].Str &&
-                    func.Equals(_listenerInfos[i].Func as Action<T>))
-                {
-                    _listenerInfos.RemoveAt(i);
-                    break;
-                }
-            }
-        }
-
-        protected void RemoveListener<T>(int index, Action<T> func)
-        {
-            ObjectAggregator<T>.Instance.RemoveListener(index, func);
-
-            for (int i = 0; i < _listenerInfos.Count; i++)
-            {
-                if (_listenerInfos[i].KeyType == 2 && index == _listenerInfos[i].Index &&
-                    func.Equals(_listenerInfos[i].Func as Action<T>))
-                {
-                    _listenerInfos.RemoveAt(i);
-                    break;
-                }
-            }
-        }
-
-        protected void RemoveListener<T>(Enum index, Action<T> func)
-        {
-            RemoveListener(Convert.ToInt32(index), func);
         }
 
         #endregion
 
         #region AddHandler
 
-        protected void AddHandler<TValue1, TValue2, TValue3, TResult>(int index,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.AddHandler(index, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, handler, typeof(TValue1), typeof(TValue2), typeof(TValue3),
-                typeof(TResult));
-            _handlerInfos.Add(temp);
-        }
-
-        protected void AddHandler<TValue1, TValue2, TResult>(int index, Func<TValue1, TValue2, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.AddHandler(index, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, handler, typeof(TValue1), typeof(TValue2), typeof(TResult));
-            _handlerInfos.Add(temp);
-        }
-
-        protected void AddHandler<TValue, TResult>(int index, Func<TValue, TResult> handler)
-        {
-            MethodAggregator<TValue, TResult>.Instance.AddHandler(index, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, handler, typeof(TValue), typeof(TResult));
-            _handlerInfos.Add(temp);
-        }
-
+//
+// AddHandler - 1 generic (Func<TResult>)
+//
         protected void AddHandler<TResult>(int index, Func<TResult> handler)
         {
             MethodAggregator<TResult>.Instance.AddHandler(index, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, handler, typeof(TResult));
-            _handlerInfos.Add(temp);
+            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(TResult)));
         }
 
-        protected void AddHandler<TValue1, TValue2, TValue3, TResult>(Enum index,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+        protected void AddHandler<TResult>(string str, Func<TResult> handler)
         {
-            AddHandler(Convert.ToInt32(index), handler);
+            MethodAggregator<TResult>.Instance.AddHandler(str, handler);
+            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(TResult)));
         }
 
-        protected void AddHandler<TValue1, TValue2, TResult>(Enum index, Func<TValue1, TValue2, TResult> handler)
+        protected void AddHandler<TResult>(int index, string id, Func<TResult> handler)
         {
-            AddHandler(Convert.ToInt32(index), handler);
+            MethodAggregator<TResult>.Instance.AddHandler(index, id, handler);
+            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(TResult)));
         }
 
-        protected void AddHandler<TValue, TResult>(Enum index, Func<TValue, TResult> handler)
+        protected void AddHandler<TResult>(string str, string id, Func<TResult> handler)
         {
-            AddHandler(Convert.ToInt32(index), handler);
+            MethodAggregator<TResult>.Instance.AddHandler(str, id, handler);
+            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(TResult)));
         }
 
         protected void AddHandler<TResult>(Enum index, Func<TResult> handler)
@@ -1272,86 +1030,41 @@ namespace NonsensicalKit.Core
             AddHandler(Convert.ToInt32(index), handler);
         }
 
-        protected void AddHandler<TValue1, TValue2, TValue3, TResult>(string str,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+        protected void AddHandler<TResult>(Enum index, string id, Func<TResult> handler)
         {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.AddHandler(str, handler);
-
-            HandlerInfo temp = new HandlerInfo(str, handler, typeof(TValue1), typeof(TValue2), typeof(TValue3),
-                typeof(TResult));
-            _handlerInfos.Add(temp);
+            AddHandler(Convert.ToInt32(index), id, handler);
         }
 
-        protected void AddHandler<TValue1, TValue2, TResult>(string str, Func<TValue1, TValue2, TResult> handler)
+//
+// AddHandler - 2 generics (Func<TValue, TResult>)
+//
+        protected void AddHandler<TValue, TResult>(int index, Func<TValue, TResult> handler)
         {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.AddHandler(str, handler);
-
-            HandlerInfo temp = new HandlerInfo(str, handler, typeof(TValue1), typeof(TValue2), typeof(TResult));
-            _handlerInfos.Add(temp);
+            MethodAggregator<TValue, TResult>.Instance.AddHandler(index, handler);
+            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(TValue), typeof(TResult)));
         }
 
         protected void AddHandler<TValue, TResult>(string str, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.AddHandler(str, handler);
-
-            HandlerInfo temp = new HandlerInfo(str, handler, typeof(TValue), typeof(TResult));
-            _handlerInfos.Add(temp);
-        }
-
-        protected void AddHandler<TResult>(string str, Func<TResult> handler)
-        {
-            MethodAggregator<TResult>.Instance.AddHandler(str, handler);
-
-            HandlerInfo temp = new HandlerInfo(str, handler, typeof(TResult));
-            _handlerInfos.Add(temp);
-        }
-
-
-        protected void AddHandler<TValue1, TValue2, TValue3, TResult>(int index, string id,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.AddHandler(index, id, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, id, handler, typeof(TValue1), typeof(TValue2), typeof(TValue3),
-                typeof(TResult));
-            _handlerInfos.Add(temp);
-        }
-
-        protected void AddHandler<TValue1, TValue2, TResult>(int index, string id,
-            Func<TValue1, TValue2, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.AddHandler(index, id, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, id, handler, typeof(TValue1), typeof(TValue2), typeof(TResult));
-            _handlerInfos.Add(temp);
+            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(TValue), typeof(TResult)));
         }
 
         protected void AddHandler<TValue, TResult>(int index, string id, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.AddHandler(index, id, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, id, handler, typeof(TValue), typeof(TResult));
-            _handlerInfos.Add(temp);
+            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(TValue), typeof(TResult)));
         }
 
-        protected void AddHandler<TResult>(int index, string id, Func<TResult> handler)
+        protected void AddHandler<TValue, TResult>(string str, string id, Func<TValue, TResult> handler)
         {
-            MethodAggregator<TResult>.Instance.AddHandler(index, id, handler);
-
-            HandlerInfo temp = new HandlerInfo(index, id, handler, typeof(TResult));
-            _handlerInfos.Add(temp);
+            MethodAggregator<TValue, TResult>.Instance.AddHandler(str, id, handler);
+            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(TValue), typeof(TResult)));
         }
 
-        protected void AddHandler<TValue1, TValue2, TValue3, TResult>(Enum index, string id,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+        protected void AddHandler<TValue, TResult>(Enum index, Func<TValue, TResult> handler)
         {
-            AddHandler(Convert.ToInt32(index), id, handler);
-        }
-
-        protected void AddHandler<TValue1, TValue2, TResult>(Enum index, string id,
-            Func<TValue1, TValue2, TResult> handler)
-        {
-            AddHandler(Convert.ToInt32(index), id, handler);
+            AddHandler(Convert.ToInt32(index), handler);
         }
 
         protected void AddHandler<TValue, TResult>(Enum index, string id, Func<TValue, TResult> handler)
@@ -1359,129 +1072,115 @@ namespace NonsensicalKit.Core
             AddHandler(Convert.ToInt32(index), id, handler);
         }
 
-        protected void AddHandler<TResult>(Enum index, string id, Func<TResult> handler)
+//
+// AddHandler - 3 generics (Func<T1, T2, TResult>)
+//
+        protected void AddHandler<T1, T2, TResult>(int index, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(index, handler);
+            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(T1), typeof(T2), typeof(TResult)));
+        }
+
+        protected void AddHandler<T1, T2, TResult>(string str, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(str, handler);
+            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(T1), typeof(T2), typeof(TResult)));
+        }
+
+        protected void AddHandler<T1, T2, TResult>(int index, string id, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(index, id, handler);
+            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(T1), typeof(T2), typeof(TResult)));
+        }
+
+        protected void AddHandler<T1, T2, TResult>(string str, string id, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(str, id, handler);
+            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(T1), typeof(T2), typeof(TResult)));
+        }
+
+        protected void AddHandler<T1, T2, TResult>(Enum index, Func<T1, T2, TResult> handler)
+        {
+            AddHandler(Convert.ToInt32(index), handler);
+        }
+
+        protected void AddHandler<T1, T2, TResult>(Enum index, string id, Func<T1, T2, TResult> handler)
         {
             AddHandler(Convert.ToInt32(index), id, handler);
         }
 
-        protected void AddHandler<TValue1, TValue2, TValue3, TResult>(string str, string id,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+//
+// AddHandler - 4 generics (Func<T1, T2, T3, TResult>)
+//
+        protected void AddHandler<T1, T2, T3, TResult>(int index, Func<T1, T2, T3, TResult> handler)
         {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.AddHandler(str, id, handler);
-
-            HandlerInfo temp = new HandlerInfo(str, id, handler, typeof(TValue1), typeof(TValue2), typeof(TValue3),
-                typeof(TResult));
-            _handlerInfos.Add(temp);
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(index, handler);
+            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
         }
 
-        protected void AddHandler<TValue1, TValue2, TResult>(string str, string id,
-            Func<TValue1, TValue2, TResult> handler)
+        protected void AddHandler<T1, T2, T3, TResult>(string str, Func<T1, T2, T3, TResult> handler)
         {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.AddHandler(str, id, handler);
-
-            HandlerInfo temp = new HandlerInfo(str, id, handler, typeof(TValue1), typeof(TValue2), typeof(TResult));
-            _handlerInfos.Add(temp);
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(str, handler);
+            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
         }
 
-        protected void AddHandler<TValue, TResult>(string str, string id, Func<TValue, TResult> handler)
+        protected void AddHandler<T1, T2, T3, TResult>(int index, string id, Func<T1, T2, T3, TResult> handler)
         {
-            MethodAggregator<TValue, TResult>.Instance.AddHandler(str, id, handler);
-
-            HandlerInfo temp = new HandlerInfo(str, id, handler, typeof(TValue), typeof(TResult));
-            _handlerInfos.Add(temp);
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(index, id, handler);
+            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
         }
 
-        protected void AddHandler<TResult>(string str, string id, Func<TResult> handler)
+        protected void AddHandler<T1, T2, T3, TResult>(string str, string id, Func<T1, T2, T3, TResult> handler)
         {
-            MethodAggregator<TResult>.Instance.AddHandler(str, id, handler);
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(str, id, handler);
+            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
+        }
 
-            HandlerInfo temp = new HandlerInfo(str, id, handler, typeof(TResult));
-            _handlerInfos.Add(temp);
+        protected void AddHandler<T1, T2, T3, TResult>(Enum index, Func<T1, T2, T3, TResult> handler)
+        {
+            AddHandler(Convert.ToInt32(index), handler);
+        }
+
+        protected void AddHandler<T1, T2, T3, TResult>(Enum index, string id, Func<T1, T2, T3, TResult> handler)
+        {
+            AddHandler(Convert.ToInt32(index), id, handler);
         }
 
         #endregion
 
         #region RemoveHandler
 
-        protected void RemoveHandler<TValue1, TValue2, TValue3, TResult>(int index,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.RemoveHandler(index, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && !_handlerInfos[i].UseID &&
-                    index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TValue3, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        protected void RemoveHandler<TValue1, TValue2, TResult>(int index, Func<TValue1, TValue2, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.RemoveHandler(index, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && !_handlerInfos[i].UseID &&
-                    index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        protected void RemoveHandler<TValue, TResult>(int index, Func<TValue, TResult> handler)
-        {
-            MethodAggregator<TValue, TResult>.Instance.RemoveHandler(index, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && !_handlerInfos[i].UseID &&
-                    index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TValue, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
+//
+// RemoveHandler - 1 generic
+//
         protected void RemoveHandler<TResult>(int index, Func<TResult> handler)
         {
             MethodAggregator<TResult>.Instance.RemoveHandler(index, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && !_handlerInfos[i].UseID && index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index && handler == (info.Func as Func<TResult>));
         }
 
-
-        protected void RemoveHandler<TValue1, TValue2, TValue3, TResult>(Enum index,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+        protected void RemoveHandler<TResult>(string str, Func<TResult> handler)
         {
-            RemoveHandler(Convert.ToInt32(index), handler);
+            MethodAggregator<TResult>.Instance.RemoveHandler(str, handler);
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && handler == (info.Func as Func<TResult>));
         }
 
-        protected void RemoveHandler<TValue1, TValue2, TResult>(Enum index, Func<TValue1, TValue2, TResult> handler)
+        protected void RemoveHandler<TResult>(int index, string id, Func<TResult> handler)
         {
-            RemoveHandler(Convert.ToInt32(index), handler);
+            MethodAggregator<TResult>.Instance.RemoveHandler(index, id, handler);
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id &&
+                handler == (info.Func as Func<TResult>));
         }
 
-        protected void RemoveHandler<TValue, TResult>(Enum index, Func<TValue, TResult> handler)
+        protected void RemoveHandler<TResult>(string str, string id, Func<TResult> handler)
         {
-            RemoveHandler(Convert.ToInt32(index), handler);
+            MethodAggregator<TResult>.Instance.RemoveHandler(str, id, handler);
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id &&
+                handler == (info.Func as Func<TResult>));
         }
 
         protected void RemoveHandler<TResult>(Enum index, Func<TResult> handler)
@@ -1489,148 +1188,47 @@ namespace NonsensicalKit.Core
             RemoveHandler(Convert.ToInt32(index), handler);
         }
 
-        protected void RemoveHandler<TValue1, TValue2, TValue3, TResult>(string str,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+        protected void RemoveHandler<TResult>(Enum index, string id, Func<TResult> handler)
         {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.RemoveHandler(str, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (!_handlerInfos[i].UseInt && !_handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TValue3, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveHandler(Convert.ToInt32(index), id, handler);
         }
 
-        protected void RemoveHandler<TValue1, TValue2, TResult>(string str, Func<TValue1, TValue2, TResult> handler)
+//
+// RemoveHandler - 2 generics
+//
+        protected void RemoveHandler<TValue, TResult>(int index, Func<TValue, TResult> handler)
         {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.RemoveHandler(str, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (!_handlerInfos[i].UseInt && !_handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            MethodAggregator<TValue, TResult>.Instance.RemoveHandler(index, handler);
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index && handler == (info.Func as Func<TValue, TResult>));
         }
 
         protected void RemoveHandler<TValue, TResult>(string str, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.RemoveHandler(str, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (!_handlerInfos[i].UseInt && !_handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    handler == (_handlerInfos[i].Func as Func<TValue, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        protected void RemoveHandler<TResult>(string str, Func<TResult> handler)
-        {
-            MethodAggregator<TResult>.Instance.RemoveHandler(str, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (!_handlerInfos[i].UseInt && !_handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    handler == (_handlerInfos[i].Func as Func<TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-
-        protected void RemoveHandler<TValue1, TValue2, TValue3, TResult>(int index, string id,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.RemoveHandler(index, id, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && _handlerInfos[i].UseID &&
-                    index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TValue3, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        protected void RemoveHandler<TValue1, TValue2, TResult>(int index, string id,
-            Func<TValue1, TValue2, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.RemoveHandler(index, id, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && _handlerInfos[i].UseID &&
-                    index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && handler == (info.Func as Func<TValue, TResult>));
         }
 
         protected void RemoveHandler<TValue, TResult>(int index, string id, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.RemoveHandler(index, id, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && _handlerInfos[i].UseID &&
-                    index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TValue, TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id &&
+                handler == (info.Func as Func<TValue, TResult>));
         }
 
-        protected void RemoveHandler<TResult>(int index, string id, Func<TResult> handler)
+        protected void RemoveHandler<TValue, TResult>(string str, string id, Func<TValue, TResult> handler)
         {
-            MethodAggregator<TResult>.Instance.RemoveHandler(index, id, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (_handlerInfos[i].UseInt && _handlerInfos[i].UseID && index == _handlerInfos[i].Index &&
-                    handler == (_handlerInfos[i].Func as Func<TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
-            }
+            MethodAggregator<TValue, TResult>.Instance.RemoveHandler(str, id, handler);
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id &&
+                handler == (info.Func as Func<TValue, TResult>));
         }
 
-
-        protected void RemoveHandler<TValue1, TValue2, TValue3, TResult>(Enum index, string id,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+        protected void RemoveHandler<TValue, TResult>(Enum index, Func<TValue, TResult> handler)
         {
-            RemoveHandler(Convert.ToInt32(index), id, handler);
-        }
-
-        protected void RemoveHandler<TValue1, TValue2, TResult>(Enum index, string id,
-            Func<TValue1, TValue2, TResult> handler)
-        {
-            RemoveHandler(Convert.ToInt32(index), id, handler);
+            RemoveHandler(Convert.ToInt32(index), handler);
         }
 
         protected void RemoveHandler<TValue, TResult>(Enum index, string id, Func<TValue, TResult> handler)
@@ -1638,78 +1236,307 @@ namespace NonsensicalKit.Core
             RemoveHandler(Convert.ToInt32(index), id, handler);
         }
 
-        protected void RemoveHandler<TResult>(Enum index, string id, Func<TResult> handler)
+//
+// RemoveHandler - 3 generics
+//
+        protected void RemoveHandler<T1, T2, TResult>(int index, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(index, handler);
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index && handler == (info.Func as Func<T1, T2, TResult>));
+        }
+
+        protected void RemoveHandler<T1, T2, TResult>(string str, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(str, handler);
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && handler == (info.Func as Func<T1, T2, TResult>));
+        }
+
+        protected void RemoveHandler<T1, T2, TResult>(int index, string id, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(index, id, handler);
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id &&
+                handler == (info.Func as Func<T1, T2, TResult>));
+        }
+
+        protected void RemoveHandler<T1, T2, TResult>(string str, string id, Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(str, id, handler);
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id &&
+                handler == (info.Func as Func<T1, T2, TResult>));
+        }
+
+        protected void RemoveHandler<T1, T2, TResult>(Enum index, Func<T1, T2, TResult> handler)
+        {
+            RemoveHandler(Convert.ToInt32(index), handler);
+        }
+
+        protected void RemoveHandler<T1, T2, TResult>(Enum index, string id, Func<T1, T2, TResult> handler)
         {
             RemoveHandler(Convert.ToInt32(index), id, handler);
         }
 
-        protected void RemoveHandler<TValue1, TValue2, TValue3, TResult>(string str, string id,
-            Func<TValue1, TValue2, TValue3, TResult> handler)
+//
+// RemoveHandler - 4 generics
+//
+        protected void RemoveHandler<T1, T2, T3, TResult>(int index, Func<T1, T2, T3, TResult> handler)
         {
-            MethodAggregator<TValue1, TValue2, TValue3, TResult>.Instance.RemoveHandler(str, id, handler);
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(index, handler);
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && !info.UseID && info.Index == index &&
+                handler == (info.Func as Func<T1, T2, T3, TResult>));
+        }
 
+        protected void RemoveHandler<T1, T2, T3, TResult>(string str, Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(str, handler);
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && !info.UseID && info.Str == str && handler == (info.Func as Func<T1, T2, T3, TResult>));
+        }
+
+        protected void RemoveHandler<T1, T2, T3, TResult>(int index, string id, Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(index, id, handler);
+            RemoveHandlerInfoMatch(info =>
+                info.UseInt && info.UseID && info.Index == index && info.ID == id &&
+                handler == (info.Func as Func<T1, T2, T3, TResult>));
+        }
+
+        protected void RemoveHandler<T1, T2, T3, TResult>(string str, string id, Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(str, id, handler);
+            RemoveHandlerInfoMatch(info =>
+                !info.UseInt && info.UseID && info.Str == str && info.ID == id &&
+                handler == (info.Func as Func<T1, T2, T3, TResult>));
+        }
+
+        protected void RemoveHandler<T1, T2, T3, TResult>(Enum index, Func<T1, T2, T3, TResult> handler)
+        {
+            RemoveHandler(Convert.ToInt32(index), handler);
+        }
+
+        protected void RemoveHandler<T1, T2, T3, TResult>(Enum index, string id, Func<T1, T2, T3, TResult> handler)
+        {
+            RemoveHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        private void RemoveHandlerInfoMatch(Predicate<HandlerInfo> match)
+        {
             for (int i = 0; i < _handlerInfos.Count; i++)
             {
-                if (!_handlerInfos[i].UseInt && _handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    id == _handlerInfos[i].ID &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TValue3, TResult>))
+                if (match(_handlerInfos[i]))
                 {
                     _handlerInfos.RemoveAt(i);
-                    return;
+                    break;
                 }
             }
         }
 
-        protected void RemoveHandler<TValue1, TValue2, TResult>(string str, string id,
-            Func<TValue1, TValue2, TResult> handler)
-        {
-            MethodAggregator<TValue1, TValue2, TResult>.Instance.RemoveHandler(str, id, handler);
+        #endregion
 
-            for (int i = 0; i < _handlerInfos.Count; i++)
+        #region Execute
+
+//
+// Execute - 1 generic (Func<TResult>)
+//
+        protected TResult Execute<TResult>(int index) => MethodAggregator<TResult>.Instance.Execute(index);
+
+        protected TResult Execute<TResult>(string str) => MethodAggregator<TResult>.Instance.Execute(str);
+
+        protected TResult Execute<TResult>(int index, string id) =>
+            MethodAggregator<TResult>.Instance.ExecuteWithID(index, id);
+
+        protected TResult Execute<TResult>(string str, string id) =>
+            MethodAggregator<TResult>.Instance.ExecuteWithID(str, id);
+
+        protected TResult Execute<TResult>(Enum index) =>
+            MethodAggregator<TResult>.Instance.Execute(Convert.ToInt32(index));
+
+        protected TResult Execute<TResult>(Enum index, string id) =>
+            MethodAggregator<TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id);
+
+        //
+// Execute - 2 generics (Func<TValue, TResult>)
+//
+        protected TResult Execute<TValue, TResult>(int index, TValue value) =>
+            MethodAggregator<TValue, TResult>.Instance.Execute(index, value);
+
+        protected TResult Execute<TValue, TResult>(Enum index, TValue value) =>
+            MethodAggregator<TValue, TResult>.Instance.Execute(Convert.ToInt32(index), value);
+
+        protected TResult Execute<TValue, TResult>(string str, TValue value) =>
+            MethodAggregator<TValue, TResult>.Instance.Execute(str, value);
+
+        protected TResult Execute<TValue, TResult>(int index, string id, TValue value) =>
+            MethodAggregator<TValue, TResult>.Instance.ExecuteWithID(index, id, value);
+
+        protected TResult Execute<TValue, TResult>(string str, string id, TValue value) =>
+            MethodAggregator<TValue, TResult>.Instance.ExecuteWithID(str, id, value);
+
+        protected TResult Execute<TValue, TResult>(Enum index, string id, TValue value) =>
+            MethodAggregator<TValue, TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id, value);
+
+        //
+// Execute - 3 generics (Func<T1, T2, TResult>)
+//
+        protected TResult Execute<T1, T2, TResult>(int index, T1 v1, T2 v2) =>
+            MethodAggregator<T1, T2, TResult>.Instance.Execute(index, v1, v2);
+
+        protected TResult Execute<T1, T2, TResult>(Enum index, T1 v1, T2 v2) =>
+            MethodAggregator<T1, T2, TResult>.Instance.Execute(Convert.ToInt32(index), v1, v2);
+
+        protected TResult Execute<T1, T2, TResult>(string str, T1 v1, T2 v2) =>
+            MethodAggregator<T1, T2, TResult>.Instance.Execute(str, v1, v2);
+
+        protected TResult Execute<T1, T2, TResult>(int index, string id, T1 v1, T2 v2) =>
+            MethodAggregator<T1, T2, TResult>.Instance.ExecuteWithID(index, id, v1, v2);
+
+        protected TResult Execute<T1, T2, TResult>(Enum index, string id, T1 v1, T2 v2) =>
+            MethodAggregator<T1, T2, TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id, v1, v2);
+
+        protected TResult Execute<T1, T2, TResult>(string str, string id, T1 v1, T2 v2) =>
+            MethodAggregator<T1, T2, TResult>.Instance.ExecuteWithID(str, id, v1, v2);
+
+        //
+// Execute - 4 generics (Func<T1, T2, T3, TResult>)
+//
+        protected TResult Execute<T1, T2, T3, TResult>(int index, T1 v1, T2 v2, T3 v3) =>
+            MethodAggregator<T1, T2, T3, TResult>.Instance.Execute(index, v1, v2, v3);
+
+        protected TResult Execute<T1, T2, T3, TResult>(Enum index, T1 v1, T2 v2, T3 v3) =>
+            MethodAggregator<T1, T2, T3, TResult>.Instance.Execute(Convert.ToInt32(index), v1, v2, v3);
+
+
+        protected TResult Execute<T1, T2, T3, TResult>(string str, T1 v1, T2 v2, T3 v3) =>
+            MethodAggregator<T1, T2, T3, TResult>.Instance.Execute(str, v1, v2, v3);
+
+        protected TResult Execute<T1, T2, T3, TResult>(int index, string id, T1 v1, T2 v2, T3 v3) =>
+            MethodAggregator<T1, T2, T3, TResult>.Instance.ExecuteWithID(index, id, v1, v2, v3);
+
+        protected TResult Execute<T1, T2, T3, TResult>(Enum index, string id, T1 v1, T2 v2, T3 v3) =>
+            MethodAggregator<T1, T2, T3, TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id, v1, v2, v3);
+
+        protected TResult Execute<T1, T2, T3, TResult>(string str, string id, T1 v1, T2 v2, T3 v3) =>
+            MethodAggregator<T1, T2, T3, TResult>.Instance.ExecuteWithID(str, id, v1, v2, v3);
+
+        #endregion
+
+        #region AggregatorInvoker helper (reflection + caching)
+
+        // A small helper that centralizes reflection invocation for aggregator types.
+        // Caches MethodInfo to reduce repeated reflection cost.
+        internal static class AggregatorInvoker
+        {
+            // Simple cache for MethodInfo lookup: key => MethodInfo
+            // Key format: aggregatorFullName|methodName|paramType1;paramType2;...
+            private static readonly Dictionary<string, MethodInfo> MethodCache = new Dictionary<string, MethodInfo>();
+
+            public static void Invoke(Type genericBaseType, string methodName, Type[] genericArgs, Type[] paramTypes,
+                object[] parameters)
             {
-                if (!_handlerInfos[i].UseInt && _handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    id == _handlerInfos[i].ID &&
-                    handler == (_handlerInfos[i].Func as Func<TValue1, TValue2, TResult>))
+                if (genericBaseType == null)
                 {
-                    _handlerInfos.RemoveAt(i);
+                    Debug.LogWarning("AggregatorInvoker: genericBaseType is null.");
                     return;
+                }
+
+                try
+                {
+                    Type targetType;
+                    if (genericBaseType.IsGenericTypeDefinition)
+                    {
+                        // MakeGenericType - ensure genericArgs provided
+                        if (genericArgs == null || genericArgs.Length == 0)
+                        {
+                            // if base is generic but no args given, we cannot make it
+                            Debug.LogWarning($"AggregatorInvoker: generic args required for {genericBaseType}.");
+                            return;
+                        }
+
+                        targetType = genericBaseType.MakeGenericType(genericArgs);
+                    }
+                    else
+                    {
+                        targetType = genericBaseType;
+                    }
+
+                    // Get instance
+                    PropertyInfo instField = targetType.GetProperty("Instance", BindingFlags.Static | BindingFlags.Public);
+                    if (instField == null)
+                    {
+                        Debug.LogWarning($"AggregatorInvoker: Instance field not found on {targetType}.");
+                        return;
+                    }
+
+                    object instance = instField.GetValue(null);
+                    if (instance == null)
+                    {
+                        Debug.LogWarning($"AggregatorInvoker: Instance is null for {targetType}.");
+                        return;
+                    }
+
+                    // Build cache key
+                    string key = BuildCacheKey(targetType, methodName, paramTypes);
+
+                    MethodInfo method;
+                    lock (MethodCache)
+                    {
+                        if (!MethodCache.TryGetValue(key, out method))
+                        {
+                            method = targetType.GetMethod(methodName, paramTypes);
+                            if (method == null)
+                            {
+                                Debug.LogWarning(
+                                    $"AggregatorInvoker: Method {methodName} not found on {targetType} with specified parameter signature.");
+                                MethodCache[key] = null; // remember miss to avoid repeated attempts
+                            }
+                            else
+                            {
+                                MethodCache[key] = method;
+                            }
+                        }
+                    }
+
+                    if (method == null)
+                    {
+                        // already warned above
+                        return;
+                    }
+
+                    method.Invoke(instance, parameters);
+                }
+                catch (TargetInvocationException tie)
+                {
+                    Debug.LogError(
+                        $"AggregatorInvoker: target invocation exception invoking {methodName} on {genericBaseType}: {tie.InnerException?.Message ?? tie.Message}\n{tie.InnerException?.StackTrace}");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"AggregatorInvoker: error invoking {methodName} on {genericBaseType}: {e}");
                 }
             }
-        }
 
-        protected void RemoveHandler<TValue, TResult>(string str, string id, Func<TValue, TResult> handler)
-        {
-            MethodAggregator<TValue, TResult>.Instance.RemoveHandler(str, id, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
+            private static string BuildCacheKey(Type targetType, string methodName, Type[] paramTypes)
             {
-                if (!_handlerInfos[i].UseInt && _handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    id == _handlerInfos[i].ID &&
-                    handler == (_handlerInfos[i].Func as Func<TValue, TResult>))
+                StringBuilder sb = new StringBuilder();
+                sb.Append(targetType.FullName);
+                sb.Append("|");
+                sb.Append(methodName);
+                sb.Append("|");
+                if (paramTypes != null)
                 {
-                    _handlerInfos.RemoveAt(i);
-                    return;
+                    for (int i = 0; i < paramTypes.Length; i++)
+                    {
+                        if (paramTypes[i] == null) sb.Append("null");
+                        else sb.Append(paramTypes[i].AssemblyQualifiedName);
+                        if (i < paramTypes.Length - 1) sb.Append(";");
+                    }
                 }
-            }
-        }
 
-        protected void RemoveHandler<TResult>(string str, string id, Func<TResult> handler)
-        {
-            MethodAggregator<TResult>.Instance.RemoveHandler(str, id, handler);
-
-            for (int i = 0; i < _handlerInfos.Count; i++)
-            {
-                if (!_handlerInfos[i].UseInt && _handlerInfos[i].UseID &&
-                    str == _handlerInfos[i].Str &&
-                    id == _handlerInfos[i].ID &&
-                    handler == (_handlerInfos[i].Func as Func<TResult>))
-                {
-                    _handlerInfos.RemoveAt(i);
-                    return;
-                }
+                return sb.ToString();
             }
         }
 
