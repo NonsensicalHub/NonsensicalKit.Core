@@ -108,6 +108,14 @@ namespace NonsensicalKit.Core
             };
             return c;
         }
+        public static bool operator ==(Int3 a,Int3 b)
+        {
+            return a.Equals(b);
+        }
+        public static bool operator !=(Int3 a,Int3 b)
+        {
+            return !a.Equals(b);
+        }
 
         /// <summary>
         /// 检测是否超出最大值
