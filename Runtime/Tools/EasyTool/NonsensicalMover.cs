@@ -4,18 +4,20 @@ using UnityEngine;
 namespace NonsensicalKit.Tools.EasyTool
 {
     /// <summary>
-    /// 简单移动逻辑封装，
+    /// 简单移动逻辑封装
     /// </summary>
     public class NonsensicalMover
     {
         public Action<NonsensicalMover> OnArrived;
-        public Transform Obj => _obj;
-
-        private float Speed { set => _speed = value; }
+        public float Speed { get => _speed;  set => _speed = value; }
+        public Transform Obj { get => _obj; set => _obj = value; }
+        public float Distance => _distance;
+        public bool Moving => _moving;
 
         private float _speed;
-        private readonly Transform _obj;
+        private Transform _obj;
         private readonly bool _localMode;
+        private float _distance;
 
         private Vector3 Current
         {
@@ -59,17 +61,18 @@ namespace NonsensicalKit.Tools.EasyTool
             if (!_moving) return;
             var current = Current;
             var max = deltaTime * _speed;
-            var distance = Vector3.Distance(current, _target);
+             _distance = Vector3.Distance(current, _target);
 
-            if (max > distance)
+            if (max > _distance)
             {
+                _distance = 0;
                 Current = _target;
                 _moving = false;
                 OnArrived?.Invoke(this);
             }
             else
             {
-                var dir = _target - current;
+                var dir = (_target - current).normalized;
                 var next = max * dir + current;
                 Current = next;
             }
