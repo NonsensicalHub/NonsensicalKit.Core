@@ -69,6 +69,8 @@ namespace NonsensicalKit.Tools.PlayerController
         [Tooltip("How far in degrees can you move the camera down||旋转下限角度")] [SerializeField]
         private float m_bottomClamp = -30.0f;
 
+        [SerializeField] private bool m_updateMainCamera;
+
         /// <summary>
         /// 临界垂直速度，当下落时垂直速度大于此速度时不再加速，以模拟空气阻力
         /// </summary>
@@ -181,7 +183,7 @@ namespace NonsensicalKit.Tools.PlayerController
         {
             get
             {
-                if (m_mainCamera == null)
+                if (m_updateMainCamera||m_mainCamera == null)
                 {
                     m_mainCamera = GameObject.FindWithTag("MainCamera");
                 }
@@ -189,6 +191,7 @@ namespace NonsensicalKit.Tools.PlayerController
                 return m_mainCamera;
             }
         }
+        
 
         protected virtual void Awake()
         {
