@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace NonsensicalKit.Core
@@ -19,9 +17,19 @@ namespace NonsensicalKit.Core
         public int m_Length2;
         public int m_Length3;
 
+        public int Length0 => m_Length0;
+        public int Length1 => m_Length1;
+        public int Length2 => m_Length2;
+        public int Length3 => m_Length3;
+
         public int m_Step0;
         public int m_Step1;
         public int m_Step2;
+        
+        public Int4 Size=>new(Length0, Length1, Length2, Length3);
+        public int Length => m_Array.Length;
+
+        public Array4(Int4 length) : this(length.I1, length.I2, length.I3, length.I4) { }
 
         public Array4(int length0, int length1, int length2, int length3)
         {
@@ -43,10 +51,28 @@ namespace NonsensicalKit.Core
             set => m_Array[index0 * m_Step0 + index1 * m_Step1 + index2 * m_Step2 + index3] = value;
         }
 
+        public T this[int index0, int index1, int index2]
+        {
+            get => m_Array[index0 * m_Step0 + index1 * m_Step1 + index2 * m_Step2];
+            set => m_Array[index0 * m_Step0 + index1 * m_Step1 + index2 * m_Step2] = value;
+        }
+
         public T this[Int3 int3, int index3]
         {
             get => m_Array[int3.I1 * m_Step0 + int3.I2 * m_Step1 + int3.I3 * m_Step2 + index3];
             set => m_Array[int3.I1 * m_Step0 + int3.I2 * m_Step1 + int3.I3 * m_Step2 + index3] = value;
+        }
+
+        public T this[Int3 int3]
+        {
+            get => m_Array[int3.I1 * m_Step0 + int3.I2 * m_Step1 + int3.I3 * m_Step2];
+            set => m_Array[int3.I1 * m_Step0 + int3.I2 * m_Step1 + int3.I3 * m_Step2] = value;
+        }
+
+        public T this[Vector3Int int3]
+        {
+            get => m_Array[int3.x * m_Step0 + int3.y * m_Step1 + int3.z * m_Step2];
+            set => m_Array[int3.x * m_Step0 + int3.y * m_Step1 + int3.z * m_Step2] = value;
         }
 
         public T this[int index]
@@ -71,7 +97,7 @@ namespace NonsensicalKit.Core
                 m_Array[i] = state;
             }
         }
-        
+
 
         public void Reset()
         {

@@ -63,6 +63,18 @@ namespace NonsensicalKit.Core
             }
         }
 
+        public static Int4 operator *(Int4 a, int b)
+        {
+            Int4 c = new Int4
+            {
+                I1 = a.I1 + b,
+                I2 = a.I2 + b,
+                I3 = a.I3 + b,
+                I4 = a.I4 + b,
+            };
+            return c;
+        }
+
         public static Int4 operator +(Int4 a, Int4 b)
         {
             Int4 c = new Int4
