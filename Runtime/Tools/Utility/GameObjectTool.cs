@@ -418,7 +418,7 @@ namespace NonsensicalKit.Tools
 
         public static Transform GetNode(Transform root, string path)
         {
-            if (path == null)
+            if (string.IsNullOrEmpty(path))
             {
                 return root;
             }
@@ -426,7 +426,21 @@ namespace NonsensicalKit.Tools
             string[] index = path.Split('|', StringSplitOptions.RemoveEmptyEntries);
             foreach (var t in index)
             {
-                root = root.GetChild(int.Parse(t));
+                if (int.TryParse(t,out int i))
+                {
+                    if (root.childCount>i)
+                    {
+                        root = root.GetChild(i);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             return root;
