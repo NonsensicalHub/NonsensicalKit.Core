@@ -7,8 +7,10 @@ using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service.Config;
 using NonsensicalKit.Tools;
 using NonsensicalKit.Tools.EasyTool;
-using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace NonsensicalKit.Core.Service.Setting
 {
@@ -168,6 +170,7 @@ namespace NonsensicalKit.Core.Service.Setting
                 Debug.LogWarning("GUI设置未启用,不支持添加监听");
                 return;
             }
+
             _onGUISettingChanged.ListAdd<string, Action<string, GUISettingItem>>(settingName, listener);
             listener?.Invoke(settingName, _settingsDict[settingName]);
         }
