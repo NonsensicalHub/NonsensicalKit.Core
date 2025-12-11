@@ -1,0 +1,124 @@
+[
+    {
+        "key": "musicEnabled",
+        "type": "bool",
+        "label": "启用音乐",
+        "description": "开启或关闭游戏背景音乐",
+        "value": true
+    },
+    {
+        "key": "targetFrameRate",
+        "type": "float",
+        "label": "帧率设置",
+        "description": "调整程序运行帧率 (0-120)",
+        "value": 60,
+        "range": {
+            "I1": 0,
+            "I2": 120
+        }
+    },
+    {
+        "key": "soundVolume",
+        "type": "float",
+        "label": "音效音量",
+        "description": "调整游戏音效音量 (0-1)",
+        "value": 0.8,
+        "range": {
+            "I1": 0,
+            "I2": 1
+        }
+    },
+    {
+        "key": "graphicsQuality",
+        "type": "enum",
+        "label": "图形质量",
+        "description": "选择游戏图形质量",
+        "value": "中",
+        "options": [
+            "低",
+            "中",
+            "高",
+            "极高"
+        ]
+    },
+    {
+        "key": "resolution",
+        "type": "enum",
+        "label": "分辨率",
+        "description": "选择游戏分辨率",
+        "value": "1920x1080",
+        "options": [
+            "800x600",
+            "1024x768",
+            "1280x720",
+            "1920x1080",
+            "2560x1440"
+        ]
+    },
+    {
+        "key": "playerName",
+        "type": "string",
+        "label": "玩家名称",
+        "description": "输入你的游戏名称",
+        "value": "玩家1"
+    },
+    {
+        "key": "language",
+        "type": "enum",
+        "label": "语言",
+        "description": "选择游戏语言",
+        "value": "中文",
+        "options": [
+            "中文",
+            "English",
+            "日本語",
+            "Español"
+        ]
+    },
+    {
+        "key": "sensitivity",
+        "type": "float",
+        "label": "鼠标灵敏度",
+        "description": "调整鼠标灵敏度 (0.1-3.0)",
+        "value": 1.0,
+        "range": {
+            "I1": 0,
+            "I2": 3
+        }
+    },
+    {
+        "key": "fullscreen",
+        "type": "bool",
+        "label": "全屏模式",
+        "description": "开启或关闭全屏模式",
+        "value": true
+    },
+    {
+        "key": "showFPS",
+        "type": "bool",
+        "label": "显示FPS",
+        "description": "在屏幕上显示帧率信息",
+        "value": false
+    },
+    {
+        "key": "resetSettings",
+        "type": "button",
+        "label": "重置设置",
+        "description": "将所有设置恢复到默认值",
+        "buttonAction": "resetSettings"
+    },
+    {
+        "key": "hideObj",
+        "type": "button",
+        "label": "隐藏测试物体",
+        "description": "隐藏测试物体",
+        "buttonAction": "hideObj"
+    },
+    {
+        "key": "exitApplication",
+        "type": "button",
+        "label": "退出程序",
+        "description": "退出程序",
+        "buttonAction": "exitApplication"
+    }
+]

@@ -1,0 +1,50 @@
+[
+    {
+        "key": "targetFrameRate",
+        "type": "string",
+        "label": "帧率设置",
+        "description": "调整程序运行帧率 (0-120)",
+        "value": 60
+    },
+    {
+        "key": "showFPS",
+        "type": "bool",
+        "label": "显示FPS",
+        "description": "在屏幕上显示帧率信息",
+        "value": false
+    },
+    {
+        "key": "graphicsQuality",
+        "type": "enum",
+        "label": "图形质量",
+        "description": "选择游戏图形质量",
+        "value": "中",
+        "options": [
+            "极低",
+            "低",
+            "中",
+            "高"
+        ]
+    },
+    {
+        "key": "resetSettings",
+        "type": "button",
+        "label": "重置设置",
+        "description": "将所有设置恢复到默认值",
+        "buttonAction": "resetSettings"
+    },
+    {
+        "key": "hideObj",
+        "type": "button",
+        "label": "隐藏测试物体",
+        "description": "隐藏测试物体",
+        "buttonAction": "hideObj"
+    },
+    {
+        "key": "exitApplication",
+        "type": "button",
+        "label": "退出程序",
+        "description": "退出程序",
+        "buttonAction": "exitApplication"
+    }
+]
