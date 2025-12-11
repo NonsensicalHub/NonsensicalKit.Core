@@ -33,6 +33,15 @@ namespace NonsensicalKit.Tools
             return newTweener;
         }
 
+        public static Tweener DoColor(this Graphic graphic, Color endValue, float value)
+        {
+            GraphicColorTweener newTweener = new GraphicColorTweener(graphic, endValue, value);
+
+            Hub.Tweeners.Add(newTweener);
+
+            return newTweener;
+        }
+
         public static Tweener DoMove(this Transform transform, Vector3 endValue, float value)
         {
             TransformMoveTweener newTweener = new TransformMoveTweener(transform, endValue, value);
@@ -295,6 +304,44 @@ namespace NonsensicalKit.Tools
 
             _canvasGroup.alpha = _startValue + (_endValue - _startValue) * schedule;
 
+            return false;
+        }
+    }
+
+    public class GraphicColorTweener : Tweener
+    {
+        private readonly Graphic _graphic;
+        private readonly Color _startValue;
+        private readonly Color _endValue;
+
+        public GraphicColorTweener(Graphic graphic, Color endValue, float value) : base(value)
+        {
+            this._graphic = graphic;
+            _startValue = graphic.color;
+            this._endValue = endValue;
+            
+            TotalValue = ColorDistance(_startValue, endValue);
+        }
+
+        private float ColorDistance(Color a, Color b)
+        {
+            float r = a.r - b.r;
+            float g = a.g - b.g;
+            float bl = a.b - b.b; 
+            float al = a.a - b.a;
+
+            return Mathf.Sqrt(r * r + g * g + bl * bl + al * al);
+        }
+
+        public override bool DoSpecificBySchedule(float schedule)
+        {
+            if (_graphic == null)
+            {
+                return true;
+            }
+
+            _graphic.color = Color.Lerp(_startValue, _endValue, schedule);
+            
             return false;
         }
     }
