@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace NonsensicalKit.Core
@@ -18,208 +16,30 @@ namespace NonsensicalKit.Core
 
         protected virtual void OnDestroy()
         {
-            //TODO:或许可以不使用反射，而是动态管理一个Action来进行自动注销（需要测试是否能正常提前注销）
-
             foreach (var info in _subscribeInfos)
             {
-                // 根据参数数量选择聚合器泛型版本
-                Type baseType = info.Types.Length switch
-                {
-                    0 => typeof(MessageAggregator),
-                    1 => typeof(MessageAggregator<>),
-                    2 => typeof(MessageAggregator<,>),
-                    3 => typeof(MessageAggregator<,,>),
-                    _ => null
-                };
-
-                Type funcType = info.Types.Length switch
-                {
-                    0 => typeof(Action),
-                    1 => typeof(Action<>).MakeGenericType(info.Types),
-                    2 => typeof(Action<,>).MakeGenericType(info.Types),
-                    3 => typeof(Action<,,>).MakeGenericType(info.Types),
-                    _ => null
-                };
-                Type[] ts;
-                object[] os;
-
-                if (info.UseInt)
-                {
-                    if (info.UseID)
-                    {
-                        ts = new[] { typeof(int), typeof(string), funcType };
-                        os = new[] { info.Index, info.ID, info.Func };
-                    }
-                    else
-                    {
-                        ts = new[] { typeof(int), funcType };
-                        os = new[] { info.Index, info.Func };
-                    }
-                }
-                else
-                {
-                    if (info.UseID)
-                    {
-                        ts = new[] { typeof(string), typeof(string), funcType };
-                        os = new[] { info.Str, info.ID, info.Func };
-                    }
-                    else
-                    {
-                        ts = new[] { typeof(string), funcType };
-                        os = new[] { info.Str, info.Func };
-                    }
-                }
-
-                if (baseType == null) continue;
-
-                AggregatorInvoker.Invoke(
-                    baseType,
-                    "Unsubscribe",
-                    info.Types,
-                    ts,
-                    os
-                );
+                info.Recycle.Invoke();
             }
 
             _subscribeInfos.Clear();
 
             foreach (var info in _registerInfos)
             {
-                Type[] ts;
-                object[] os;
-
-                switch (info.KeyType)
-                {
-                    case 0: // 类型键
-                        ts = new[] { typeof(Func<>).MakeGenericType(info.Type) };
-                        os = new[] { info.Func };
-                        break;
-
-                    case 1: // 字符串键
-                        ts = new[] { typeof(string), typeof(Func<>).MakeGenericType(info.Type) };
-                        os = new[] { info.Str, info.Func };
-                        break;
-
-                    case 2: // 数字键
-                        ts = new[] { typeof(int), typeof(Func<>).MakeGenericType(info.Type) };
-                        os = new[] { info.Index, info.Func };
-                        break;
-
-                    default:
-                        continue;
-                }
-
-                AggregatorInvoker.Invoke(
-                    typeof(ObjectAggregator<>),
-                    "Unregister",
-                    new[] { info.Type },
-                    ts,
-                    os
-                );
+                info.Recycle.Invoke();
             }
 
             _registerInfos.Clear();
 
             foreach (var info in _listenerInfos)
             {
-                Type[] ts;
-                object[] os;
-
-                switch (info.KeyType)
-                {
-                    case 0: // 类型键
-                        ts = new[] { typeof(Action<>).MakeGenericType(info.Type) };
-                        os = new[] { info.Func };
-                        break;
-
-                    case 1: // 字符串键
-                        ts = new[] { typeof(string), typeof(Action<>).MakeGenericType(info.Type) };
-                        os = new[] { info.Str, info.Func };
-                        break;
-
-                    case 2: // 数字键
-                        ts = new[] { typeof(int), typeof(Action<>).MakeGenericType(info.Type) };
-                        os = new[] { info.Index, info.Func };
-                        break;
-
-                    default:
-                        continue;
-                }
-
-                AggregatorInvoker.Invoke(
-                    typeof(ObjectAggregator<>),
-                    "RemoveListener",
-                    new[] { info.Type },
-                    ts,
-                    os
-                );
+                info.Recycle.Invoke();
             }
 
             _listenerInfos.Clear();
 
             foreach (var info in _handlerInfos)
             {
-                Type[] genericArgs = info.Types;
-                int argCount = genericArgs.Length;
-
-                Type baseAggregatorType;
-                switch (argCount)
-                {
-                    case 1: baseAggregatorType = typeof(MethodAggregator<>); break;
-                    case 2: baseAggregatorType = typeof(MethodAggregator<,>); break;
-                    case 3: baseAggregatorType = typeof(MethodAggregator<,,>); break;
-                    case 4: baseAggregatorType = typeof(MethodAggregator<,,,>); break;
-                    default: continue;
-                }
-
-                // 构造 Func<...> 类型
-                Type funcType;
-                if (argCount == 1)
-                    funcType = typeof(Func<>).MakeGenericType(genericArgs);
-                else if (argCount == 2)
-                    funcType = typeof(Func<,>).MakeGenericType(genericArgs);
-                else if (argCount == 3)
-                    funcType = typeof(Func<,,>).MakeGenericType(genericArgs);
-                else
-                    funcType = typeof(Func<,,,>).MakeGenericType(genericArgs);
-
-                Type[] ts;
-                object[] os;
-
-                if (info.UseInt)
-                {
-                    if (info.UseID)
-                    {
-                        ts = new[] { typeof(int), typeof(string), funcType };
-                        os = new[] { info.Index, info.ID, info.Func };
-                    }
-                    else
-                    {
-                        ts = new[] { typeof(int), funcType };
-                        os = new[] { info.Index, info.Func };
-                    }
-                }
-                else
-                {
-                    if (info.UseID)
-                    {
-                        ts = new[] { typeof(string), typeof(string), funcType };
-                        os = new[] { info.Str, info.ID, info.Func };
-                    }
-                    else
-                    {
-                        ts = new[] { typeof(string), funcType };
-                        os = new[] { info.Str, info.Func };
-                    }
-                }
-
-                AggregatorInvoker.Invoke(
-                    baseAggregatorType,
-                    "RemoveHandler",
-                    genericArgs,
-                    ts,
-                    os
-                );
+                info.Recycle.Invoke();
             }
 
             _handlerInfos.Clear();
@@ -249,54 +69,54 @@ namespace NonsensicalKit.Core
         {
             public readonly bool UseInt;
             public readonly bool UseID;
-            public readonly Type[] Types;
             public readonly int Index;
             public readonly string Str;
             public readonly string ID;
             public readonly object Func;
+            public readonly Action Recycle;
 
-            public SubscribeInfo(int index, object func, params Type[] types)
+            public SubscribeInfo(int index, object func, Action recycle)
             {
                 UseID = false;
                 UseInt = true;
-                Types = types;
                 Index = index;
                 Func = func;
                 ID = null;
                 Str = null;
+                Recycle = recycle;
             }
 
-            public SubscribeInfo(string str, object func, params Type[] types)
+            public SubscribeInfo(string str, object func, Action recycle)
             {
                 UseID = false;
                 UseInt = false;
-                Types = types;
                 Str = str;
                 Func = func;
                 ID = null;
                 Index = 0;
+                Recycle = recycle;
             }
 
-            public SubscribeInfo(int index, string id, object func, params Type[] types)
+            public SubscribeInfo(int index, string id, object func, Action recycle)
             {
                 UseID = true;
                 UseInt = true;
-                Types = types;
                 Index = index;
                 Func = func;
                 ID = id;
                 Str = null;
+                Recycle = recycle;
             }
 
-            public SubscribeInfo(string str, string id, object func, params Type[] types)
+            public SubscribeInfo(string str, string id, object func, Action recycle)
             {
                 UseID = true;
                 UseInt = false;
-                Types = types;
                 Str = str;
                 Func = func;
                 ID = id;
                 Index = 0;
+                Recycle = recycle;
             }
         }
 
@@ -304,35 +124,35 @@ namespace NonsensicalKit.Core
         {
             public readonly int KeyType; //0代表类型键，1代表字符串键，2代表数字键
             public readonly int Index;
-            public readonly Type Type;
             public readonly string Str;
             public readonly object Func;
+            public readonly Action Recycle;
 
-            public RegisterInfo(object func, Type type)
+            public RegisterInfo(object func, Action recycle)
             {
                 KeyType = 0;
                 Index = 0;
                 Str = null;
                 Func = func;
-                Type = type;
+                Recycle = recycle;
             }
 
-            public RegisterInfo(string str, object func, Type type)
+            public RegisterInfo(string str, object func, Action recycle)
             {
                 KeyType = 1;
                 Index = 0;
                 Str = str;
                 Func = func;
-                Type = type;
+                Recycle = recycle;
             }
 
-            public RegisterInfo(int index, object func, Type type)
+            public RegisterInfo(int index, object func, Action recycle)
             {
                 KeyType = 2;
                 Index = index;
                 Str = null;
                 Func = func;
-                Type = type;
+                Recycle = recycle;
             }
         }
 
@@ -340,35 +160,35 @@ namespace NonsensicalKit.Core
         {
             public readonly int KeyType; //0代表类型键，1代表字符串键，2代表数字键
             public readonly int Index;
-            public readonly Type Type;
             public readonly string Str;
             public readonly object Func;
+            public readonly Action Recycle;
 
-            public ListenerInfo(object func, Type type)
+            public ListenerInfo(object func, Action recycle)
             {
                 KeyType = 0;
                 Index = 0;
                 Str = null;
                 Func = func;
-                Type = type;
+                Recycle = recycle;
             }
 
-            public ListenerInfo(string str, object func, Type type)
+            public ListenerInfo(string str, object func, Action recycle)
             {
                 KeyType = 1;
                 Index = 0;
                 Str = str;
                 Func = func;
-                Type = type;
+                Recycle = recycle;
             }
 
-            public ListenerInfo(int index, object func, Type type)
+            public ListenerInfo(int index, object func, Action recycle)
             {
                 KeyType = 2;
                 Index = index;
                 Str = null;
                 Func = func;
-                Type = type;
+                Recycle = recycle;
             }
         }
 
@@ -376,54 +196,54 @@ namespace NonsensicalKit.Core
         {
             public readonly bool UseInt;
             public readonly bool UseID;
-            public readonly Type[] Types;
             public readonly int Index;
             public readonly string Str;
             public readonly string ID;
             public readonly object Func;
+            public readonly Action Recycle;
 
-            public HandlerInfo(int index, object func, params Type[] types)
+            public HandlerInfo(int index, object func, Action recycle)
             {
                 UseID = false;
                 UseInt = true;
-                Types = types;
                 Index = index;
                 Func = func;
                 ID = null;
                 Str = null;
+                Recycle = recycle;
             }
 
-            public HandlerInfo(string str, object func, params Type[] types)
+            public HandlerInfo(string str, object func, Action recycle)
             {
                 UseID = false;
                 UseInt = false;
-                Types = types;
                 Str = str;
                 Func = func;
                 ID = null;
                 Index = 0;
+                Recycle = recycle;
             }
 
-            public HandlerInfo(int index, string id, object func, params Type[] types)
+            public HandlerInfo(int index, string id, object func, Action recycle)
             {
                 UseID = true;
                 UseInt = true;
-                Types = types;
                 Index = index;
                 Func = func;
                 ID = id;
                 Str = null;
+                Recycle = recycle;
             }
 
-            public HandlerInfo(string str, string id, object func, params Type[] types)
+            public HandlerInfo(string str, string id, object func, Action recycle)
             {
                 UseID = true;
                 UseInt = false;
-                Types = types;
                 Str = str;
                 Func = func;
                 ID = id;
                 Index = 0;
+                Recycle = recycle;
             }
         }
 
@@ -433,25 +253,29 @@ namespace NonsensicalKit.Core
         protected void Subscribe<T1, T2, T3>(int index, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(index, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, func, typeof(T1), typeof(T2), typeof(T3)));
+            _subscribeInfos.Add(new SubscribeInfo(index, func,
+                () => MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(index, func)));
         }
 
         protected void Subscribe<T1, T2>(int index, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(index, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, func, typeof(T1), typeof(T2)));
+            _subscribeInfos.Add(new SubscribeInfo(index, func,
+                () => MessageAggregator<T1, T2>.Instance.Unsubscribe(index, func)));
         }
 
         protected void Subscribe<T>(int index, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(index, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, func, typeof(T)));
+            _subscribeInfos.Add(new SubscribeInfo(index, func,
+                () => MessageAggregator<T>.Instance.Unsubscribe(index, func)));
         }
 
         protected void Subscribe(int index, Action func)
         {
             MessageAggregator.Instance.Subscribe(index, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, func));
+            _subscribeInfos.Add(new SubscribeInfo(index, func,
+                () => MessageAggregator.Instance.Unsubscribe(index, func)));
         }
 
         // --- Subscribe (Enum)
@@ -479,25 +303,29 @@ namespace NonsensicalKit.Core
         protected void Subscribe<T1, T2, T3>(int index, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(index, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, id, func, typeof(T1), typeof(T2), typeof(T3)));
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func,
+                () => MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(index, id, func)));
         }
 
         protected void Subscribe<T1, T2>(int index, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(index, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, id, func, typeof(T1), typeof(T2)));
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func,
+                () => MessageAggregator<T1, T2>.Instance.Unsubscribe(index, id, func)));
         }
 
         protected void Subscribe<T>(int index, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(index, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, id, func, typeof(T)));
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func,
+                () => MessageAggregator<T>.Instance.Unsubscribe(index, id, func)));
         }
 
         protected void Subscribe(int index, string id, Action func)
         {
             MessageAggregator.Instance.Subscribe(index, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(index, id, func));
+            _subscribeInfos.Add(new SubscribeInfo(index, id, func,
+                () => MessageAggregator.Instance.Unsubscribe(index, id, func)));
         }
 
         protected void Subscribe<T1, T2, T3>(Enum index, string id, Action<T1, T2, T3> func)
@@ -525,50 +353,57 @@ namespace NonsensicalKit.Core
         protected void Subscribe<T1, T2, T3>(string str, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(str, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, func, typeof(T1), typeof(T2), typeof(T3)));
+            _subscribeInfos.Add(new SubscribeInfo(str, func,
+                () => MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(str, func)));
         }
 
         protected void Subscribe<T1, T2>(string str, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(str, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, func, typeof(T1), typeof(T2)));
+            _subscribeInfos.Add(new SubscribeInfo(str, func,
+                () => MessageAggregator<T1, T2>.Instance.Unsubscribe(str, func)));
         }
 
         protected void Subscribe<T>(string str, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(str, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, func, typeof(T)));
+            _subscribeInfos.Add(
+                new SubscribeInfo(str, func, () => MessageAggregator<T>.Instance.Unsubscribe(str, func)));
         }
 
         protected void Subscribe(string str, Action func)
         {
             MessageAggregator.Instance.Subscribe(str, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, func));
+            _subscribeInfos.Add(new SubscribeInfo(str, func, () => MessageAggregator.Instance.Unsubscribe(str, func)));
         }
 
         // --- Subscribe (string + id)
         protected void Subscribe<T1, T2, T3>(string str, string id, Action<T1, T2, T3> func)
         {
             MessageAggregator<T1, T2, T3>.Instance.Subscribe(str, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, id, func, typeof(T1), typeof(T2), typeof(T3)));
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func,
+                () => MessageAggregator<T1, T2, T3>.Instance.Unsubscribe(str,id,  func)));
         }
 
         protected void Subscribe<T1, T2>(string str, string id, Action<T1, T2> func)
         {
             MessageAggregator<T1, T2>.Instance.Subscribe(str, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, id, func, typeof(T1), typeof(T2)));
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func,
+                () => MessageAggregator<T1, T2>.Instance.Unsubscribe(str, id, func)));
         }
 
         protected void Subscribe<T>(string str, string id, Action<T> func)
         {
             MessageAggregator<T>.Instance.Subscribe(str, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, id, func, typeof(T)));
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func,
+                () => MessageAggregator<T>.Instance.Unsubscribe(str,id, func)));
         }
 
         protected void Subscribe(string str, string id, Action func)
         {
             MessageAggregator.Instance.Subscribe(str, id, func);
-            _subscribeInfos.Add(new SubscribeInfo(str, id, func));
+            _subscribeInfos.Add(new SubscribeInfo(str, id, func,
+                () => MessageAggregator.Instance.Unsubscribe(str,  id, func)));
         }
 
         #endregion
@@ -689,6 +524,7 @@ namespace NonsensicalKit.Core
         protected void Unsubscribe<T>(string str, Action<T> func)
         {
             MessageAggregator<T>.Instance.Unsubscribe(str, func);
+
             RemoveSubscribeInfoMatch(info =>
                 !info.UseInt && !info.UseID && info.Str == str && func == (Action<T>)info.Func);
         }
@@ -872,19 +708,19 @@ namespace NonsensicalKit.Core
         protected void Register<T>(Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(func);
-            _registerInfos.Add(new RegisterInfo(func, typeof(T)));
+            _registerInfos.Add(new RegisterInfo(func, () => ObjectAggregator<T>.Instance.Unregister(func)));
         }
 
         protected void Register<T>(string str, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(str, func);
-            _registerInfos.Add(new RegisterInfo(str, func, typeof(T)));
+            _registerInfos.Add(new RegisterInfo(str, func, () => ObjectAggregator<T>.Instance.Unregister(func)));
         }
 
         protected void Register<T>(int index, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(index, func);
-            _registerInfos.Add(new RegisterInfo(index, func, typeof(T)));
+            _registerInfos.Add(new RegisterInfo(index, func, () => ObjectAggregator<T>.Instance.Unregister(func)));
         }
 
         protected void Register<T>(Enum index, Func<T> func)
@@ -895,21 +731,21 @@ namespace NonsensicalKit.Core
         protected void Unregister<T>(Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(func);
-            RemoveRegisterInfoMatch(info => info.KeyType == 0 && info.Type == typeof(T) && (Func<T>)info.Func == func);
+            RemoveRegisterInfoMatch(info => info.KeyType == 0 && (Func<T>)info.Func == func);
         }
 
         protected void Unregister<T>(string str, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(str, func);
             RemoveRegisterInfoMatch(info =>
-                info.KeyType == 1 && info.Type == typeof(T) && info.Str == str && (Func<T>)info.Func == func);
+                info.KeyType == 1 && info.Str == str && (Func<T>)info.Func == func);
         }
 
         protected void Unregister<T>(int index, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Unregister(index, func);
             RemoveRegisterInfoMatch(info =>
-                info.KeyType == 2 && info.Type == typeof(T) && info.Index == index && (Func<T>)info.Func == func);
+                info.KeyType == 2 && info.Index == index && (Func<T>)info.Func == func);
         }
 
         protected void Unregister<T>(Enum index, Func<T> func)
@@ -936,19 +772,21 @@ namespace NonsensicalKit.Core
         protected void AddListener<T>(Action<T> listener)
         {
             ObjectAggregator<T>.Instance.AddListener(listener);
-            _listenerInfos.Add(new ListenerInfo(listener, typeof(T)));
+            _listenerInfos.Add(new ListenerInfo(listener, () => ObjectAggregator<T>.Instance.RemoveListener(listener)));
         }
 
         protected void AddListener<T>(string str, Action<T> listener)
         {
             ObjectAggregator<T>.Instance.AddListener(str, listener);
-            _listenerInfos.Add(new ListenerInfo(str, listener, typeof(T)));
+            _listenerInfos.Add(new ListenerInfo(str, listener,
+                () => ObjectAggregator<T>.Instance.RemoveListener(listener)));
         }
 
         protected void AddListener<T>(int index, Action<T> listener)
         {
             ObjectAggregator<T>.Instance.AddListener(index, listener);
-            _listenerInfos.Add(new ListenerInfo(index, listener, typeof(T)));
+            _listenerInfos.Add(new ListenerInfo(index, listener,
+                () => ObjectAggregator<T>.Instance.RemoveListener(listener)));
         }
 
         protected void AddListener<T>(Enum index, Action<T> listener)
@@ -960,21 +798,21 @@ namespace NonsensicalKit.Core
         {
             ObjectAggregator<T>.Instance.RemoveListener(listener);
             RemoveListenerInfoMatch(info =>
-                info.KeyType == 0 && info.Type == typeof(T) && (Action<T>)info.Func == listener);
+                info.KeyType == 0 && (Action<T>)info.Func == listener);
         }
 
         protected void RemoveListener<T>(string str, Action<T> listener)
         {
             ObjectAggregator<T>.Instance.RemoveListener(str, listener);
             RemoveListenerInfoMatch(info =>
-                info.KeyType == 1 && info.Type == typeof(T) && info.Str == str && (Action<T>)info.Func == listener);
+                info.KeyType == 1 && info.Str == str && (Action<T>)info.Func == listener);
         }
 
         protected void RemoveListener<T>(int index, Action<T> listener)
         {
             ObjectAggregator<T>.Instance.RemoveListener(index, listener);
             RemoveListenerInfoMatch(info =>
-                info.KeyType == 2 && info.Type == typeof(T) && info.Index == index && (Action<T>)info.Func == listener);
+                info.KeyType == 2 && info.Index == index && (Action<T>)info.Func == listener);
         }
 
         protected void RemoveListener<T>(Enum index, Action<T> listener)
@@ -1004,25 +842,29 @@ namespace NonsensicalKit.Core
         protected void AddHandler<TResult>(int index, Func<TResult> handler)
         {
             MethodAggregator<TResult>.Instance.AddHandler(index, handler);
-            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, handler,
+                () => MethodAggregator<TResult>.Instance.RemoveHandler(index, handler)));
         }
 
         protected void AddHandler<TResult>(string str, Func<TResult> handler)
         {
             MethodAggregator<TResult>.Instance.AddHandler(str, handler);
-            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, handler,
+                () => MethodAggregator<TResult>.Instance.RemoveHandler(str, handler)));
         }
 
         protected void AddHandler<TResult>(int index, string id, Func<TResult> handler)
         {
             MethodAggregator<TResult>.Instance.AddHandler(index, id, handler);
-            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, id, handler,
+                () => MethodAggregator<TResult>.Instance.RemoveHandler(id, handler)));
         }
 
         protected void AddHandler<TResult>(string str, string id, Func<TResult> handler)
         {
             MethodAggregator<TResult>.Instance.AddHandler(str, id, handler);
-            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, id, handler,
+                () => MethodAggregator<TResult>.Instance.RemoveHandler(str, id, handler)));
         }
 
         protected void AddHandler<TResult>(Enum index, Func<TResult> handler)
@@ -1041,25 +883,29 @@ namespace NonsensicalKit.Core
         protected void AddHandler<TValue, TResult>(int index, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.AddHandler(index, handler);
-            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(TValue), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, handler,
+                () => MethodAggregator<TValue, TResult>.Instance.RemoveHandler(index, handler)));
         }
 
         protected void AddHandler<TValue, TResult>(string str, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.AddHandler(str, handler);
-            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(TValue), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, handler,
+                () => MethodAggregator<TValue, TResult>.Instance.RemoveHandler(str, handler)));
         }
 
         protected void AddHandler<TValue, TResult>(int index, string id, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.AddHandler(index, id, handler);
-            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(TValue), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, id, handler,
+                () => MethodAggregator<TValue, TResult>.Instance.RemoveHandler(index, id, handler)));
         }
 
         protected void AddHandler<TValue, TResult>(string str, string id, Func<TValue, TResult> handler)
         {
             MethodAggregator<TValue, TResult>.Instance.AddHandler(str, id, handler);
-            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(TValue), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, id, handler,
+                () => MethodAggregator<TValue, TResult>.Instance.RemoveHandler(str, id, handler)));
         }
 
         protected void AddHandler<TValue, TResult>(Enum index, Func<TValue, TResult> handler)
@@ -1078,25 +924,29 @@ namespace NonsensicalKit.Core
         protected void AddHandler<T1, T2, TResult>(int index, Func<T1, T2, TResult> handler)
         {
             MethodAggregator<T1, T2, TResult>.Instance.AddHandler(index, handler);
-            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(T1), typeof(T2), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, handler,
+                () => MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(index, handler)));
         }
 
         protected void AddHandler<T1, T2, TResult>(string str, Func<T1, T2, TResult> handler)
         {
             MethodAggregator<T1, T2, TResult>.Instance.AddHandler(str, handler);
-            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(T1), typeof(T2), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, handler,
+                () => MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(str, handler)));
         }
 
         protected void AddHandler<T1, T2, TResult>(int index, string id, Func<T1, T2, TResult> handler)
         {
             MethodAggregator<T1, T2, TResult>.Instance.AddHandler(index, id, handler);
-            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(T1), typeof(T2), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, id, handler,
+                () => MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(index, id, handler)));
         }
 
         protected void AddHandler<T1, T2, TResult>(string str, string id, Func<T1, T2, TResult> handler)
         {
             MethodAggregator<T1, T2, TResult>.Instance.AddHandler(str, id, handler);
-            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(T1), typeof(T2), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, id, handler,
+                () => MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(str, id, handler)));
         }
 
         protected void AddHandler<T1, T2, TResult>(Enum index, Func<T1, T2, TResult> handler)
@@ -1115,25 +965,29 @@ namespace NonsensicalKit.Core
         protected void AddHandler<T1, T2, T3, TResult>(int index, Func<T1, T2, T3, TResult> handler)
         {
             MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(index, handler);
-            _handlerInfos.Add(new HandlerInfo(index, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, handler,
+                () => MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(index, handler)));
         }
 
         protected void AddHandler<T1, T2, T3, TResult>(string str, Func<T1, T2, T3, TResult> handler)
         {
             MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(str, handler);
-            _handlerInfos.Add(new HandlerInfo(str, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, handler,
+                () => MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(str, handler)));
         }
 
         protected void AddHandler<T1, T2, T3, TResult>(int index, string id, Func<T1, T2, T3, TResult> handler)
         {
             MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(index, id, handler);
-            _handlerInfos.Add(new HandlerInfo(index, id, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(index, id, handler,
+                () => MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(index, id, handler)));
         }
 
         protected void AddHandler<T1, T2, T3, TResult>(string str, string id, Func<T1, T2, T3, TResult> handler)
         {
             MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(str, id, handler);
-            _handlerInfos.Add(new HandlerInfo(str, id, handler, typeof(T1), typeof(T2), typeof(T3), typeof(TResult)));
+            _handlerInfos.Add(new HandlerInfo(str, id, handler,
+                () => MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(str, id, handler)));
         }
 
         protected void AddHandler<T1, T2, T3, TResult>(Enum index, Func<T1, T2, T3, TResult> handler)
@@ -1421,124 +1275,6 @@ namespace NonsensicalKit.Core
 
         protected TResult Execute<T1, T2, T3, TResult>(string str, string id, T1 v1, T2 v2, T3 v3) =>
             MethodAggregator<T1, T2, T3, TResult>.Instance.ExecuteWithID(str, id, v1, v2, v3);
-
-        #endregion
-
-        #region AggregatorInvoker helper (reflection + caching)
-
-        // A small helper that centralizes reflection invocation for aggregator types.
-        // Caches MethodInfo to reduce repeated reflection cost.
-        internal static class AggregatorInvoker
-        {
-            // Simple cache for MethodInfo lookup: key => MethodInfo
-            // Key format: aggregatorFullName|methodName|paramType1;paramType2;...
-            private static readonly Dictionary<string, MethodInfo> MethodCache = new Dictionary<string, MethodInfo>();
-
-            public static void Invoke(Type genericBaseType, string methodName, Type[] genericArgs, Type[] paramTypes,
-                object[] parameters)
-            {
-                if (genericBaseType == null)
-                {
-                    Debug.LogWarning("AggregatorInvoker: genericBaseType is null.");
-                    return;
-                }
-
-                try
-                {
-                    Type targetType;
-                    if (genericBaseType.IsGenericTypeDefinition)
-                    {
-                        // MakeGenericType - ensure genericArgs provided
-                        if (genericArgs == null || genericArgs.Length == 0)
-                        {
-                            // if base is generic but no args given, we cannot make it
-                            Debug.LogWarning($"AggregatorInvoker: generic args required for {genericBaseType}.");
-                            return;
-                        }
-
-                        targetType = genericBaseType.MakeGenericType(genericArgs);
-                    }
-                    else
-                    {
-                        targetType = genericBaseType;
-                    }
-
-                    // Get instance
-                    PropertyInfo instField = targetType.GetProperty("Instance", BindingFlags.Static | BindingFlags.Public);
-                    if (instField == null)
-                    {
-                        Debug.LogWarning($"AggregatorInvoker: Instance field not found on {targetType}.");
-                        return;
-                    }
-
-                    object instance = instField.GetValue(null);
-                    if (instance == null)
-                    {
-                        Debug.LogWarning($"AggregatorInvoker: Instance is null for {targetType}.");
-                        return;
-                    }
-
-                    // Build cache key
-                    string key = BuildCacheKey(targetType, methodName, paramTypes);
-
-                    MethodInfo method;
-                    lock (MethodCache)
-                    {
-                        if (!MethodCache.TryGetValue(key, out method))
-                        {
-                            method = targetType.GetMethod(methodName, paramTypes);
-                            if (method == null)
-                            {
-                                Debug.LogWarning(
-                                    $"AggregatorInvoker: Method {methodName} not found on {targetType} with specified parameter signature.");
-                                MethodCache[key] = null; // remember miss to avoid repeated attempts
-                            }
-                            else
-                            {
-                                MethodCache[key] = method;
-                            }
-                        }
-                    }
-
-                    if (method == null)
-                    {
-                        // already warned above
-                        return;
-                    }
-
-                    method.Invoke(instance, parameters);
-                }
-                catch (TargetInvocationException tie)
-                {
-                    Debug.LogError(
-                        $"AggregatorInvoker: target invocation exception invoking {methodName} on {genericBaseType}: {tie.InnerException?.Message ?? tie.Message}\n{tie.InnerException?.StackTrace}");
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"AggregatorInvoker: error invoking {methodName} on {genericBaseType}: {e}");
-                }
-            }
-
-            private static string BuildCacheKey(Type targetType, string methodName, Type[] paramTypes)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append(targetType.FullName);
-                sb.Append("|");
-                sb.Append(methodName);
-                sb.Append("|");
-                if (paramTypes != null)
-                {
-                    for (int i = 0; i < paramTypes.Length; i++)
-                    {
-                        if (paramTypes[i] == null) sb.Append("null");
-                        else sb.Append(paramTypes[i].AssemblyQualifiedName);
-                        if (i < paramTypes.Length - 1) sb.Append(";");
-                    }
-                }
-
-                return sb.ToString();
-            }
-        }
 
         #endregion
     }
