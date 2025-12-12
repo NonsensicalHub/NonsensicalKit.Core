@@ -313,10 +313,12 @@ namespace NonsensicalKit.Core.Service.Setting
 
                 case "applySettings":
                     Debug.Log("Apply settings");
-                    foreach (var item in _settingsTempDict)
+                    foreach (var item in _settingsTempDict.Values)
                     {
+                        item.value = item.GetCacheValue()?.ToString();
+                        _currentSettings[item.key] = item.value;
                         //IOCC.PublishWithID("OnSettingValueChanged", item.Key, item.Key, item.Value.Item1, item.Value.Item2);
-                        Publisher(item.Value);
+                        Publisher(item);
                     }
 
                     _settingsTempDict.Clear();
