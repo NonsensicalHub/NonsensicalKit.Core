@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Core.Service.SettingService.GUISetting;
 using NaughtyAttributes;
 using Newtonsoft.Json;
 using NonsensicalKit.Core.Service.Config;
@@ -35,18 +34,22 @@ namespace NonsensicalKit.Core.Service.Setting
 
         public void OnBeforeSerialize()
         {
+#if UNITY_EDITOR
             if (m_config.guiPanelConfig.m_CustomSkin != null)
             {
                 m_config.guiPanelConfig.m_GuiSkinPath = GetResourcePath(m_config.guiPanelConfig.m_CustomSkin);
             }
+#endif
         }
 
         public void OnAfterDeserialize()
         {
+#if UNITY_EDITOR
             if (!m_config.guiPanelConfig.m_CustomSkin && string.IsNullOrEmpty(m_config.guiPanelConfig.m_GuiSkinPath) == false)
             {
                 m_config.guiPanelConfig.m_CustomSkin = Resources.Load<GUISkin>(m_config.guiPanelConfig.m_GuiSkinPath);
             }
+#endif
         }
 
 #if UNITY_EDITOR

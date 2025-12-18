@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using NonsensicalKit.Core;
 using UnityEngine;
 
-namespace Core.Service.SettingService.GUISetting
+namespace  NonsensicalKit.Core.Service.Setting
 {
     // 定义设置项的类型枚举 (用于内部处理)
     public enum SettingItemTypeInternal

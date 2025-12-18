@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Service.SettingService.GUISetting;
 using Newtonsoft.Json;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service.Config;
