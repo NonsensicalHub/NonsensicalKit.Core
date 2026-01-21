@@ -125,7 +125,23 @@ namespace NonsensicalKit.Tools
             }
         }
 
+        public static void DicAdd<TKey,  TKey2,TValue>(this Dictionary<TKey, Dictionary<TKey2,TValue>> dictionary, TKey key, TKey2 key2,TValue value)
+        {
+            if (dictionary.ContainsKey(key)==false)
+            {
+                dictionary.Add(key, new Dictionary<TKey2, TValue>() );
+            }
 
+            if (dictionary[key].ContainsKey(key2))
+            {
+                dictionary[key][key2]= value;
+            }
+            else
+            {
+                dictionary[key].Add(key2, value);
+            }
+        }
+        
         public static bool ListContains<TKey, TValue>(this Dictionary<TKey, List<TValue>> dictionary, TKey key, TValue value)
         {
             return dictionary.TryGetValue(key, out var value1) && value1.Contains(value);

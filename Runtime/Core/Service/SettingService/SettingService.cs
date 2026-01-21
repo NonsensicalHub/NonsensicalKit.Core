@@ -135,7 +135,7 @@ namespace NonsensicalKit.Core.Service.Setting
             PlayerPrefs.SetString($"NONSENSICALSETTING", JsonTool.SerializeObject(settingItems));
         }
 
-        //会在初次有值时调用一次listener
+        //会在初次有值时直接调用一次listener
         public void AddSettingListener(string settingName, Action<string> listener)
         {
             if (_currentSettings.TryGetValue(settingName, out var setting))

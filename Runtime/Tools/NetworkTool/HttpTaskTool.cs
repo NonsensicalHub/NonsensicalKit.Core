@@ -76,9 +76,9 @@ namespace NonsensicalKit.Tools.NetworkTool
         #region Post
 
         public static async UniTask<string> Post(string url, string json, Dictionary<string, string> header,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)   
         {
-            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url, "POST");
+            using UnityWebRequest unityWebRequest = UnityWebRequest.Post(url,  new WWWForm());
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
             using (var a = (UploadHandler)new UploadHandlerRaw(bodyRaw))
             {
@@ -91,8 +91,7 @@ namespace NonsensicalKit.Tools.NetworkTool
 
                 await unityWebRequest.SendWebRequest().WithCancellation(cancellationToken);
 
-                if (unityWebRequest.result == UnityWebRequest.Result.ConnectionError ||
-                    unityWebRequest.result == UnityWebRequest.Result.ProtocolError)
+                if (unityWebRequest.result is UnityWebRequest.Result.ConnectionError or UnityWebRequest.Result.ProtocolError)
                 {
                     Debug.LogError(
                         $"{unityWebRequest.url} 请求错误: {unityWebRequest.error} Return:{unityWebRequest.downloadHandler.text}");
