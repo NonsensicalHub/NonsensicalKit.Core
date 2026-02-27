@@ -2,7 +2,7 @@ using NonsensicalKit.Core;
 using NonsensicalKit.Core.Service;
 using UnityEngine;
 
-namespace Core.Service.SettingService.GUISetting
+namespace  NonsensicalKit.Core.Service.Setting
 {
     public abstract class GUISettingListenerBase : NonsensicalMono
     {

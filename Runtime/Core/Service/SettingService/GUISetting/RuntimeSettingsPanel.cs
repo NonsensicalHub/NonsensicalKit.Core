@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NonsensicalKit.Core.Service.Setting;
 using UnityEngine;
 
-namespace Core.Service.SettingService.GUISetting
+namespace  NonsensicalKit.Core.Service.Setting
 {
     /// <summary>
     /// 运行时设置面板，使用 Unity 的 IMGUI 绘制可拖动的窗口。
