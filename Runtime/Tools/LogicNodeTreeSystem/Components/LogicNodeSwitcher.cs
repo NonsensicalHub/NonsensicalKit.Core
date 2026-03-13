@@ -8,6 +8,12 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
     {
         [SerializeField] private string m_targetNodeID;
 
+        public string TargetNodeID
+        {
+                get=>m_targetNodeID;
+                set =>m_targetNodeID=value;
+        }
+
         private string _buffer;
 
         private LogicNodeManager _manager;
