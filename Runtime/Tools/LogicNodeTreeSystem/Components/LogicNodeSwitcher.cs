@@ -10,8 +10,8 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
 
         public string TargetNodeID
         {
-                get=>m_targetNodeID;
-                set =>m_targetNodeID=value;
+            get => m_targetNodeID;
+            set => m_targetNodeID = value;
         }
 
         private string _buffer;

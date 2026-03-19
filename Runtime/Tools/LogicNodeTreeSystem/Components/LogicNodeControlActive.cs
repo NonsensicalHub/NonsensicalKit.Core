@@ -26,6 +26,17 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
                 m_nodeID = value;
             }
         }
+        public LogicNodeCheckType CheckType
+        {
+            get
+            {
+                return m_checkType;
+            }
+            set
+            {
+                m_checkType = value;
+            }
+        }
 
         private GameObject _controlTarget;
 
