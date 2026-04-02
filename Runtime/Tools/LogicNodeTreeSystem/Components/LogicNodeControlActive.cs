@@ -15,6 +15,29 @@ namespace NonsensicalKit.Tools.LogicNodeTreeSystem
         [SerializeField] private List<string> m_spOn;
         [SerializeField] private List<string> m_spOff;
 
+        public string NodeID
+        {
+            get
+            {
+                return m_nodeID;
+            }
+            set
+            {
+                m_nodeID = value;
+            }
+        }
+        public LogicNodeCheckType CheckType
+        {
+            get
+            {
+                return m_checkType;
+            }
+            set
+            {
+                m_checkType = value;
+            }
+        }
+
         private GameObject _controlTarget;
 
         private bool _isRunning;

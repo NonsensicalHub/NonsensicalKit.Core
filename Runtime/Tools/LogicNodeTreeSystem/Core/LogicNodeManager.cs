@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service;
+using UnityEngine;
 
 namespace NonsensicalKit.Tools.LogicNodeTreeSystem
 {

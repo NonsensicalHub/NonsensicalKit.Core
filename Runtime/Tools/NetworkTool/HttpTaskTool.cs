@@ -48,7 +48,7 @@ namespace NonsensicalKit.Tools.NetworkTool
                 return unityWebRequest.downloadHandler.text;
             }
         }
-
+		
         public static async UniTask<string> GetWithArgs(string url, Dictionary<string, string> fields,
             Dictionary<string, string> header, CancellationToken cancellationToken = default(CancellationToken))
         {
