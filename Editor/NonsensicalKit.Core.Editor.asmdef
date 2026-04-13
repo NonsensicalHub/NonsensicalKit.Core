@@ -2,7 +2,8 @@
     "name": "NonsensicalKit.Core.Editor",
     "rootNamespace": "",
     "references": [
-        "NonsensicalKit.Core"
+        "NonsensicalKit.Core",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"

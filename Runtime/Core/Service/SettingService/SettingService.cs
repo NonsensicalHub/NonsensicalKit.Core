@@ -47,6 +47,7 @@ namespace NonsensicalKit.Core.Service.Setting
                     }
                 }
 
+                Debug.Log(2);
                 var settingStr = PlayerPrefs.GetString($"NONSENSICALSETTING", string.Empty);
                 if (string.IsNullOrEmpty(settingStr) == false)
                 {

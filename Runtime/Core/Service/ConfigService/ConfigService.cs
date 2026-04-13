@@ -484,7 +484,7 @@ namespace NonsensicalKit.Core.Service.Config
                         }
                         catch (Exception e)
                         {
-                            throw new BuildFailedException($"配置{data.ConfigID}json文件写入{GetFilePath(data)}失败\r\n{e.Message}");
+                            throw new BuildFailedException($"配置{t.name}(ID:{data.ConfigID})json文件写入{GetFilePath(data)}失败\r\n{e.Message}");
                         }
                     }
                     else

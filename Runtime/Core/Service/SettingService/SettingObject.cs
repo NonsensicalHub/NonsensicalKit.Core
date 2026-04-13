@@ -161,7 +161,10 @@ namespace NonsensicalKit.Core.Service.Setting
         [Tooltip("窗口高度使用百分比")] public bool m_UsePercentage = true;
 
         public float m_WindowHeightPercentage = 0.8f;
-        public Rect m_WindowRect = new Rect(50, 50, 400, 600);
+        public float m_X =50;
+        public float m_Y = 50;
+        public float m_W = 400;
+        public float m_H = 600;
 
         public GUISkin GetSkin()
         {
