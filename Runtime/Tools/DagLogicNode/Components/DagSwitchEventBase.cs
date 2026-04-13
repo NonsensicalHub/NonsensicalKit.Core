@@ -16,6 +16,8 @@ namespace NonsensicalKit.Core.DagLogicNode
 
         private bool _state;
 
+        private bool _first = true;
+
         protected virtual void Awake()
         {
             ServiceCore.SafeGet<DagLogicManager>(GetService);
@@ -29,19 +31,20 @@ namespace NonsensicalKit.Core.DagLogicNode
 
         private void Init()
         {
-            Subscribe<string>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
+            Subscribe<DagRuntimeNode>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
             if (_manager.CrtSelectNode != null)
             {
-                OnSwitchNode(_manager.CrtSelectNode.NodeID);
+                OnSwitchNode(_manager.CrtSelectNode);
             }
         }
 
-        private void OnSwitchNode(string nodeId)
+        private void OnSwitchNode(DagRuntimeNode node)
         {
             var newState = _manager.CheckState(m_nodeId, m_checkType);
 
-            if (_state != newState)
+            if (_first||(_state != newState))
             {
+                _first=false;
                 _state = newState;
                 OnStateChanged(_state);
             }

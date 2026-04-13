@@ -20,6 +20,7 @@ namespace NonsensicalKit.Core.DagLogicNode
     public sealed class DagRuntimeNode
     {
         public string NodeID;
+        public string AutoJumpNode;
         public DagNode SourceNode;
         public readonly List<DagRuntimeNode> ParentNodes = new List<DagRuntimeNode>();
         public readonly List<DagRuntimeNode> ChildNodes = new List<DagRuntimeNode>();
@@ -320,6 +321,12 @@ namespace NonsensicalKit.Core.DagLogicNode
         {
             if (targetNode == null)
             {
+                return;
+            }
+            if (string.IsNullOrEmpty( targetNode.AutoJumpNode)==false)
+            {
+                LogCore.Debug($"自动跳转节点:{targetNode.NodeID} => {targetNode.AutoJumpNode}");
+                SwitchNode(targetNode.AutoJumpNode);
                 return;
             }
 
