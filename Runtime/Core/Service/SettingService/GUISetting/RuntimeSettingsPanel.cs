@@ -52,7 +52,7 @@ namespace  NonsensicalKit.Core.Service.Setting
             m_customSkin = config.m_CustomSkin;
             m_usePercentage = config.m_UsePercentage;
             m_windowHeightPercentage = config.m_WindowHeightPercentage;
-            m_windowRect = config.m_WindowRect;
+            m_windowRect = new Rect(config.m_X,config.m_Y,config.m_W,config.m_H) ;
         }
 
         private void Update()
