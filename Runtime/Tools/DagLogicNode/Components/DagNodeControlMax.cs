@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NonsensicalKit.Core.Service;
-using NonsensicalKit.Tools.LogicNodeTreeSystem;
 using UnityEngine;
 
 namespace NonsensicalKit.Core.DagLogicNode
@@ -60,7 +59,7 @@ namespace NonsensicalKit.Core.DagLogicNode
         public void Close()
         {
             _isRunning = false;
-            Unsubscribe<DagRuntimeNode>((int)LogicNodeEnum.SwitchNode, OnSwitchNode);
+            Unsubscribe<DagRuntimeNode>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
         }
 
         public void AddCondition(string nodeId, string checkType)
