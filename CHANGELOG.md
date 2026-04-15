@@ -16,3 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 
 - 移除LogicNodeTreeSystem，改为使用DagLogicManager  
+
+## [1.0.1] - 2026-4-15
+
+### Fixed
+- 修复DagLogicManager的DagNode的Vector2在序列化错误

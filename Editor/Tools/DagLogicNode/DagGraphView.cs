@@ -118,7 +118,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
             {
                 nodeId = GetUniqueNodeId(baseNodeId),
                 describe = nodeName,
-                position = position,
+                position = (Float2)position,
                 isRoot = isRoot
             };
 
@@ -132,7 +132,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
         {
             var view = new DagNodeView(node, this);
             view.Init();
-            view.SetPosition(new Rect(node.position, new Vector2(160, 0)));
+            view.SetPosition(new Rect(node.position.ToVector2(), new Vector2(160, 0)));
             AddElement(view);
             return view;
         }
@@ -242,7 +242,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                 {
                     nodeId = newNodeId,
                     describe = n.describe,
-                    position = n.position + new Vector2(pasteOffset, pasteOffset),
+                    position = (Float2)(n.position.ToVector2() + new Vector2(pasteOffset, pasteOffset)),
                     isRoot = n.isRoot,
                 };
 
@@ -308,7 +308,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
             {
                 foreach (var e in change.movedElements)
                     if (e is DagNodeView nodeView)
-                        nodeView.Node.position = nodeView.GetPosition().position;
+                        nodeView.Node.position = (Float2)nodeView.GetPosition().position;
 
                 EditorUtility.SetDirty(graphConfig);
             }
@@ -373,7 +373,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
         {
             return DFS(from, target, new HashSet<string>());
         }
-        
+
         /// <summary>
         /// 深度优先搜索
         /// </summary>

@@ -41,7 +41,7 @@ namespace NonsensicalKit.Core.DagLogicNode
     {
         public string nodeId;
         public string describe;
-        public Vector2 position;
+        public Float2 position;
 
         public bool isRoot;
 
