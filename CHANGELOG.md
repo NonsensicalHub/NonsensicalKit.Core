@@ -28,3 +28,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - 新增中文字体的示例，之后所有示例使用tmp中文字体时都引用此字体即可
+
+## [1.0.3] - 2026-04-16
+
+### Added
+
+- 公共资产中新增urp设置
+
+### Changed
+
+- 项目备忘录编辑器工具从示例移动至包本体中
+
+### Removed
+
+- 移出冗余的示例（ServiceTemplates、Timer）

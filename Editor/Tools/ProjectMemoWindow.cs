@@ -22,7 +22,7 @@ public class MemoData
 // 备忘录管理器
 public class MemoManager
 {
-    private const string MEMO_FOLDER = "Assets/ProjectMemos";
+    private const string MEMO_FOLDER = "Assets/Editor/ProjectMemos";
     private const string MEMO_INDEX_FILE = "memo_index.json";
     internal List<MemoData> memos = new List<MemoData>();
 
