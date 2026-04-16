@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using Core.Service.SettingService.GUISetting;
+using NonsensicalKit.Core.Service.Setting;
 using NonsensicalKit.Tools.GUITool;
 using TMPro;
 using UnityEngine;
