@@ -36,6 +36,12 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static int GetRandomInt(int max)
         {
+            if (max <= 0)
+            {
+                return 0;
+            }
+
+            // 这里返回区间为 [-max+1, max-1]，用于需要“正负扰动量”的场景。
             byte[] buffer = Guid.NewGuid().ToByteArray();
             int iSeed = BitConverter.ToInt32(buffer, 0);
             Random random = new Random(iSeed);
@@ -47,10 +53,16 @@ namespace NonsensicalKit.Tools
 
         public static float GetRandomFloat(float max)
         {
+            if (max <= 0f)
+            {
+                return 0f;
+            }
+
+            // 返回 [0, max) 的均匀分布。
             byte[] buffer = Guid.NewGuid().ToByteArray();
             int iSeed = BitConverter.ToInt32(buffer, 0);
             Random random = new Random(iSeed);
-            float temp = (float)random.NextDouble() % max;
+            float temp = (float)random.NextDouble() * max;
             return temp;
         }
 

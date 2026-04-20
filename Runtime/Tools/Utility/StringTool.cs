@@ -119,7 +119,8 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static string ReplaceNoBreakingSpace(string str)
         {
-            return str.Replace(" ", NoBreakingSpace);
+            // 替换为不换行空格，避免 UI 文本在空格处自动断行。
+            return string.IsNullOrEmpty(str) ? string.Empty : str.Replace(" ", NoBreakingSpace);
         }
 
         /// <summary>
@@ -229,6 +230,7 @@ namespace NonsensicalKit.Tools
         {
             return $"({v3.x},{v3.y},{v3.z})";
         }
+
         public static string ToRealCopyString(this Vector3 v3)
         {
             return $"Vector3({v3.x},{v3.y},{v3.z})";
@@ -458,7 +460,8 @@ namespace NonsensicalKit.Tools
         public static string GetDateTimeString(string divider = "_")
         {
             DateTime dt = DateTime.Now;
-            return DateTime.Now.ToString($"yyyy{divider}MM{divider}dd {dt.Hour}{divider}mm{divider}ss");
+            // 统一使用 24 小时制，避免与调用方时制预期不一致。
+            return dt.ToString($"yyyy{divider}MM{divider}dd HH{divider}mm{divider}ss");
         }
 
         /// <summary>
@@ -535,7 +538,8 @@ namespace NonsensicalKit.Tools
                         }
                         else
                         {
-                            if ((s[i - 1] != '+' && s[i - 1] != '-' && s[i - 1] != '*' && s[i - 1] != '/') || !char.IsNumber(s[i + 1]))
+                            if ((s[i - 1] != '+' && s[i - 1] != '-' && s[i - 1] != '*' && s[i - 1] != '/') ||
+                                !char.IsNumber(s[i + 1]))
                             {
                                 return null;
                             }
@@ -557,7 +561,8 @@ namespace NonsensicalKit.Tools
                         }
                         else
                         {
-                            if (!char.IsNumber(s[i - 1]) || (s[i + 1] != '+' && s[i + 1] != '-' && s[i + 1] != '*' && s[i + 1] != '/'))
+                            if (!char.IsNumber(s[i - 1]) ||
+                                (s[i + 1] != '+' && s[i + 1] != '-' && s[i + 1] != '*' && s[i + 1] != '/'))
                             {
                                 return null;
                             }
@@ -600,7 +605,8 @@ namespace NonsensicalKit.Tools
         {
             for (int i = 0; i < ls.Count; i++)
             {
-                if (ls[i] != "+" && ls[i] != "-" && ls[i] != "*" && ls[i] != "/" && ls[i] != "(" && ls[i] != ")" && ls[i] != "（" &&
+                if (ls[i] != "+" && ls[i] != "-" && ls[i] != "*" && ls[i] != "/" && ls[i] != "(" && ls[i] != ")" &&
+                    ls[i] != "（" &&
                     ls[i] != "）")
                 {
                     for (int j = 0; j < ls[i].Length; j++)

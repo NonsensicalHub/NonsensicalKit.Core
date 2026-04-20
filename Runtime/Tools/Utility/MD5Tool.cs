@@ -18,7 +18,7 @@ namespace NonsensicalKit.Tools
         /// <returns></returns>
         public static string GetMd5Str(string convertString, bool toLower)
         {
-            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            using MD5 md5 = MD5.Create();
             string t2 = BitConverter.ToString(md5.ComputeHash(Encoding.Default.GetBytes(convertString)), 4, 8);
             t2 = t2.Replace("-", "");
             if (toLower)
@@ -53,7 +53,7 @@ namespace NonsensicalKit.Tools
 
         public static string StringToMD5Hash(string inputString)
         {
-            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            using MD5 md5 = MD5.Create();
             byte[] encryptedBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(inputString));
             StringBuilder sb = new StringBuilder();
             foreach (var t in encryptedBytes)
@@ -109,44 +109,42 @@ namespace NonsensicalKit.Tools
         /// <returns>MD5值</returns>
         public static string GetMD5HashFromFile(string fileName, int size = 0)
         {
-            FileStream file;
             StringBuilder sb;
             try
             {
-                file = new FileStream(fileName, FileMode.Open);
+                using FileStream file = new FileStream(fileName, FileMode.Open);
+                using MD5 md5 = MD5.Create();
+                byte[] retVal;
+                if (size <= 0)
+                {
+                    // size<=0 时对整个文件计算摘要。
+                    retVal = md5.ComputeHash(file);
+                }
+                else
+                {
+                    // 否则仅使用前 size 字节计算摘要，适合快速粗校验。
+                    var bytes = new byte[size];
+                    var l = file.Read(bytes, 0, size);
+                    if (l < size)
+                    {
+                        Array.Resize(ref bytes, l);
+                    }
+
+                    retVal = md5.ComputeHash(bytes);
+                }
+
+                sb = new StringBuilder();
+                foreach (var t in retVal)
+                {
+                    sb.Append(t.ToString("x2"));
+                }
+
+                return sb.ToString();
             }
             catch (Exception)
             {
                 return null;
             }
-
-            MD5 md5 = new MD5CryptoServiceProvider();
-            byte[] retVal;
-            if (size <= 0)
-            {
-                retVal = md5.ComputeHash(file);
-            }
-            else
-            {
-                var bytes = new byte[size];
-                var l = file.Read(bytes, 0, size);
-                if (l < size)
-                {
-                    Array.Resize(ref bytes, l);
-                }
-
-                retVal = md5.ComputeHash(bytes);
-            }
-
-            file.Close();
-
-            sb = new StringBuilder();
-            foreach (var t in retVal)
-            {
-                sb.Append(t.ToString("x2"));
-            }
-
-            return sb.ToString();
         }
     }
 }

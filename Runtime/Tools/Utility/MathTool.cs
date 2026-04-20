@@ -15,6 +15,7 @@ namespace NonsensicalKit.Tools
         {
             return value >= 0 ? Mathf.Pow(value, 1f / 3f) : -Mathf.Pow(-value, 1f / 3f);
         }
+
         /// <summary>
         /// 计算枚举改变
         /// </summary>
@@ -124,7 +125,8 @@ namespace NonsensicalKit.Tools
 
                     if (child + 1 < i)
                     {
-                        if (values[child].CompareTo(values[index]) < 0 && values[child + 1].CompareTo(values[index]) < 0)
+                        if (values[child].CompareTo(values[index]) < 0 &&
+                            values[child + 1].CompareTo(values[index]) < 0)
                             break;
                         if (values[child].CompareTo(values[child + 1]) < 0) child++;
                         Swap(values, index, child);
@@ -162,7 +164,8 @@ namespace NonsensicalKit.Tools
 
                     if (child + 1 < i)
                     {
-                        if (values[child].CompareTo(values[index]) > 0 && values[child + 1].CompareTo(values[index]) > 0)
+                        if (values[child].CompareTo(values[index]) > 0 &&
+                            values[child + 1].CompareTo(values[index]) > 0)
                             break;
                         if (values[child].CompareTo(values[child + 1]) > 0) child++;
                         Swap(values, index, child);

@@ -42,3 +42,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 
 - 移出冗余的示例（ServiceTemplates、Timer）
+
+## [1.0.4] - 2026-04-20
+
+### Added
+
+- Array4新增Int4调用
+
+### Changed
+
+- 工具类整理
+
+### Fixed
+
+- 修复DagLogicManager返回上一级方法的问题，暂时使用第一个父节点

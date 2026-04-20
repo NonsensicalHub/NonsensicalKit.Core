@@ -56,7 +56,8 @@ namespace NonsensicalKit.Tools
         /// <param name="line2Point1"></param>
         /// <param name="line2Point2"></param>
         /// <returns></returns>
-        public static bool IsOnSameStraightLine(Vector3 line1Point1, Vector3 line1Point2, Vector3 line2Point1, Vector3 line2Point2)
+        public static bool IsOnSameStraightLine(Vector3 line1Point1, Vector3 line1Point2, Vector3 line2Point1,
+            Vector3 line2Point2)
         {
             if (!IsNear(line2Point1, line1Point1) && !IsNear(line2Point1, line1Point2) &&
                 !IsEnoughParallel(line2Point1 - line1Point1, line2Point1 - line1Point2))
@@ -81,7 +82,8 @@ namespace NonsensicalKit.Tools
         /// <param name="line2Point1"></param>
         /// <param name="line2Point2"></param>
         /// <returns></returns>
-        public static bool IsOnSameStraightLineScale(Vector3 line1Point1, Vector3 line1Point2, Vector3 line2Point1, Vector3 line2Point2)
+        public static bool IsOnSameStraightLineScale(Vector3 line1Point1, Vector3 line1Point2, Vector3 line2Point1,
+            Vector3 line2Point2)
         {
             line1Point1 *= 1000000;
             line1Point2 *= 1000000;
@@ -629,9 +631,10 @@ namespace NonsensicalKit.Tools
             float numerator = (singlePoint.x - linePoint1.x) * (linePoint2.x - linePoint1.x)
                               + (singlePoint.y - linePoint1.y) * (linePoint2.y - linePoint1.y)
                               + (singlePoint.z - linePoint1.z) * (linePoint2.z - linePoint1.z);
-            
+
             float k = numerator / denominator;
-            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y,
+            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x,
+                k * (linePoint2.y - linePoint1.y) + linePoint1.y,
                 k * (linePoint2.z - linePoint1.z) + linePoint1.z);
 
             return result;
@@ -743,7 +746,8 @@ namespace NonsensicalKit.Tools
                 return null;
             }
 
-            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x, k * (linePoint2.y - linePoint1.y) + linePoint1.y,
+            Vector3 result = new Vector3(k * (linePoint2.x - linePoint1.x) + linePoint1.x,
+                k * (linePoint2.y - linePoint1.y) + linePoint1.y,
                 k * (linePoint2.z - linePoint1.z) + linePoint1.z);
 
             return result;
@@ -817,11 +821,14 @@ namespace NonsensicalKit.Tools
         /// <param name="posTarget">UGUI中需放置位置的UI对象</param>
         /// <param name="renderCanvas">渲染ui的相机</param>
         /// <param name="zOffset">对象移动目标位置的深度</param>
-        public static void MovePosByUGUI(Transform changeTarget, Camera targetCamera, RectTransform posTarget, RectTransform renderCanvas,
+        public static void MovePosByUGUI(Transform changeTarget, Camera targetCamera, RectTransform posTarget,
+            RectTransform renderCanvas,
             float zOffset = 10)
         {
-            float x = (posTarget.localPosition.x + renderCanvas.rect.width * 0.5f) / renderCanvas.rect.width * Screen.width;
-            float y = (posTarget.localPosition.y + renderCanvas.rect.height * 0.5f) / renderCanvas.rect.height * Screen.height;
+            float x = (posTarget.localPosition.x + renderCanvas.rect.width * 0.5f) / renderCanvas.rect.width *
+                      Screen.width;
+            float y = (posTarget.localPosition.y + renderCanvas.rect.height * 0.5f) / renderCanvas.rect.height *
+                      Screen.height;
 
             Vector3 screenPoint = new Vector3(x, y, zOffset);
 
@@ -953,7 +960,8 @@ namespace NonsensicalKit.Tools
         /// <param name="rotateObject">需要旋转的对象</param>
         /// <param name="crtElementPoints">子物体面上不在一条直线上的三个点的数组</param>
         /// <param name="targetElementPoints">目标物体面上不在一条直线上的三个点的数组</param>
-        public static void RotateByChildren(this Transform rotateObject, Vector3[] crtElementPoints, Vector3[] targetElementPoints)
+        public static void RotateByChildren(this Transform rotateObject, Vector3[] crtElementPoints,
+            Vector3[] targetElementPoints)
         {
             Vector3 dir1 = crtElementPoints[0] - crtElementPoints[1];
             Vector3 dir2 = crtElementPoints[1] - crtElementPoints[2];
@@ -1006,7 +1014,8 @@ namespace NonsensicalKit.Tools
         /// 推导过程：https://www.cnblogs.com/graphics/archive/2010/08/09/1795348.html
         /// </summary>
         /// <returns></returns>
-        public static Vector3? GetRayTriangleCrossPoint(Vector3 rayOrigin, Vector3 rayUnitVector, Vector3 trianglePoint1, Vector3 trianglePoint2,
+        public static Vector3? GetRayTriangleCrossPoint(Vector3 rayOrigin, Vector3 rayUnitVector,
+            Vector3 trianglePoint1, Vector3 trianglePoint2,
             Vector3 trianglePoint3)
         {
             Vector3 e1 = trianglePoint2 - trianglePoint1;
@@ -1026,10 +1035,9 @@ namespace NonsensicalKit.Tools
                 T = trianglePoint1 - rayOrigin;
             }
 
-            //射线在面上
-            if (det == 0)
+            // 当行列式接近 0 时，射线与三角面平行或共面，按无单点交点处理。
+            if (det <= Mathf.Epsilon)
             {
-                //TODO:返回射线与任一边的交点
                 return null;
             }
 

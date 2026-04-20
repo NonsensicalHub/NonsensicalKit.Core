@@ -108,7 +108,8 @@ namespace NonsensicalKit.Core.DagLogicNode
             return true;
         }
 
-        public bool ReturnPreviousLevel()
+        //返回上一个
+        public bool ReturnLast()
         {
             while (_history.Count > 0)
             {
@@ -121,6 +122,15 @@ namespace NonsensicalKit.Core.DagLogicNode
             }
 
             return false;
+        }
+        
+        //返回上一级
+        public void ReturnPreviousLevel()
+        {
+            if (CrtSelectNode.ParentNodes.Count>0)
+            {
+                DoSwitchNode(CrtSelectNode.ParentNodes[0],true);
+            }
         }
 
         public bool CheckState(string nodeID, DagNodeCheckType checkType)

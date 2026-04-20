@@ -53,8 +53,8 @@ namespace NonsensicalKit.Tools
 
         public static void Create(string path)
         {
-            FileStream fs = new FileStream(path, FileMode.Create);
-            fs.Close();
+            EnsureFileDir(path);
+            using FileStream fs = new FileStream(path, FileMode.Create);
         }
 
         public static void FileSave(byte[] data, string fullPath)
@@ -69,7 +69,7 @@ namespace NonsensicalKit.Tools
 
         public static bool TransferData(string filepath1, string filepath2)
         {
-            if (!File.Exists(filepath1) || !File.Exists(filepath1))
+            if (!File.Exists(filepath1) || !File.Exists(filepath2))
             {
                 return false;
             }
@@ -208,7 +208,8 @@ namespace NonsensicalKit.Tools
         public static void EnsureFileDir(string filePath)
         {
             var dirPath = Path.GetDirectoryName(filePath);
-            if (Directory.Exists(dirPath) == false)
+            // 路径可能仅文件名（无目录），此时无需创建目录。
+            if (!string.IsNullOrWhiteSpace(dirPath) && Directory.Exists(dirPath) == false)
             {
                 Directory.CreateDirectory(dirPath);
             }
@@ -220,7 +221,7 @@ namespace NonsensicalKit.Tools
         /// <param name="dirPath"></param>
         public static void EnsureDir(string dirPath)
         {
-            if (Directory.Exists(dirPath) == false)
+            if (!string.IsNullOrWhiteSpace(dirPath) && Directory.Exists(dirPath) == false)
             {
                 Directory.CreateDirectory(dirPath);
             }

@@ -71,7 +71,8 @@ namespace NonsensicalKit.Tools
 
         public static Tweener DoRotate(this Transform transform, Quaternion endValue, float value)
         {
-            TransformQuaternionRotateTweener newTweener = new TransformQuaternionRotateTweener(transform, endValue, value);
+            TransformQuaternionRotateTweener newTweener =
+                new TransformQuaternionRotateTweener(transform, endValue, value);
 
             Hub.Tweeners.Add(newTweener);
 
@@ -107,7 +108,8 @@ namespace NonsensicalKit.Tools
 
         public static Tweener DoLocalRotate(this Transform transform, Quaternion endValue, float value)
         {
-            TransformQuaternionLocalRotateTweener newTweener = new TransformQuaternionLocalRotateTweener(transform, endValue, value);
+            TransformQuaternionLocalRotateTweener newTweener =
+                new TransformQuaternionLocalRotateTweener(transform, endValue, value);
 
             Hub.Tweeners.Add(newTweener);
 
@@ -223,9 +225,18 @@ namespace NonsensicalKit.Tools
                 }
             }
 
+            if (schedule <= 0f)
+            {
+                // 延迟期间保持在起点状态，避免传入负进度导致插值异常。
+                _isOver = DoSpecificBySchedule(0f);
+                return false;
+            }
+
             if (schedule >= 1)
             {
-                _isOver = DoSpecificBySchedule(1);
+                // 到达终点时强制落到 1，并统一触发完成回调。
+                DoSpecificBySchedule(1);
+                _isOver = true;
                 OnCompleteEvent?.Invoke();
                 return true;
             }
@@ -319,7 +330,7 @@ namespace NonsensicalKit.Tools
             this._graphic = graphic;
             _startValue = graphic.color;
             this._endValue = endValue;
-            
+
             TotalValue = ColorDistance(_startValue, endValue);
         }
 
@@ -327,7 +338,7 @@ namespace NonsensicalKit.Tools
         {
             float r = a.r - b.r;
             float g = a.g - b.g;
-            float bl = a.b - b.b; 
+            float bl = a.b - b.b;
             float al = a.a - b.a;
 
             return Mathf.Sqrt(r * r + g * g + bl * bl + al * al);
@@ -341,7 +352,7 @@ namespace NonsensicalKit.Tools
             }
 
             _graphic.color = Color.Lerp(_startValue, _endValue, schedule);
-            
+
             return false;
         }
     }
@@ -406,7 +417,8 @@ namespace NonsensicalKit.Tools
         private readonly Quaternion _startValue;
         private readonly Quaternion _endValue;
 
-        public TransformQuaternionLocalRotateTweener(Transform transform, Quaternion endValue, float value) : base(value)
+        public TransformQuaternionLocalRotateTweener(Transform transform, Quaternion endValue, float value) :
+            base(value)
         {
             this._transform = transform;
             _startValue = transform.localRotation;

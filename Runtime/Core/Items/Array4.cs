@@ -57,6 +57,11 @@ namespace NonsensicalKit.Core
             set => m_Array[index0 * m_Step0 + index1 * m_Step1 + index2 * m_Step2] = value;
         }
 
+        public T this[Int4 int4]
+        {
+            get => m_Array[int4.I1 * m_Step0 + int4.I2 * m_Step1 + int4.I3 * m_Step2 + int4.I4];
+            set => m_Array[int4.I1 * m_Step0 + int4.I2 * m_Step1 + int4.I3 * m_Step2 + int4.I4] = value;
+        }
         public T this[Int3 int3, int index3]
         {
             get => m_Array[int3.I1 * m_Step0 + int3.I2 * m_Step1 + int3.I3 * m_Step2 + index3];

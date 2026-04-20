@@ -49,12 +49,12 @@ namespace NonsensicalKit.Tools
 
         public static List<Transform> GetChildren(this Transform tsf)
         {
-            return  (from Transform child in tsf select child).ToList();
+            return (from Transform child in tsf select child).ToList();
         }
-        
+
         public static List<GameObject> GetChildrenGo(this Transform tsf)
         {
-            return  (from Transform child in tsf select child.gameObject).ToList();
+            return (from Transform child in tsf select child.gameObject).ToList();
         }
 
         public static Bounds BoundingBox(this Transform root, IEnumerable<Renderer> renderers)
@@ -158,13 +158,17 @@ namespace NonsensicalKit.Tools
 
             Bounds bounds = tsf.BoundingBoxGlobal();
 
-            float fov = camera.fieldOfView * Mathf.Deg2Rad;
+            float fieldOfViewInDegrees = camera.fieldOfView;
             if (Screen.width < Screen.height)
             {
-                fov = Camera.VerticalToHorizontalFieldOfView(fov, camera.aspect);
+                // 竖屏时按水平视场角估算，避免长边/短边切换导致距离不稳定。
+                fieldOfViewInDegrees = Camera.VerticalToHorizontalFieldOfView(fieldOfViewInDegrees, camera.aspect);
             }
 
-            float diagonal = Mathf.Sqrt(bounds.size.x * bounds.size.x + bounds.size.y * bounds.size.y + bounds.size.z * bounds.size.z);
+            float fov = fieldOfViewInDegrees * Mathf.Deg2Rad;
+
+            float diagonal = Mathf.Sqrt(bounds.size.x * bounds.size.x + bounds.size.y * bounds.size.y +
+                                        bounds.size.z * bounds.size.z);
 
             //tan(fov/2)=diagonal*0.5f/distance
             //distance=diagonal*0.5f/tan(fov/2)
@@ -281,7 +285,7 @@ namespace NonsensicalKit.Tools
 
             return list;
         }
-        
+
         public static void SetChildren(this Transform t, IEnumerable<GameObject> children)
         {
             if (children != null)
@@ -426,9 +430,9 @@ namespace NonsensicalKit.Tools
             string[] index = path.Split('|', StringSplitOptions.RemoveEmptyEntries);
             foreach (var t in index)
             {
-                if (int.TryParse(t,out int i))
+                if (int.TryParse(t, out int i))
                 {
-                    if (root.childCount>i)
+                    if (root.childCount > i)
                     {
                         root = root.GetChild(i);
                     }
@@ -483,7 +487,8 @@ namespace NonsensicalKit.Tools
             collider.isTrigger = true;
             collider.center = bounds.center - go.transform.position;
 
-            collider.size = new Vector3(bounds.size.x / go.transform.lossyScale.x, bounds.size.y / go.transform.lossyScale.y,
+            collider.size = new Vector3(bounds.size.x / go.transform.lossyScale.x,
+                bounds.size.y / go.transform.lossyScale.y,
                 bounds.size.z / go.transform.lossyScale.z);
 
             go.transform.rotation = qn;

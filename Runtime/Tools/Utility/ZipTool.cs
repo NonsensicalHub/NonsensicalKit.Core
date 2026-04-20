@@ -51,8 +51,8 @@ namespace NonsensicalKit.Tools
     }
 
     /// <summary>
-    /// https://blog.csdn.net/u014361280/article/details/109677502
-    /// 待整改
+    /// Zip 压缩/解压工具。
+    /// 设计目标是提供“可回调、可过滤”的轻量封装，用于运行时简单打包场景。
     /// </summary>
     public class ZipTool : MonoBehaviour
     {
@@ -74,36 +74,42 @@ namespace NonsensicalKit.Tools
                 return false;
             }
 
-            ZipOutputStream zipOutputStream = new ZipOutputStream(File.Create(outputPathName));
-            zipOutputStream.SetLevel(6); // 压缩质量和压缩速度的平衡点
-            if (!string.IsNullOrEmpty(password))
-                zipOutputStream.Password = password;
-
-            for (int index = 0; index < fileOrDirectoryArray.Length; ++index)
+            try
             {
-                bool result = false;
-                string fileOrDirectory = fileOrDirectoryArray[index];
-                if (Directory.Exists(fileOrDirectory))
-                    result = ZipDirectory(fileOrDirectory, string.Empty, zipOutputStream, zipCallback);
-                else if (File.Exists(fileOrDirectory))
-                    result = ZipFile(fileOrDirectory, string.Empty, zipOutputStream, zipCallback);
-
-                if (!result)
+                // 使用 using 保证异常路径也能正确释放句柄，避免 zip 文件被占用。
+                using ZipOutputStream zipOutputStream = new ZipOutputStream(File.Create(outputPathName));
+                zipOutputStream.SetLevel(6); // 压缩质量和压缩速度的平衡点
+                if (!string.IsNullOrEmpty(password))
                 {
-                    if (null != zipCallback)
-                        zipCallback.OnFinished(false);
-
-                    return false;
+                    zipOutputStream.Password = password;
                 }
+
+                for (int index = 0; index < fileOrDirectoryArray.Length; ++index)
+                {
+                    bool result = false;
+                    string fileOrDirectory = fileOrDirectoryArray[index];
+                    if (Directory.Exists(fileOrDirectory))
+                        result = ZipDirectory(fileOrDirectory, string.Empty, zipOutputStream, zipCallback);
+                    else if (File.Exists(fileOrDirectory))
+                        result = ZipFile(fileOrDirectory, string.Empty, zipOutputStream, zipCallback);
+
+                    if (!result)
+                    {
+                        zipCallback?.OnFinished(false);
+                        return false;
+                    }
+                }
+
+                zipOutputStream.Finish();
+                zipCallback?.OnFinished(true);
+                return true;
             }
-
-            zipOutputStream.Finish();
-            zipOutputStream.Close();
-
-            if (null != zipCallback)
-                zipCallback.OnFinished(true);
-
-            return true;
+            catch (Exception e)
+            {
+                Debug.LogError("[ZipUtility.Zip]: " + e);
+                zipCallback?.OnFinished(false);
+                return false;
+            }
         }
 
         /// <summary>
@@ -208,6 +214,7 @@ namespace NonsensicalKit.Tools
                         continue;
                     }
 
+                    // SharpZipLib 以流式读取当前 entry，循环直到 count==0 表示当前文件结束。
                     // 写入文件
                     try
                     {

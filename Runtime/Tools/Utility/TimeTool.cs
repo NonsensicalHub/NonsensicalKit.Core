@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace NonsensicalKit.Tools
 {
+    /// <summary>
+    /// 时间与时区工具，包含北京时间快捷格式以及 UTC 偏移映射表。
+    /// </summary>
     public static class TimeTool
     {
         public static TimeZoneInfo GetChineseTimeZone()
@@ -20,7 +23,8 @@ namespace NonsensicalKit.Tools
             return GetBeiJingTime("yyyy/MM/dd hh:mm:ss tt ddd");
         }
 
-        public static string FormatTips =
+        /// <summary>日期格式占位符说明（多行版）。</summary>
+        public static readonly string FormatTips =
             @"yy 年份后两位
 yyyy 年份
 MM 月份
@@ -33,7 +37,9 @@ ss 秒数
 ff 毫秒数(最多四位)
 分隔符可使用 - 或 / 或 :";
 
-        public static string FormatTipsShort = "yy 年份后两位 yyyy 年份 MM 月份 dd 日数 ddd 周几 dddd 星期几 HH 小时数 mm 分钟数 ss 秒数 ff 毫秒数(最多四位) 分隔符可使用 - 或 / 或 :";
+        /// <summary>日期格式占位符说明（单行版）。</summary>
+        public static readonly string FormatTipsShort =
+            "yy 年份后两位 yyyy 年份 MM 月份 dd 日数 ddd 周几 dddd 星期几 HH 小时数 mm 分钟数 ss 秒数 ff 毫秒数(最多四位) 分隔符可使用 - 或 / 或 :";
 
         public enum TimeZones
         {
@@ -76,7 +82,7 @@ ff 毫秒数(最多四位)
             UTCp14h,
         };
 
-        public static List<string> TimeZoneNames = new List<string>()
+        public static readonly List<string> TimeZoneNames = new List<string>()
         {
             "UTC-12",
             "UTC-11",
@@ -117,7 +123,7 @@ ff 毫秒数(最多四位)
             "UTC+14",
         };
 
-        public static List<float> TimeZoneOffsetHours = new List<float>()
+        public static readonly List<float> TimeZoneOffsetHours = new List<float>()
         {
             -12,
             -11,

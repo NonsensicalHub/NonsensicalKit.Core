@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,12 +8,21 @@ using UnityEngine;
 
 namespace NonsensicalKit.Tools
 {
+    /// <summary>
+    /// Newtonsoft.Json 的常用封装，包含序列化、反序列化与本地持久化辅助。
+    /// </summary>
     public static class JsonTool
     {
-        public static MethodInfo DESERIALIZE_METHOD = typeof(JsonConvert).GetMethods().FirstOrDefault(
-            p => p.IsStatic == true && p.IsPublic == true && p.Name == "DeserializeObject" && p.ContainsGenericParameters == true);
-        
-        public static readonly JsonSerializerSettings IgnoreLoopSetting = new() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+        [Obsolete("Use DeserializeMethod instead.")]
+        // 兼容旧字段命名，避免外部反射或旧代码直接访问时破坏。
+        public static MethodInfo DESERIALIZE_METHOD = typeof(JsonConvert).GetMethods().FirstOrDefault(p =>
+            p.IsStatic == true && p.IsPublic == true && p.Name == "DeserializeObject" &&
+            p.ContainsGenericParameters == true);
+
+        public static readonly MethodInfo DeserializeMethod = DESERIALIZE_METHOD;
+
+        public static readonly JsonSerializerSettings IgnoreLoopSetting = new()
+            { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
 
         /// <summary>
         /// 动态生成json(使用递归)
@@ -85,7 +95,8 @@ namespace NonsensicalKit.Tools
 
             FileTool.EnsureDir(Path.Combine(Application.streamingAssetsPath, "SaveJsonFiles"));
 
-            FileTool.WriteText(Path.Combine(Application.streamingAssetsPath, "SaveJsonFiles", fileName + ".json"), dataJson);
+            FileTool.WriteText(Path.Combine(Application.streamingAssetsPath, "SaveJsonFiles", fileName + ".json"),
+                dataJson);
         }
 
         /// <summary>
@@ -101,7 +112,7 @@ namespace NonsensicalKit.Tools
             string dataJson = FileTool.ReadAllText(fullPath);
             if (dataJson == null)
             {
-                return default(T);
+                return default;
             }
 
             T data = DeserializeObject<T>(dataJson);
@@ -125,7 +136,8 @@ namespace NonsensicalKit.Tools
             // for example in default constructor some list property initialized with some values,
             // but in 'source' these items are cleaned -
             // without ObjectCreationHandling.Replace default constructor values will be added to result
-            var deserializeSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
+            var deserializeSettings = new JsonSerializerSettings
+                { ObjectCreationHandling = ObjectCreationHandling.Replace };
 
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), deserializeSettings);
         }
@@ -142,6 +154,7 @@ namespace NonsensicalKit.Tools
 
         public static T DeserializeObject<T>(string str)
         {
+            // 处理 UTF-8 BOM，避免反序列化首字符污染导致失败。
             str = str.TrimBom();
             return JsonConvert.DeserializeObject<T>(str);
         }

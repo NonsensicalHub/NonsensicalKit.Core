@@ -11,6 +11,12 @@ namespace NonsensicalKit.Tools
     {
         public static T Clone<T>(this T list) where T : IList
         {
+            // 仅做浅拷贝：容器是新实例，但元素引用保持不变。
+            if (list == null)
+            {
+                return default;
+            }
+
             T clonedList = (T)Activator.CreateInstance(list.GetType());
             foreach (var obj in list)
             {
@@ -22,6 +28,11 @@ namespace NonsensicalKit.Tools
 
         public static T[] Clone<T>(this T[] array)
         {
+            if (array == null)
+            {
+                return null;
+            }
+
             T[] clonedArray = new T[array.Length];
             for (int i = 0; i < array.Length; i++)
             {
@@ -33,6 +44,11 @@ namespace NonsensicalKit.Tools
 
         public static List<T> Clone<T>(this List<T> list)
         {
+            if (list == null)
+            {
+                return null;
+            }
+
             List<T> clonedList = new List<T>(list.Count);
             foreach (var obj in list)
             {
@@ -44,6 +60,16 @@ namespace NonsensicalKit.Tools
 
         public static IList Resize(IList list, Type type, int size)
         {
+            if (size < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size), size, "size must be greater than or equal to 0.");
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             int delta = size;
             if (list != null)
             {
@@ -52,7 +78,10 @@ namespace NonsensicalKit.Tools
 
             bool remove = delta < 0;
 
-            IList newList = (list != null) ? (IList)Activator.CreateInstance(type, list) : (IList)Activator.CreateInstance(type);
+            // 先构造同类型副本，再做扩/缩容，避免直接修改传入列表。
+            IList newList = (list != null)
+                ? (IList)Activator.CreateInstance(type, list)
+                : (IList)Activator.CreateInstance(type);
 
             Type elementType = type.GetGenericArguments()[0];
 
@@ -115,34 +144,40 @@ namespace NonsensicalKit.Tools
 
         public static T SafeGet<T>(this IList<T> list, int index)
         {
+            if (list == null)
+            {
+                return default;
+            }
+
             if (index < 0 || index >= list.Count)
             {
                 return default;
             }
-            else
-            {
-                return list[index];
-            }
+
+            return list[index];
         }
 
-        public static void DicAdd<TKey,  TKey2,TValue>(this Dictionary<TKey, Dictionary<TKey2,TValue>> dictionary, TKey key, TKey2 key2,TValue value)
+        public static void DicAdd<TKey, TKey2, TValue>(this Dictionary<TKey, Dictionary<TKey2, TValue>> dictionary,
+            TKey key, TKey2 key2, TValue value)
         {
-            if (dictionary.ContainsKey(key)==false)
+            if (!dictionary.TryGetValue(key, out var childDictionary))
             {
-                dictionary.Add(key, new Dictionary<TKey2, TValue>() );
+                childDictionary = new Dictionary<TKey2, TValue>();
+                dictionary.Add(key, childDictionary);
             }
 
-            if (dictionary[key].ContainsKey(key2))
+            if (childDictionary.ContainsKey(key2))
             {
-                dictionary[key][key2]= value;
+                childDictionary[key2] = value;
             }
             else
             {
-                dictionary[key].Add(key2, value);
+                childDictionary.Add(key2, value);
             }
         }
-        
-        public static bool ListContains<TKey, TValue>(this Dictionary<TKey, List<TValue>> dictionary, TKey key, TValue value)
+
+        public static bool ListContains<TKey, TValue>(this Dictionary<TKey, List<TValue>> dictionary, TKey key,
+            TValue value)
         {
             return dictionary.TryGetValue(key, out var value1) && value1.Contains(value);
         }
@@ -167,7 +202,8 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        public static void ActionAdd<TKey, TValue>(this Dictionary<TKey, Action<TValue>> dictionary, TKey key, Action<TValue> value)
+        public static void ActionAdd<TKey, TValue>(this Dictionary<TKey, Action<TValue>> dictionary, TKey key,
+            Action<TValue> value)
         {
             if (!dictionary.TryAdd(key, value))
             {
@@ -175,7 +211,8 @@ namespace NonsensicalKit.Tools
             }
         }
 
-        public static void ActionAdd<TKey, TValue1, TValue2>(this Dictionary<TKey, Action<TValue1, TValue2>> dictionary, TKey key,
+        public static void ActionAdd<TKey, TValue1, TValue2>(this Dictionary<TKey, Action<TValue1, TValue2>> dictionary,
+            TKey key,
             Action<TValue1, TValue2> value)
         {
             if (!dictionary.TryAdd(key, value))

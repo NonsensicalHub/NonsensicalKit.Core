@@ -10,6 +10,7 @@ namespace NonsensicalKit.Tools
     /// </summary>
     public static class ReflectionTool
     {
+        // 缓存程序集列表，避免频繁扫描 AppDomain 带来的额外开销。
         private static Assembly[] _assemblyBuffer;
 
         /// <summary>
@@ -68,9 +69,10 @@ namespace NonsensicalKit.Tools
                 {
                     assemblyTypes = assembly.GetTypes();
                 }
-                catch
+                catch (ReflectionTypeLoadException e)
                 {
-                    Debug.LogError($"Could not load types from assembly : {assembly.FullName}");
+                    // 某些程序集可能因平台裁剪或依赖缺失导致类型加载失败，记录后继续扫描其余程序集。
+                    Debug.LogError($"Could not load types from assembly: {assembly.FullName}. {e}");
                 }
 
                 if (assemblyTypes != null)
@@ -110,9 +112,9 @@ namespace NonsensicalKit.Tools
                 {
                     assemblyTypes = assembly.GetTypes();
                 }
-                catch
+                catch (ReflectionTypeLoadException e)
                 {
-                    Debug.LogError($"Could not load types from assembly : {assembly.FullName}");
+                    Debug.LogError($"Could not load types from assembly: {assembly.FullName}. {e}");
                 }
 
                 if (assemblyTypes != null)
@@ -158,9 +160,9 @@ namespace NonsensicalKit.Tools
                 {
                     assemblyTypes = assembly.GetTypes();
                 }
-                catch
+                catch (ReflectionTypeLoadException e)
                 {
-                    Debug.LogError($"Could not load types from assembly : {assembly.FullName}");
+                    Debug.LogError($"Could not load types from assembly: {assembly.FullName}. {e}");
                 }
 
                 if (assemblyTypes != null)
@@ -200,9 +202,9 @@ namespace NonsensicalKit.Tools
                 {
                     assemblyTypes = assembly.GetTypes();
                 }
-                catch
+                catch (ReflectionTypeLoadException e)
                 {
-                    Debug.LogError($"Could not load types from assembly : {assembly.FullName}");
+                    Debug.LogError($"Could not load types from assembly: {assembly.FullName}. {e}");
                 }
 
                 if (assemblyTypes != null)
@@ -252,9 +254,9 @@ namespace NonsensicalKit.Tools
                 {
                     assemblyTypes = assembly.GetTypes();
                 }
-                catch
+                catch (ReflectionTypeLoadException e)
                 {
-                    Debug.LogError($"Could not load types from assembly : {assembly.FullName}");
+                    Debug.LogError($"Could not load types from assembly: {assembly.FullName}. {e}");
                 }
 
                 if (assemblyTypes != null)

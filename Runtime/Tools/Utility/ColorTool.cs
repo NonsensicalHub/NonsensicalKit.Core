@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace NonsensicalKit.Tools
 {
+    /// <summary>
+    /// 颜色工具：支持 Hex 转换与近似颜色名匹配。
+    /// </summary>
     public static class ColorTool
     {
         private static readonly string[] ColorChineseName =
@@ -771,22 +774,42 @@ namespace NonsensicalKit.Tools
         // Note that Color32 and Color implictly convert to each other. You may pass a Color object to this method without first casting it.
         public static string ColorToHex(Color32 color)
         {
-            string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2") + color.a.ToString("X2");
+            string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2") +
+                         color.a.ToString("X2");
             return hex;
         }
 
         public static Color HexToColor(string hex)
         {
+            if (string.IsNullOrWhiteSpace(hex))
+            {
+                return Color.clear;
+            }
+
             hex = hex.Replace("0x", ""); //in case the string is formatted 0xFFFFFF
             hex = hex.Replace("#", ""); //in case the string is formatted #FFFFFF
+            if (hex.Length != 6 && hex.Length != 8)
+            {
+                // 返回透明色作为“非法输入”的哨兵值，避免抛异常中断业务流。
+                return Color.clear;
+            }
+
             byte a = 255; //assume fully visible unless specified in hex
-            byte r = byte.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
-            byte g = byte.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
-            byte b = byte.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
+            if (!byte.TryParse(hex.Substring(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte r)
+                || !byte.TryParse(hex.Substring(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte g)
+                || !byte.TryParse(hex.Substring(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture,
+                    out byte b))
+            {
+                return Color.clear;
+            }
+
             //Only use alpha if the string has enough characters
             if (hex.Length == 8)
             {
-                a = byte.Parse(hex.Substring(6, 2), NumberStyles.HexNumber);
+                if (!byte.TryParse(hex.Substring(6, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out a))
+                {
+                    return Color.clear;
+                }
             }
 
             return new Color32(r, g, b, a);
@@ -805,11 +828,12 @@ namespace NonsensicalKit.Tools
 
         public static string GetColorName01(float r, float g, float b)
         {
-            return GetColorName(r * 255, g * 255, b * 255);
+            return GetColorName(r, g, b);
         }
 
         public static string GetColorName(float r, float g, float b, bool chineseName = true)
         {
+            // 这里输入采用 0..1 归一化范围，内部统一映射到 0..255 做距离比较。
             int index = 0;
             float minDistance = int.MaxValue;
             for (int i = 0; i < ColorRGB.Length; i++)
