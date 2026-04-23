@@ -56,3 +56,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - 修复DagLogicManager返回上一级方法的问题，暂时使用第一个父节点
+
+## [1.0.5] - 2026-04-23
+
+### Added
+
+- InputHub输入系统增加设备数据注入

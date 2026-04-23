@@ -27,16 +27,19 @@ namespace NonsensicalKit.Tools.InputTool
         public Action<bool> OnLeftShiftKeyChanged { get; set; }
         public Action<bool> OnLeftAltKeyChanged { get; set; }
 
-        public float CrtZoom { get; private set; }
+        public float CrtZoom { get; internal set; }
 
-        public bool IsMouseLeftButtonHold { get; private set; }
-        public bool IsMouseRightButtonHold { get; private set; }
-        public bool IsMouseMiddleButtonHold { get; private set; }
-        public bool IsLeftShiftKeyHold { get; private set; }
-        public bool IsLeftAltKeyHold { get; private set; }
+        public bool IsMouseLeftButtonHold { get; internal set; }
+        public bool IsMouseRightButtonHold { get; internal set; }
+        public bool IsMouseMiddleButtonHold { get; internal set; }
+        public bool IsLeftShiftKeyHold { get; internal set; }
+        public bool IsLeftAltKeyHold { get; internal set; }
 
-        public Vector2 CrtMove { get; private set; }
-        public Vector2 CrtMousePos { get; private set; }
-        public Vector2 CrtMouseMove { get; private set; }
+        public Vector2 CrtMove { get; internal set; }
+        public Vector2 CrtMousePos { get; internal set; }
+        public Vector2 CrtMouseMove { get; internal set; }
+
+        public DataInjection DataInjection = new();
+
     }
 }
