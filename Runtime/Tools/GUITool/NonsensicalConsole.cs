@@ -8,6 +8,12 @@ using UnityEngine.InputSystem;
 
 namespace NonsensicalKit.Tools.GUITool
 {
+    [AggregatorEnum]
+    enum NonsensicalConsoleEnum
+    {
+        ExecuteCommand = 12306
+    }
+
     /// <summary>
     /// 调试面板控制器（OnGUI）：负责 F1 显隐、调试命令和日志显示。
     /// </summary>
@@ -161,7 +167,7 @@ namespace NonsensicalKit.Tools.GUITool
                 return;
             }
 
-            bool result = Execute<string[], bool>("ExecuteDebugCommand", commandID, param);
+            bool result = Execute<string[], bool>(NonsensicalConsoleEnum.ExecuteCommand, commandID, param);
 
             if (result)
             {
