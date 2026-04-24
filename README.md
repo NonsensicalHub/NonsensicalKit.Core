@@ -17,6 +17,41 @@
   3. 业务层通过 `ServiceCore.Get<T>()` / `TryGet<T>()` 获取实例。
   4. 若初始化时序不确定，统一改用 `SafeGet<T>(Action<T>)`。
 
+### Save
+
+- **模块定位**：统一管理模块化存档的采集、写入、读取与恢复流程。
+- **核心入口**：`SaveService`、`ISaveProvider`、`SaveProviderBehaviour`
+- **使用方法**：
+  1. 在业务模块实现 `ISaveProvider`（或继承 `SaveProviderBehaviour`）并提供唯一 `SaveKey`。
+  2. 在 `CaptureAsBytes()` 中输出模块数据，在 `RestoreFromBytes(byte[])` 中恢复数据。
+  3. 通过 `ServiceCore.Get<SaveService>().Save(slotId)` 执行保存。
+  4. 通过 `ServiceCore.Get<SaveService>().TryLoad(slotId, out var data)` 执行加载。
+- **最小示例**：
+```csharp
+using NonsensicalKit.Core.Save;
+using UnityEngine;
+
+public sealed class PlayerSaveProvider : SaveProviderBehaviour
+{
+    [SerializeField] private int m_hp = 100;
+
+    public override byte[] CaptureAsBytes()
+    {
+        return System.BitConverter.GetBytes(m_hp);
+    }
+
+    public override void RestoreFromBytes(byte[] bytes)
+    {
+        if (bytes == null || bytes.Length < sizeof(int))
+        {
+            return;
+        }
+
+        m_hp = System.BitConverter.ToInt32(bytes, 0);
+    }
+}
+```
+
 ### Log
 
 - **模块定位**：统一日志打印、等级控制、来源分组。

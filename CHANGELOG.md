@@ -62,3 +62,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - InputHub输入系统增加设备数据注入
+
+## [1.0.6] - 2026-04-24
+
+### Added
+
+- 添加SaveService和NonsensicalConsole
