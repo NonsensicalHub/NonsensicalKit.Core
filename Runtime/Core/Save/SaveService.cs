@@ -15,6 +15,10 @@ namespace NonsensicalKit.Core.Save
     /// </summary>
     public sealed class SaveService : IClassService
     {
+        private const int MaxModuleCount = 1024;
+        private const int MaxModulePayloadBytes = 8 * 1024 * 1024;
+        private const long MaxTotalPayloadBytes = 64L * 1024 * 1024;
+
         public bool IsReady => true;
         public Action InitCompleted { get; set; }
 
@@ -289,8 +293,13 @@ namespace NonsensicalKit.Core.Save
             {
                 throw new InvalidDataException($"无效的模块数量：{moduleCount}");
             }
+            if (moduleCount > MaxModuleCount)
+            {
+                throw new InvalidDataException($"模块数量超过上限：{moduleCount}/{MaxModuleCount}");
+            }
 
             data.Modules = new List<SaveModuleRecord>(moduleCount);
+            long totalPayloadBytes = 0;
             for (var i = 0; i < moduleCount; i++)
             {
                 var key = reader.ReadString();
@@ -300,11 +309,25 @@ namespace NonsensicalKit.Core.Save
                 {
                     throw new InvalidDataException($"无效的负载长度：{length}");
                 }
+                if (length > MaxModulePayloadBytes)
+                {
+                    throw new InvalidDataException($"模块负载超过上限：{length}/{MaxModulePayloadBytes}");
+                }
+                if (length > stream.Length - stream.Position)
+                {
+                    throw new EndOfStreamException($"读取负载长度不足，期望：{length}，剩余：{stream.Length - stream.Position}");
+                }
 
                 var payload = length > 0 ? reader.ReadBytes(length) : Array.Empty<byte>();
                 if (payload.Length != length)
                 {
                     throw new EndOfStreamException($"读取负载长度不足，期望：{length}，实际：{payload.Length}");
+                }
+
+                totalPayloadBytes += length;
+                if (totalPayloadBytes > MaxTotalPayloadBytes)
+                {
+                    throw new InvalidDataException($"存档总负载超过上限：{totalPayloadBytes}/{MaxTotalPayloadBytes}");
                 }
 
                 data.Modules.Add(new SaveModuleRecord

@@ -1,8 +1,10 @@
 using System.Collections;
 using NaughtyAttributes;
 using NonsensicalKit.Core;
-using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif

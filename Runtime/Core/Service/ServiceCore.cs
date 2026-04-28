@@ -6,9 +6,11 @@ using System.Reflection;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Setting;
 using NonsensicalKit.Tools;
-using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace NonsensicalKit.Core.Service
 {
@@ -26,13 +28,18 @@ namespace NonsensicalKit.Core.Service
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void CreateServices()
         {
+            _runningService = new List<string>();
             var setting = NonsensicalSetting.LoadSetting();
             if (setting == null)
             {
+                AfterServiceCoreInit?.Invoke();
                 return;
             }
 
-            _runningService = setting.RunningServices.ToList();
+            if (setting.RunningServices != null)
+            {
+                _runningService = setting.RunningServices.ToList();
+            }
 
             var allServiceTypes = ReflectionTool.GetConcreteTypes<IClassService>();
             foreach (Type type in allServiceTypes)
@@ -178,6 +185,16 @@ namespace NonsensicalKit.Core.Service
         /// <param name="callback"></param>
         public static void SafeGet<T>(Action<T> callback) where T : class, IService
         {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (_runningService == null)
+            {
+                throw new TODOException("服务系统尚未初始化");
+            }
+
             if (!_runningService.Contains(typeof(T).Name))
             {
                 throw new TODOException($"服务[{typeof(T).Name}]未配置");
@@ -188,6 +205,7 @@ namespace NonsensicalKit.Core.Service
                 if (Services[typeof(T)].IsReady)
                 {
                     callback(Services[typeof(T)] as T);
+                    return;
                 }
             }
 

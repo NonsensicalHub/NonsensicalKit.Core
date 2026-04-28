@@ -714,13 +714,13 @@ namespace NonsensicalKit.Core
         protected void Register<T>(string str, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(str, func);
-            _registerInfos.Add(new RegisterInfo(str, func, () => ObjectAggregator<T>.Instance.Unregister(func)));
+            _registerInfos.Add(new RegisterInfo(str, func, () => ObjectAggregator<T>.Instance.Unregister(str, func)));
         }
 
         protected void Register<T>(int index, Func<T> func)
         {
             ObjectAggregator<T>.Instance.Register(index, func);
-            _registerInfos.Add(new RegisterInfo(index, func, () => ObjectAggregator<T>.Instance.Unregister(func)));
+            _registerInfos.Add(new RegisterInfo(index, func, () => ObjectAggregator<T>.Instance.Unregister(index, func)));
         }
 
         protected void Register<T>(Enum index, Func<T> func)
@@ -779,14 +779,14 @@ namespace NonsensicalKit.Core
         {
             ObjectAggregator<T>.Instance.AddListener(str, listener);
             _listenerInfos.Add(new ListenerInfo(str, listener,
-                () => ObjectAggregator<T>.Instance.RemoveListener(listener)));
+                () => ObjectAggregator<T>.Instance.RemoveListener(str, listener)));
         }
 
         protected void AddListener<T>(int index, Action<T> listener)
         {
             ObjectAggregator<T>.Instance.AddListener(index, listener);
             _listenerInfos.Add(new ListenerInfo(index, listener,
-                () => ObjectAggregator<T>.Instance.RemoveListener(listener)));
+                () => ObjectAggregator<T>.Instance.RemoveListener(index, listener)));
         }
 
         protected void AddListener<T>(Enum index, Action<T> listener)
@@ -857,7 +857,7 @@ namespace NonsensicalKit.Core
         {
             MethodAggregator<TResult>.Instance.AddHandler(index, id, handler);
             _handlerInfos.Add(new HandlerInfo(index, id, handler,
-                () => MethodAggregator<TResult>.Instance.RemoveHandler(id, handler)));
+                () => MethodAggregator<TResult>.Instance.RemoveHandler(index, id, handler)));
         }
 
         protected void AddHandler<TResult>(string str, string id, Func<TResult> handler)

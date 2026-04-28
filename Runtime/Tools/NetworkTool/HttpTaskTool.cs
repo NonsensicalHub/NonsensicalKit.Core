@@ -127,7 +127,7 @@ namespace NonsensicalKit.Tools.NetworkTool
             Dictionary<string, string> header, CancellationToken cancellationToken = default(CancellationToken))
         {
             string json = await Post(url, CreateForm(formData), header, cancellationToken);
-            if (string.IsNullOrEmpty(json))
+            if (!string.IsNullOrEmpty(json))
             {
                 return json;
             }

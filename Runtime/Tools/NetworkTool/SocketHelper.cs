@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -15,13 +15,12 @@ namespace NonsensicalKit.Tools.NetworkTool
     {
         public Action<string> OnReceived { get; set; }
         private SocketClientInstance _sci;
-        private Queue<string> _datas = new();
+        private readonly ConcurrentQueue<string> _datas = new();
 
         private void Update()
         {
-            while (_datas.Count > 0)
+            while (_datas.TryDequeue(out string str))
             {
-                string str = _datas.Dequeue();
                 OnReceived?.Invoke(str);
             }
         }
@@ -42,7 +41,10 @@ namespace NonsensicalKit.Tools.NetworkTool
 
         private void OnReceivedMessage(string msg)
         {
-            _datas.Enqueue(msg);
+            if (msg != null)
+            {
+                _datas.Enqueue(msg);
+            }
         }
 
         public void Send(string msg)
@@ -77,7 +79,7 @@ namespace NonsensicalKit.Tools.NetworkTool
         public Action<string> OnConnectFail { get; set; }
         public Action<string> OnReceived { get; set; }
 
-        public bool Connected => _socket.Connected;
+        public bool Connected => _socket != null && _socket.Connected;
 
         private Socket _socket;
 
@@ -152,6 +154,13 @@ namespace NonsensicalKit.Tools.NetworkTool
                 var content = state.Sb.ToString();
 
                 string[] contents = content.Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                if (contents.Length == 0)
+                {
+                    state.Sb.Clear();
+                    handler.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0, ReceiveCallBack, state);
+                    return;
+                }
+
                 int i;
                 for (i = 0; i < contents.Length - 1; i++)
                 {

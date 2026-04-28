@@ -209,9 +209,15 @@ namespace NonsensicalKit.Core.Service.Config
                 if (f != null)
                 {
                     var v = f.GetValue(config);
-                    if (v.GetType() == typeof(T))
+                    if (v is T value)
                     {
-                        t = (T)v;
+                        t = value;
+                        return true;
+                    }
+
+                    if (v == null && !typeof(T).IsValueType)
+                    {
+                        t = default;
                         return true;
                     }
                 }
@@ -230,9 +236,14 @@ namespace NonsensicalKit.Core.Service.Config
                 if (f != null)
                 {
                     var v = f.GetValue(config);
-                    if (v.GetType() == typeof(T))
+                    if (v is T value)
                     {
-                        return (T)v;
+                        return value;
+                    }
+
+                    if (v == null && !typeof(T).IsValueType)
+                    {
+                        return default;
                     }
                 }
             }
