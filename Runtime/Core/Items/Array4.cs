@@ -156,5 +156,47 @@ namespace NonsensicalKit.Core
             var index = index0 * m_Step0 + index1 * m_Step1 + index2 * m_Step2 + index3;
             return index >= m_Array.Length ? default : m_Array[index];
         }
+
+        public static bool operator ==(Array4<T> left, object right)
+        {
+            if (right == null)
+            {
+                return left.m_Array == null;
+            }
+
+            return false;
+        }
+
+        public static bool operator !=(Array4<T> left, object right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Array4<T> other)
+            {
+                return Equals(m_Array, other.m_Array) &&
+                       m_Length0 == other.m_Length0 &&
+                       m_Length1 == other.m_Length1 &&
+                       m_Length2 == other.m_Length2 &&
+                       m_Length3 == other.m_Length3;
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = m_Array != null ? m_Array.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ m_Length0;
+                hashCode = (hashCode * 397) ^ m_Length1;
+                hashCode = (hashCode * 397) ^ m_Length2;
+                hashCode = (hashCode * 397) ^ m_Length3;
+                return hashCode;
+            }
+        }
     }
 }

@@ -19,7 +19,9 @@ namespace NonsensicalKit.Tools
             p.IsStatic == true && p.IsPublic == true && p.Name == "DeserializeObject" &&
             p.ContainsGenericParameters == true);
 
-        public static readonly MethodInfo DeserializeMethod = DESERIALIZE_METHOD;
+        public static readonly MethodInfo DeserializeMethod = typeof(JsonConvert).GetMethods().FirstOrDefault(p =>
+            p.IsStatic == true && p.IsPublic == true && p.Name == "DeserializeObject" &&
+            p.ContainsGenericParameters == true);
 
         public static readonly JsonSerializerSettings IgnoreLoopSetting = new()
             { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };

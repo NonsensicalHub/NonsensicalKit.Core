@@ -324,7 +324,7 @@ namespace NonsensicalKit.Core.Service.Config
         /// <param name="configData"></param>
         private void SetData(string str, Type type, ConfigObject configData)
         {
-            MethodInfo deserializeMethod = JsonTool.DESERIALIZE_METHOD.MakeGenericMethod(new[] { type });
+            MethodInfo deserializeMethod = JsonTool.DeserializeMethod.MakeGenericMethod(new[] { type });
             object deserializeData;
             try
             {

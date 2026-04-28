@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Cysharp.Threading.Tasks;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service;
 using NonsensicalKit.Tools;
@@ -101,6 +102,16 @@ namespace NonsensicalKit.Core.Save
         }
 
         /// <summary>
+        /// 异步保存指定槽位，避免阻塞主线程。
+        /// </summary>
+        public async UniTask SaveAsync(string slotId)
+        {
+            var snapshot = Capture(slotId);
+            var raw = Serialize(snapshot);
+            await WriteAsync(snapshot.SlotId, raw);
+        }
+
+        /// <summary>
         /// 尝试读取并恢复指定槽位。
         /// </summary>
         public bool Load(string slotId)
@@ -114,6 +125,68 @@ namespace NonsensicalKit.Core.Save
             try
             {
                 var raw = Read(slotId);
+                data = Deserialize(raw);
+                if (data == null)
+                {
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                LogCore.Warning($"读取存档失败：{slotId}，{e.Message}");
+                return false;
+            }
+
+            var lookup = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+            if (data.Modules != null)
+            {
+                foreach (var module in data.Modules)
+                {
+                    if (module == null || string.IsNullOrWhiteSpace(module.Key))
+                    {
+                        continue;
+                    }
+
+                    lookup[module.Key] = module.Payload ?? Array.Empty<byte>();
+                }
+            }
+
+            foreach (var provider in _providers)
+            {
+                if (lookup.TryGetValue(provider.SaveKey, out var payload))
+                {
+                    try
+                    {
+                        provider.RestoreFromBytes(payload);
+                    }
+                    catch (Exception e)
+                    {
+                        LogCore.Warning($"恢复存档失败：{provider.SaveKey}，{e.Message}");
+                    }
+                }
+                else
+                {
+                    LogCore.Warning($"未找到对应存档模块：{provider.SaveKey}");
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 异步尝试读取并恢复指定槽位，避免阻塞主线程。
+        /// </summary>
+        public async UniTask<bool> LoadAsync(string slotId)
+        {
+            SaveGameData data = null;
+            if (Exists(slotId) == false)
+            {
+                return false;
+            }
+
+            try
+            {
+                var raw = await ReadAsync(slotId);
                 data = Deserialize(raw);
                 if (data == null)
                 {
@@ -278,12 +351,37 @@ namespace NonsensicalKit.Core.Save
         }
 
         /// <summary>
+        /// 异步写入指定槽位文件的二进制内容。
+        /// </summary>
+        private UniTask WriteAsync(string slotId, byte[] raw)
+        {
+            return UniTask.RunOnThreadPool(() =>
+            {
+                var path = BuildSavePath(slotId);
+                FileTool.EnsureFileDir(path);
+                File.WriteAllBytes(path, raw ?? Array.Empty<byte>());
+            });
+        }
+
+        /// <summary>
         /// 读取指定槽位文件的二进制内容。
         /// </summary>
         private byte[] Read(string slotId)
         {
             var path = BuildSavePath(slotId);
             return File.Exists(path) ? File.ReadAllBytes(path) : null;
+        }
+
+        /// <summary>
+        /// 异步读取指定槽位文件的二进制内容。
+        /// </summary>
+        private UniTask<byte[]> ReadAsync(string slotId)
+        {
+            return UniTask.RunOnThreadPool(() =>
+            {
+                var path = BuildSavePath(slotId);
+                return File.Exists(path) ? File.ReadAllBytes(path) : null;
+            });
         }
     }
 }
