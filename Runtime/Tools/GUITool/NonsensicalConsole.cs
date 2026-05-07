@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using NonsensicalKit.Core;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
@@ -15,9 +13,9 @@ namespace NonsensicalKit.Tools.GUITool
     }
 
     /// <summary>
-    /// 调试面板控制器（OnGUI）：负责 F1 显隐、调试命令和日志显示。
+    /// 调试面板控制器（OnGUI）：负责快捷键显隐、调试命令和日志显示。
     /// </summary>
-    public class NonsensicalConsole : NonsensicalMono
+    public partial class NonsensicalConsole : NonsensicalMono
     {
         private const string WindowTitle = "Nonsensical Console";
         private const float WindowMargin = 40f;
@@ -29,6 +27,14 @@ namespace NonsensicalKit.Tools.GUITool
 
         [Header("Console Options")]
         [SerializeField] private bool m_restrictLogCount = true;
+
+#if ENABLE_INPUT_SYSTEM
+        [Tooltip("按下其中任意一键可切换控制台显隐（新输入系统使用 Key）。")]
+        [SerializeField] private Key[] m_togglePanelKeys = { Key.Backquote };
+#else
+        [Tooltip("按下其中任意一键可切换控制台显隐（旧输入管理器使用 KeyCode）。")]
+        [SerializeField] private KeyCode[] m_togglePanelKeyCodes = { KeyCode.BackQuote };
+#endif
 
         [SerializeField] private int m_maxLogs = 100; //最大日志显示条数
         [SerializeField] private int m_maxLogCharsPerLine = 1000; //单条日志字符长度限制
@@ -70,17 +76,13 @@ namespace NonsensicalKit.Tools.GUITool
 
         private void Update()
         {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame)
+            _logPanel.FlushPendingLogs(m_restrictLogCount, m_maxLogs);
+
+            // 面板关闭时用 Update 打开；打开后仅用 IMGUI 处理热键，避免与 TextField 抢键、且防止同帧双切换。
+            if (_visible == false && ShouldTogglePanelThisFrame())
             {
                 TogglePanel();
             }
-#else
-            if (Input.GetKeyDown(KeyCode.F1))
-            {
-                TogglePanel();
-            }
-#endif
         }
 
         private void TogglePanel()
@@ -95,6 +97,8 @@ namespace NonsensicalKit.Tools.GUITool
                 return;
             }
 
+            _logPanel.FlushPendingLogs(m_restrictLogCount, m_maxLogs);
+
             _styles.Update(Mathf.Max(10, m_consoleFontSize));
             _windowRect = GUILayout.Window(GetInstanceID(), _windowRect, DrawWindow, WindowTitle, _styles.Window);
             HandleWindowResize();
@@ -102,6 +106,14 @@ namespace NonsensicalKit.Tools.GUITool
 
         private void DrawWindow(int windowId)
         {
+            Event evt = Event.current;
+            if (TryConsumeToggleHotkeyImGui(evt))
+            {
+                TogglePanel();
+                evt.Use();
+                GUIUtility.ExitGUI();
+            }
+
             _commandPanel.Draw(SendCommand, _styles);
             GUILayout.Space(8);
             _logPanel.Draw(
@@ -176,305 +188,6 @@ namespace NonsensicalKit.Tools.GUITool
             else
             {
                 Debug.LogWarning($"执行命令 {commandID} 失败，参数为 {StringTool.GetSetString(param)}");
-            }
-        }
-
-        private struct LogInfo
-        {
-            public string Message;
-            public string StackTrace;
-            public LogType LogType;
-            public DateTime Time;
-        }
-
-        private sealed class CommandPanel
-        {
-            private const string CommandInputControlName = "NonseniscalCommandInput";
-            private const float PromptLabelWidth = 16f;
-            private const float SendButtonWidth = 70f;
-            private static readonly char[] CommandSeparator = { ' ' };
-
-            private string _commandInput = string.Empty;
-            private readonly List<string> _commandHistory = new List<string>();
-            private int _historyIndex = -1;
-            private string _historyDraft = string.Empty;
-
-            public void Draw(Action<string, string[]> onSubmit, ConsoleStyles styles)
-            {
-                if (ShouldSubmitOnEnter(Event.current))
-                {
-                    Submit(onSubmit);
-                    Event.current.Use();
-                }
-                else if (TryNavigateHistory(Event.current))
-                {
-                    Event.current.Use();
-                }
-
-                GUILayout.Label("Command", styles.Label);
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(">", styles.Label, GUILayout.Width(PromptLabelWidth));
-                GUI.SetNextControlName(CommandInputControlName);
-                _commandInput = GUILayout.TextField(_commandInput, styles.TextField, GUILayout.ExpandWidth(true));
-                if (GUILayout.Button("Send", styles.Button, GUILayout.Width(SendButtonWidth)))
-                {
-                    Submit(onSubmit);
-                }
-
-                GUILayout.EndHorizontal();
-                GUILayout.Label("格式: commandId [argument]，按 Enter 发送", styles.Label);
-            }
-
-            private bool ShouldSubmitOnEnter(Event current)
-            {
-                if (GUI.GetNameOfFocusedControl() != CommandInputControlName || current.type != EventType.KeyDown)
-                {
-                    return false;
-                }
-
-                return current.keyCode == KeyCode.Return ||
-                       current.keyCode == KeyCode.KeypadEnter ||
-                       current.character == '\n' ||
-                       current.character == '\r';
-            }
-
-            private bool TryNavigateHistory(Event current)
-            {
-                if (GUI.GetNameOfFocusedControl() != CommandInputControlName || current.type != EventType.KeyDown)
-                {
-                    return false;
-                }
-
-                if (current.keyCode == KeyCode.UpArrow)
-                {
-                    return NavigateToOlderCommand();
-                }
-
-                if (current.keyCode == KeyCode.DownArrow)
-                {
-                    return NavigateToNewerCommand();
-                }
-
-                return false;
-            }
-
-            private bool NavigateToOlderCommand()
-            {
-                if (_commandHistory.Count == 0)
-                {
-                    return false;
-                }
-
-                if (_historyIndex < 0)
-                {
-                    _historyDraft = _commandInput;
-                    _historyIndex = _commandHistory.Count - 1;
-                }
-                else if (_historyIndex > 0)
-                {
-                    _historyIndex--;
-                }
-
-                _commandInput = _commandHistory[_historyIndex];
-                return true;
-            }
-
-            private bool NavigateToNewerCommand()
-            {
-                if (_historyIndex < 0)
-                {
-                    return false;
-                }
-
-                if (_historyIndex < _commandHistory.Count - 1)
-                {
-                    _historyIndex++;
-                    _commandInput = _commandHistory[_historyIndex];
-                }
-                else
-                {
-                    _historyIndex = -1;
-                    _commandInput = _historyDraft;
-                }
-
-                return true;
-            }
-
-            private void Submit(Action<string, string[]> onSubmit)
-            {
-                string line = _commandInput?.Trim();
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    return;
-                }
-
-                string[] tokens = line.Split(CommandSeparator, StringSplitOptions.RemoveEmptyEntries);
-                string commandId = tokens[0];
-                string[] param = new string[Mathf.Max(0, tokens.Length - 1)];
-                if (tokens.Length > 1)
-                {
-                    Array.Copy(tokens, 1, param, 0, param.Length);
-                }
-
-                onSubmit(commandId, param);
-                if (_commandHistory.Count == 0 || _commandHistory[_commandHistory.Count - 1] != line)
-                {
-                    _commandHistory.Add(line);
-                }
-
-                _historyIndex = -1;
-                _historyDraft = string.Empty;
-                _commandInput = string.Empty;
-            }
-        }
-
-        private sealed class ConsoleStyles
-        {
-            private int _fontSize = -1;
-            private GUISkin _skin;
-
-            public GUIStyle Window { get; private set; }
-            public GUIStyle Label { get; private set; }
-            public GUIStyle Button { get; private set; }
-            public GUIStyle TextField { get; private set; }
-            public GUIStyle Toggle { get; private set; }
-
-            public void Update(int fontSize)
-            {
-                if (GUI.skin == null)
-                {
-                    return;
-                }
-
-                if (_fontSize == fontSize && ReferenceEquals(_skin, GUI.skin))
-                {
-                    return;
-                }
-
-                _fontSize = fontSize;
-                _skin = GUI.skin;
-
-                Window = Clone(_skin.window, fontSize);
-                Label = Clone(_skin.label, fontSize);
-                Button = Clone(_skin.button, fontSize);
-                TextField = Clone(_skin.textField, fontSize);
-                Toggle = Clone(_skin.toggle, fontSize);
-            }
-
-            private static GUIStyle Clone(GUIStyle source, int fontSize)
-            {
-                GUIStyle style = source == null ? new GUIStyle() : new GUIStyle(source);
-                style.fontSize = fontSize;
-                return style;
-            }
-        }
-
-        private sealed class LogPanel
-        {
-            private static readonly Dictionary<LogType, Color> TypeColors = new Dictionary<LogType, Color>
-            {
-                { LogType.Assert, Color.white },
-                { LogType.Error, Color.red },
-                { LogType.Exception, Color.red },
-                { LogType.Log, Color.white },
-                { LogType.Warning, Color.yellow }
-            };
-
-            private readonly List<LogInfo> _logs = new List<LogInfo>();
-            private Vector2 _scrollPosition;
-
-            public void Bind()
-            {
-                Application.logMessageReceived += HandleLogMessageReceived;
-            }
-
-            public void Unbind()
-            {
-                Application.logMessageReceived -= HandleLogMessageReceived;
-            }
-
-            public void Draw(
-                ref bool collapse,
-                ref bool showStackTrace,
-                bool restrictLogCount,
-                int maxLogs,
-                int maxLogCharsPerLine,
-                ConsoleStyles styles)
-            {
-                DrawToolbar(ref collapse, ref showStackTrace, styles);
-
-                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, GUILayout.ExpandHeight(true));
-                for (int i = 0; i < _logs.Count; i++)
-                {
-                    LogInfo log = _logs[i];
-                    if (collapse && i > 0 && _logs[i - 1].Message == log.Message)
-                    {
-                        continue;
-                    }
-
-                    GUI.contentColor = TypeColors.TryGetValue(log.LogType, out Color color) ? color : Color.white;
-
-                    GUILayout.Label(BuildDisplayMessage(log, maxLogCharsPerLine), styles.Label);
-
-                    if (showStackTrace && string.IsNullOrEmpty(log.StackTrace) == false)
-                    {
-                        GUILayout.Label(log.StackTrace, styles.Label);
-                    }
-                }
-
-                GUI.contentColor = Color.white;
-                GUILayout.EndScrollView();
-
-                if (restrictLogCount)
-                {
-                    TrimLogs(maxLogs);
-                }
-            }
-
-            private void DrawToolbar(ref bool collapse, ref bool showStackTrace, ConsoleStyles styles)
-            {
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Clear", styles.Button, GUILayout.Width(70)))
-                {
-                    _logs.Clear();
-                }
-
-                collapse = GUILayout.Toggle(collapse, "Collapse", styles.Toggle, GUILayout.Width(90));
-                showStackTrace = GUILayout.Toggle(showStackTrace, "StackTrace", styles.Toggle, GUILayout.Width(110));
-                GUILayout.Label($"Count: {_logs.Count}", styles.Label, GUILayout.Width(120));
-                GUILayout.FlexibleSpace();
-                GUILayout.EndHorizontal();
-            }
-
-            private static string BuildDisplayMessage(LogInfo log, int maxLogCharsPerLine)
-            {
-                string message = $"{log.Time:HH:mm:ss} [{log.LogType}] {log.Message}";
-                if (message.Length <= maxLogCharsPerLine)
-                {
-                    return message;
-                }
-
-                return message.Substring(0, maxLogCharsPerLine) + "...";
-            }
-
-            private void HandleLogMessageReceived(string message, string stackTrace, LogType type)
-            {
-                _logs.Add(new LogInfo
-                {
-                    Message = message,
-                    StackTrace = stackTrace,
-                    LogType = type,
-                    Time = DateTime.Now,
-                });
-            }
-
-            private void TrimLogs(int maxLogs)
-            {
-                int amountToRemove = Mathf.Max(_logs.Count - Mathf.Max(1, maxLogs), 0);
-                if (amountToRemove > 0)
-                {
-                    _logs.RemoveRange(0, amountToRemove);
-                }
             }
         }
     }

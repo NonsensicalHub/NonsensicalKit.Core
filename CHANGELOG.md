@@ -68,3 +68,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - 添加SaveService和NonsensicalConsole
+
+## [1.0.7] - 2026-05-07
+
+### Added
+
+- Array4添加等于null判断
+- Saveservice支持异步读写
+- 添加gui弹出框
+
+### Changed
+
+- 优化NonsensicalConsole
+
+### Fixed
+
+- 修复冲突的聚合器枚举索引
