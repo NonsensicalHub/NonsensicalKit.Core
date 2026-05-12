@@ -2,18 +2,27 @@ using System;
 using System.Collections.Generic;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Core.Service;
+using UnityEngine;
 
 namespace NonsensicalKit.Core.DagLogicNode
 {
     public enum DagNodeCheckType
     {
+        [InspectorName("自身 · 选中")]
         SelfSelect,
+        [InspectorName("自身 · 未选中")]
         SelfUnselect,
+        [InspectorName("父节点 · 选中")]
         ParentSelect,
+        [InspectorName("父节点 · 未选中")]
         ParentUnselect,
+        [InspectorName("子节点 · 选中")]
         ChildSelect,
+        [InspectorName("子节点 · 未选中")]
         ChildUnselect,
+        [InspectorName("父或子 · 选中")]
         ParentOrChildSelect,
+        [InspectorName("父或子 · 未选中")]
         ParentOrChildUnselect
     }
 
