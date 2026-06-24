@@ -13,7 +13,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         private string _search = string.Empty;
         private GUIStyle _textStyle;
 
-        [MenuItem("NonsensicalKit/GUIStyleViewer", false, 10)]
+        [MenuItem("Tools/NonsensicalKit/GUIStyleViewer", false, 10)]
         private static void OpenStyleViewer()
         {
             GetWindow<GUIStyleViewer>(false, "内置GUIStyle");

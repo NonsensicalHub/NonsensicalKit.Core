@@ -19,7 +19,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             EditorApplication.hierarchyChanged += ChangeDefaultFont;
         }
 
-        [MenuItem("NonsensicalKit/设置默认字体")]
+        [MenuItem("Tools/NonsensicalKit/设置默认字体")]
         public static void OpenWindow()
         {
             _window = GetWindow(typeof(SetDefaultFont));

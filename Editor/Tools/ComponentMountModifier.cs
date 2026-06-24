@@ -9,7 +9,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// </summary>
     public class ComponentMountModifier : EditorWindow
     {
-        [MenuItem("NonsensicalKit/批量修改/组件挂载修改器")]
+        [MenuItem("Tools/NonsensicalKit/批量修改/组件挂载修改器")]
         public static void ShowWindow()
         {
             GetWindow(typeof(ComponentMountModifier));

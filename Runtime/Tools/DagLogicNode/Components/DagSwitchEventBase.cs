@@ -5,7 +5,7 @@ namespace NonsensicalKit.Core.DagLogicNode
 {
     public abstract class DagSwitchEventBase : NonsensicalMono
     {
-        [SerializeField] private string m_nodeId;
+        [SerializeField, DagNodeId] private string m_nodeId;
         [SerializeField] private DagNodeCheckType m_checkType;
 
         public string NodeId { get => m_nodeId; set => m_nodeId = value; }
@@ -31,14 +31,14 @@ namespace NonsensicalKit.Core.DagLogicNode
 
         private void Init()
         {
-            Subscribe<DagRuntimeNode>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
+            Subscribe<DagSwitchContext>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
             if (_manager.CrtSelectNode != null)
             {
-                OnSwitchNode(_manager.CrtSelectNode);
+                OnSwitchNode(new DagSwitchContext(null, _manager.CrtSelectNode));
             }
         }
 
-        private void OnSwitchNode(DagRuntimeNode node)
+        private void OnSwitchNode(DagSwitchContext context)
         {
             var newState = _manager.CheckState(m_nodeId, m_checkType);
 

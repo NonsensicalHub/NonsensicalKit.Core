@@ -12,7 +12,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     {
         private static string _showText; //显示给用户的文本
 
-        [MenuItem("NonsensicalKit/批量修改/清除无实体对象盒子碰撞体")]
+        [MenuItem("Tools/NonsensicalKit/批量修改/清除无实体对象盒子碰撞体")]
         private static void ClearBoxCollider()
         {
             if (Selection.gameObjects.Length == 0)
@@ -30,7 +30,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
         }
 
-        [MenuItem("NonsensicalKit/批量修改/自动添加自适应大小盒子碰撞器包括子物体")]
+        [MenuItem("Tools/NonsensicalKit/批量修改/自动添加自适应大小盒子碰撞器包括子物体")]
         private static void AddComponentToCrtTargetWithChilds()
         {
             if (Selection.gameObjects.Length == 0)
@@ -48,7 +48,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
         }
 
-        [MenuItem("NonsensicalKit/批量修改/自动添加自适应大小盒子碰撞器")]
+        [MenuItem("Tools/NonsensicalKit/批量修改/自动添加自适应大小盒子碰撞器")]
         private static void AddComponentToCrtTarget()
         {
             if (Selection.gameObjects.Length == 0)

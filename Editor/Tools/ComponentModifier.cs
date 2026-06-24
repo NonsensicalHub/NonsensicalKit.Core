@@ -10,7 +10,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// </summary>
     public class ComponentModifier : EditorWindow
     {
-        [MenuItem("NonsensicalKit/批量修改/组件内容修改器")]
+        [MenuItem("Tools/NonsensicalKit/批量修改/组件内容修改器")]
         public static void ShowWindow()
         {
             GetWindow(typeof(ComponentModifier));

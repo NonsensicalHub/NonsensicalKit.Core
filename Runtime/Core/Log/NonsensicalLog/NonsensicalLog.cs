@@ -151,8 +151,9 @@ namespace NonsensicalKit.Core.Log.NonsensicalLog
                 }
 
                 _sb.Clear();
+                _sb.Append("【");
                 _sb.Append(info.LogLevel);
-                _sb.Append(": ");
+                _sb.Append("】 ");
                 _sb.AppendLine(info.Obj != null ? info.Obj.ToString() : "null");
 
                 if (info.Tags is { Length: > 0 })

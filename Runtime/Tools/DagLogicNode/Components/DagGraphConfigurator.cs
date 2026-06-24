@@ -6,6 +6,7 @@ namespace NonsensicalKit.Core.DagLogicNode
     public class DagGraphConfigurator : MonoBehaviour
     {
         [SerializeField] private DagGraphConfig m_graph;
+        public DagGraphConfig GraphConfig => m_graph;
 
         private void Awake()
         {

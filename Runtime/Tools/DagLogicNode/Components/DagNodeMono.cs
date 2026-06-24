@@ -6,7 +6,7 @@ namespace NonsensicalKit.Core.DagLogicNode
 {
     public class DagNodeMono : NonsensicalMono
     {
-        [SerializeField] private string m_nodeId;
+        [SerializeField, DagNodeId] private string m_nodeId;
         [SerializeField] private UnityEvent m_onNodeEnter;
         [SerializeField] private UnityEvent m_onNodeExit;
 

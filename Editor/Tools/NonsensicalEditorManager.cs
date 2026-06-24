@@ -54,7 +54,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         /// 检测Resources文件夹内是否存在同名文件（无视后缀名）
         /// </summary>
         /// <returns></returns>
-        [MenuItem("NonsensicalKit/Items/检测资源重名")]
+        [MenuItem("Tools/NonsensicalKit/Items/检测资源重名")]
         private static void CheckResourceDuplicateName()
         {
             List<string> duplicateNameInfo = new List<string>();
@@ -100,14 +100,14 @@ namespace NonsensicalKit.Core.Editor.Tools
             }
         }
 
-        [MenuItem("NonsensicalKit/Items/刷新项目文件")]
+        [MenuItem("Tools/NonsensicalKit/Items/刷新项目文件")]
         private static void RefeshAsset()
         {
             AssetDatabase.Refresh();
             Debug.Log("刷新完成");
         }
 
-        [MenuItem("NonsensicalKit/Items/开启持久存储文件夹")]
+        [MenuItem("Tools/NonsensicalKit/Items/开启持久存储文件夹")]
         private static void OpenPersistentDataPath()
         {
             string path = Application.persistentDataPath;
@@ -117,7 +117,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         /// <summary>
         /// 根据名称排序场景内对象
         /// </summary>
-        [MenuItem("NonsensicalKit/Items/根据名称排序")]
+        [MenuItem("Tools/NonsensicalKit/Items/根据名称排序")]
         private static void NameSort()
         {
             if (SelectTransform==null)
@@ -165,7 +165,7 @@ namespace NonsensicalKit.Core.Editor.Tools
             Debug.Log("排序完成");
         }
 
-        [MenuItem("NonsensicalKit/检测聚合器枚举值重复")]
+        [MenuItem("Tools/NonsensicalKit/检测聚合器枚举值重复")]
         private static void AggregatorEnumChecker()
         {
             Debug.Log("开始检测枚举值重复");
@@ -194,7 +194,7 @@ namespace NonsensicalKit.Core.Editor.Tools
         }
 
 
-        [MenuItem("NonsensicalKit/Items/查找场景中的丢失脚本")]
+        [MenuItem("Tools/NonsensicalKit/Items/查找场景中的丢失脚本")]
         private static void FindLost()
         {
             //Get the current scene and all top-level GameObjects in the scene hierarchy

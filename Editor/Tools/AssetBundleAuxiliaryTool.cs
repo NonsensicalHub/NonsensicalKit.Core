@@ -11,7 +11,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// </summary>
     public class AssetBundleAuxiliaryTool : EditorWindow
     {
-        [MenuItem("NonsensicalKit/AssestBundle辅助工具")]
+        [MenuItem("Tools/NonsensicalKit/AssestBundle辅助工具")]
         private static void ShowWindow()
         {
             GetWindow(typeof(AssetBundleAuxiliaryTool));

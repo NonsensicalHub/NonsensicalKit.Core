@@ -5,7 +5,7 @@ namespace NonsensicalKit.Core.DagLogicNode
 {
     public class DagAutoSelectNode : MonoBehaviour
     {
-        [SerializeField] private string m_node;
+        [SerializeField, DagNodeId] private string m_node;
         [SerializeField] private bool m_invokeOnEnable;
 
         private void Awake()

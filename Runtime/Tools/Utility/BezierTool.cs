@@ -210,7 +210,7 @@ namespace NonsensicalKit.Tools
             float t = GetTByArcLengthRatio(ratio);
             return BezierTool.CalculateQuadraticBezierPoint(t, _p0, _c, _p2);
         }
-
+        
         /// <summary>根据弧长比例（0到1）获取曲线上的点位和切线</summary>
         [Obsolete("Use GetPointAndTangentByArcLengthRatio instead.")]
         public (Vector3, Vector3) GetPointAndTangentByArcLengthRadio(float radio)

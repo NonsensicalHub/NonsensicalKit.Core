@@ -9,7 +9,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     /// </summary>
     public class NameCopier : EditorWindow
     {
-        [MenuItem("NonsensicalKit/快速命名工具")]
+        [MenuItem("Tools/NonsensicalKit/快速命名工具")]
         private static void ShowWindow()
         {
             GetWindow(typeof(NameCopier));

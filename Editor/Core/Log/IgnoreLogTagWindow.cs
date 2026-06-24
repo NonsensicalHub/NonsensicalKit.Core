@@ -10,7 +10,7 @@ namespace NonsensicalKit.Core.Log.Editor
 {
     public class IgnoreLogTagWindow : EditorWindow
     {
-        [MenuItem("NonsensicalKit/日志过滤")]
+        [MenuItem("Tools/NonsensicalKit/日志过滤")]
         public static void ShowWindow()
         {
             GetWindow(typeof(IgnoreLogTagWindow));

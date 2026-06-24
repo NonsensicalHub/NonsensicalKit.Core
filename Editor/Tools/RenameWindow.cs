@@ -9,7 +9,7 @@ namespace NonsensicalKit.Core.Editor.Tools
     public class RenameWindow : EditorWindow
     {
         
-        [MenuItem("NonsensicalKit/批量修改/修改子物体名称")]
+        [MenuItem("Tools/NonsensicalKit/批量修改/修改子物体名称")]
         public static void ShowWindow()
         {
             GetWindow(typeof(RenameWindow));

@@ -209,7 +209,7 @@ public class ProjectMemoWindow : EditorWindow
     private const float REFRESH_COOLDOWN = 1f; // 刷新冷却时间（秒）
 
 
-    [MenuItem("Tools/项目备忘录")]
+    [MenuItem("Tools/NonsensicalKit/项目备忘录")]
     public static void ShowWindow()
     {
         GetWindow<ProjectMemoWindow>("项目备忘录");

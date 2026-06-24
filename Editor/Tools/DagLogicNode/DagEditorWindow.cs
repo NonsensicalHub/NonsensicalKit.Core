@@ -1,3 +1,4 @@
+using NonsensicalKit.Core.DagLogicNode;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -9,7 +10,6 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
         private DagGraphView graphView;
         [SerializeField] private DagGraphConfig graphConfig;
 
-        // 双击 DagGraph 资产时自动打开
         [OnOpenAsset]
         public static bool OnOpenAsset(int instanceId, int line)
         {
@@ -19,7 +19,6 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
             return true;
         }
 
-        // 右键 DagGraph 资产 → "Open DAG Editor"（仅 DagGraph 时显示）
         [MenuItem("Assets/Open DAG Editor", true)]
         private static bool OpenDAGEditorValidate() => Selection.activeObject is DagGraphConfig;
 
@@ -41,20 +40,52 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
 
         private void OnEnable()
         {
-            graphView = new DagGraphView(this);
-            rootVisualElement.Add(graphView);
+            RebuildGraphView();
 
-            // 窗口重新激活时恢复已有的 graph（序列化保留）
             if (graphConfig != null)
                 graphView.PopulateView(graphConfig);
+
+            Undo.undoRedoPerformed += OnUndoRedo;
+        }
+
+        private void OnDisable()
+        {
+            Undo.undoRedoPerformed -= OnUndoRedo;
+
+            if (graphView != null)
+            {
+                rootVisualElement.Remove(graphView);
+                graphView = null;
+            }
         }
 
         public void LoadGraph(DagGraphConfig g)
         {
             graphConfig = g;
+            if (graphView == null)
+                RebuildGraphView();
             graphView.PopulateView(graphConfig);
         }
 
         public DagGraph GetGraph() => graphConfig?.DagGraph;
+
+        private void RebuildGraphView()
+        {
+            if (graphView != null)
+            {
+                rootVisualElement.Remove(graphView);
+            }
+
+            graphView = new DagGraphView(this);
+            rootVisualElement.Add(graphView);
+        }
+
+        private void OnUndoRedo()
+        {
+            if (graphConfig != null && graphView != null)
+            {
+                graphView.PopulateView(graphConfig);
+            }
+        }
     }
 }

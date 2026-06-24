@@ -9,7 +9,7 @@ namespace NonsensicalKit.Core.Updater.Editor
 {
     public class UpdaterEditor : EditorWindow
     {
-        [MenuItem("NonsensicalKit/Updater")]
+        [MenuItem("Tools/NonsensicalKit/Updater")]
         private static void ShowWindow()
         {
             GetWindow(typeof(UpdaterEditor));

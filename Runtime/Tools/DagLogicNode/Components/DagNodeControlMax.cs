@@ -34,7 +34,7 @@ namespace NonsensicalKit.Core.DagLogicNode
         public struct ConditionGroup
         {
             [Tooltip("匹配的节点 ID")]
-            [SerializeField] private string m_nodeID;
+            [SerializeField, DagNodeId] private string m_nodeID;
 
             [Tooltip("状态检查类型")]
             [SerializeField] private DagNodeCheckType m_checkType;
@@ -99,7 +99,7 @@ namespace NonsensicalKit.Core.DagLogicNode
         private void OnEnable()
         {
             if (_isRunning && _manager != null && _manager.CrtSelectNode != null)
-                OnSwitchNode(_manager.CrtSelectNode);
+                OnSwitchNode(new DagSwitchContext(null, _manager.CrtSelectNode));
         }
 
         private void Reset()
@@ -111,7 +111,7 @@ namespace NonsensicalKit.Core.DagLogicNode
         public void Close()
         {
             _isRunning = false;
-            Unsubscribe<DagRuntimeNode>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
+            Unsubscribe<DagSwitchContext>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
         }
 
         private void OnValidate()
@@ -341,13 +341,13 @@ namespace NonsensicalKit.Core.DagLogicNode
         private void Init()
         {
             _isRunning = true;
-            Subscribe<DagRuntimeNode>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
+            Subscribe<DagSwitchContext>(DagLogicNodeEnum.SwitchNode, OnSwitchNode);
 
             if (_manager.CrtSelectNode != null)
-                OnSwitchNode(_manager.CrtSelectNode);
+                OnSwitchNode(new DagSwitchContext(null, _manager.CrtSelectNode));
         }
 
-        private void OnSwitchNode(DagRuntimeNode node)
+        private void OnSwitchNode(DagSwitchContext context)
         {
             m_logicNodes ??= new List<LogicExpressionNode>();
             var nextActive = m_logicNodes.Count > 0 &&

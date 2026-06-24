@@ -6,7 +6,7 @@ namespace NonsensicalKit.Core.Editor.Tools
 {
     public class AddMeshCollider
     {
-        [MenuItem("NonsensicalKit/批量修改/批量添加MeshCollider")]
+        [MenuItem("Tools/NonsensicalKit/批量修改/批量添加MeshCollider")]
         private static void AggregatorEnumChecker()
         {
             var tArray = GetSelectComponent<Transform>();

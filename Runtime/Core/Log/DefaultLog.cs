@@ -36,7 +36,7 @@ namespace NonsensicalKit.Core.Log
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
             {
-                UnityEngine.Debug.Log(BuildString("Debug: ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
+                UnityEngine.Debug.Log(BuildString("【Debug】 ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
             }
         }
 
@@ -45,7 +45,7 @@ namespace NonsensicalKit.Core.Log
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
             {
-                UnityEngine.Debug.Log(BuildString("Info: ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
+                UnityEngine.Debug.Log(BuildString("【Info】 ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
             }
         }
 
@@ -54,7 +54,7 @@ namespace NonsensicalKit.Core.Log
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
             {
-                UnityEngine.Debug.LogWarning(BuildString("Warning: ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
+                UnityEngine.Debug.LogWarning(BuildString("【Warning】 ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
             }
         }
 
@@ -63,7 +63,7 @@ namespace NonsensicalKit.Core.Log
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
             {
-                UnityEngine.Debug.LogError(BuildString("Error: ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
+                UnityEngine.Debug.LogError(BuildString("【Error】 ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
             }
         }
 
@@ -72,7 +72,7 @@ namespace NonsensicalKit.Core.Log
         {
             if (PlatformInfo.IsEditor && CheckTags(tags))
             {
-                UnityEngine.Debug.LogError(BuildString("Fatal: ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
+                UnityEngine.Debug.LogError(BuildString("【Fatal】 ", obj, tags, callerMemberName, callerFilePath, callerLineNumber), context);
             }
         }
 

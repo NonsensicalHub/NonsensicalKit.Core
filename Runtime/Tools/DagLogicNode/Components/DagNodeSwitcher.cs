@@ -5,7 +5,7 @@ namespace NonsensicalKit.Core.DagLogicNode
 {
     public class DagNodeSwitcher : MonoBehaviour
     {
-        [SerializeField] private string m_targetNodeId;
+        [SerializeField, DagNodeId] private string m_targetNodeId;
 
         public string TargetNodeID
         {

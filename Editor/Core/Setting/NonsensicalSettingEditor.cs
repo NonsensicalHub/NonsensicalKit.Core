@@ -7,7 +7,7 @@ namespace NonsensicalKit.Core.Editor.Setting
 {
     public class NonsensicalSettingEditor
     {
-        [MenuItem("NonsensicalKit/Init NonsensicalSetting|初始化配置文件")]
+        [MenuItem("Tools/NonsensicalKit/Init NonsensicalSetting|初始化配置文件")]
         public static void InitSetting()
         {
             if (Directory.Exists(Application.dataPath + "/Resources") == false)
