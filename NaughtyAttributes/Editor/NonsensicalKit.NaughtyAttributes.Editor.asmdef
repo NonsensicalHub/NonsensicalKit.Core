@@ -1,9 +1,8 @@
 {
-    "name": "NonsensicalKit.Core.Editor",
-    "rootNamespace": "",
+    "name": "NonsensicalKit.NaughtyAttributes.Editor",
+    "rootNamespace": "NaughtyAttributes.Editor",
     "references": [
-        "NonsensicalKit.Core",
-        "UniTask"
+        "NonsensicalKit.NaughtyAttributes"
     ],
     "includePlatforms": [
         "Editor"

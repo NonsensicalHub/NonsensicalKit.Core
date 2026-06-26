@@ -5,7 +5,11 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "NonsensicalKit.Core",
-        "NonsensicalKit.Core.Editor"
+        "NonsensicalKit.Core.Editor",
+        "NonsensicalKit.NaughtyAttributes",
+        "NonsensicalKit.NaughtyAttributes.Editor",
+        "NonsensicalKit.Tools",
+        "NonsensicalKit.Tools.ObjectPool"
     ],
     "includePlatforms": [
         "Editor"

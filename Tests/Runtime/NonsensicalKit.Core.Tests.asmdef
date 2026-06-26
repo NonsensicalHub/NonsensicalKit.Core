@@ -4,7 +4,10 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "NonsensicalKit.Core"
+        "NonsensicalKit.Core",
+        "NonsensicalKit.NaughtyAttributes",
+        "NonsensicalKit.Tools",
+        "NonsensicalKit.Tools.ObjectPool"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
