@@ -1,0 +1,20 @@
+{
+    "name": "NonsensicalKit.Core.Editor",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "NonsensicalKit.Core.Runtime",
+        "NonsensicalKit.NaughtyAttributes"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
