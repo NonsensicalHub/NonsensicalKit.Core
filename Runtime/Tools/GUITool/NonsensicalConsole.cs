@@ -78,8 +78,7 @@ namespace NonsensicalKit.Tools.GUITool
         {
             _logPanel.FlushPendingLogs(m_restrictLogCount, m_maxLogs);
 
-            // 面板关闭时用 Update 打开；打开后仅用 IMGUI 处理热键，避免与 TextField 抢键、且防止同帧双切换。
-            if (_visible == false && ShouldTogglePanelThisFrame())
+            if (ShouldTogglePanelThisFrame())
             {
                 TogglePanel();
             }
@@ -106,14 +105,6 @@ namespace NonsensicalKit.Tools.GUITool
 
         private void DrawWindow(int windowId)
         {
-            Event evt = Event.current;
-            if (TryConsumeToggleHotkeyImGui(evt))
-            {
-                TogglePanel();
-                evt.Use();
-                GUIUtility.ExitGUI();
-            }
-
             _commandPanel.Draw(SendCommand, _styles);
             GUILayout.Space(8);
             _logPanel.Draw(
