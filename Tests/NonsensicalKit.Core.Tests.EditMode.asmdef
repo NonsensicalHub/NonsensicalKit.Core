@@ -2,10 +2,10 @@
     "name": "NonsensicalKit.Core.Tests.EditMode",
     "rootNamespace": "",
     "references": [
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
         "NonsensicalKit.Core.Runtime",
-        "NonsensicalKit.Core.Editor"
+        "NonsensicalKit.Core.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [
         "Editor"
@@ -18,8 +18,15 @@
     ],
     "autoReferenced": false,
     "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.test-framework",
+            "expression": "1.0.0",
+            "define": "UNITY_INCLUDE_TESTS"
+        }
+    ],
     "noEngineReferences": false
 }

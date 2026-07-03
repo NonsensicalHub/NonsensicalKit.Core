@@ -758,6 +758,7 @@ namespace NonsensicalKit.Core.DagLogicNode
             if (previousNode != null)
             {
                 Publish(DagLogicNodeEnum.NodeExit, previousNode.NodeID);
+                PublishWithID(DagLogicNodeEnum.NodeExit, previousNode.NodeID);
             }
 
             var newChain = BuildActivationChainWithStops(landingNode, jumpOrigins);
@@ -765,6 +766,7 @@ namespace NonsensicalKit.Core.DagLogicNode
             CrtSelectNode = landingNode;
             LastSwitchContext = new DagSwitchContext(previousNode, landingNode);
             Publish(DagLogicNodeEnum.NodeEnter, landingNode.NodeID);
+            PublishWithID(DagLogicNodeEnum.NodeEnter, landingNode.NodeID);
             Publish(DagLogicNodeEnum.SwitchNode, LastSwitchContext);
         }
 
