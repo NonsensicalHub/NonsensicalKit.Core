@@ -7,7 +7,7 @@ namespace NonsensicalKit.Tools.CameraTool
 {
     /// <summary>
     /// 自由飞行摄像机
-    /// 使用asdw移动，鼠标右键旋转
+    /// 使用wasd移动，e键上升，q键下降，鼠标右键旋转
     /// </summary>
     public class FreedomCamera : MonoBehaviour
     {
@@ -34,6 +34,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
                 var move = new Vector2(keyboard.dKey.isPressed ? 1 : (keyboard.aKey.isPressed ? -1 : 0),
                     keyboard.wKey.isPressed ? 1 : (keyboard.sKey.isPressed ? -1 : 0));
+                var verticalMove = (keyboard.eKey.isPressed ? 1f : 0f) + (keyboard.qKey.isPressed ? -1f : 0f);
                 var shiftKey = keyboard.leftShiftKey.isPressed;
                 var altKey = keyboard.leftAltKey.isPressed;
                 var mouseMove = mouse.delta.ReadValue() * 0.1f;
@@ -45,6 +46,7 @@ namespace NonsensicalKit.Tools.CameraTool
 
 #else
                 var move = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+                var verticalMove = (Input.GetKey(KeyCode.E) ? 1f : 0f) + (Input.GetKey(KeyCode.Q) ? -1f : 0f);
                 var shiftKey = Input.GetKey(KeyCode.LeftShift);
                 var altKey = Input.GetKey(KeyCode.LeftAlt);
                 var mouseMove = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
@@ -55,7 +57,7 @@ namespace NonsensicalKit.Tools.CameraTool
                 var mouse2 = Input.GetMouseButton(2);
 #endif
 
-                CameraMove(move, shiftKey);
+                CameraMove(move, verticalMove, shiftKey);
 
                 if (mouse1)
                 {
@@ -68,12 +70,13 @@ namespace NonsensicalKit.Tools.CameraTool
             }
         }
 
-        private void CameraMove(Vector2 axis, bool leftShift)
+        private void CameraMove(Vector2 axis, float verticalAxis, bool leftShift)
         {
             Vector3 offset = Vector3.zero;
 
             offset += transform.right * axis.x;
             offset += transform.forward * axis.y;
+            offset += transform.up * verticalAxis;
 
             offset *= m_moveSpeed;
 
