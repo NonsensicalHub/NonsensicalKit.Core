@@ -1,7 +1,6 @@
-using System;
-using System.Reflection;
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 namespace NonsensicalKit.Tools.CameraTool
@@ -973,67 +972,16 @@ namespace NonsensicalKit.Tools.CameraTool
 
 
         private static void TryApplyUrpCameraOptimizations(Camera mapCamera)
-
         {
-            Type cameraDataType =
-                Type.GetType(
-                    "UnityEngine.Rendering.Universal.UniversalAdditionalCameraData, Unity.RenderPipelines.Universal.Runtime");
-
-            if (cameraDataType == null)
-
-            {
-                return;
-            }
-
-
-            Component urpData = mapCamera.GetComponent(cameraDataType);
-
+            var urpData = mapCamera.GetComponent<UniversalAdditionalCameraData>();
             if (urpData == null)
-
             {
                 return;
             }
 
-
-            SetBoolProperty(cameraDataType, urpData, "renderPostProcessing", false);
-
-            SetBoolProperty(cameraDataType, urpData, "renderShadows", false);
-
-            SetEnumToZero(cameraDataType, urpData, "antialiasing");
-        }
-
-
-        private static void SetBoolProperty(Type type, object target, string propertyName, bool value)
-
-        {
-            PropertyInfo property = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-
-            if (property == null || property.PropertyType != typeof(bool) || !property.CanWrite)
-
-            {
-                return;
-            }
-
-
-            property.SetValue(target, value);
-        }
-
-
-        private static void SetEnumToZero(Type type, object target, string propertyName)
-
-        {
-            PropertyInfo property = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-
-            if (property == null || !property.CanWrite || !property.PropertyType.IsEnum)
-
-            {
-                return;
-            }
-
-
-            object value = Enum.ToObject(property.PropertyType, 0);
-
-            property.SetValue(target, value);
+            urpData.renderPostProcessing = false;
+            urpData.renderShadows = false;
+            urpData.antialiasing = AntialiasingMode.None;
         }
     }
 }
