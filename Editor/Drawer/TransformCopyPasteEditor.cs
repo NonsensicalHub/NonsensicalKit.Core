@@ -44,9 +44,9 @@ public class TransformCopyPasteEditor : Editor
         {
             var transform = (Transform)target;
             EditorGUILayout.LabelField("世界坐标:", EditorStyles.boldLabel);
-            DrawCopyableValue("位置", transform.position);
-            DrawCopyableValue("旋转", transform.rotation.eulerAngles);
-            DrawCopyableValue("缩放", transform.lossyScale);
+            DrawWorldValueRow("位置", transform.position, true, false, false);
+            DrawWorldValueRow("旋转", transform.rotation.eulerAngles, false, true, false);
+            DrawWorldValueRow("缩放", transform.lossyScale, false, false, true);
         }
 
         EditorGUILayout.BeginHorizontal();
@@ -70,14 +70,19 @@ public class TransformCopyPasteEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
-    private static void DrawCopyableValue(string label, Vector3 value)
+    private void DrawWorldValueRow(string label, Vector3 value, bool position, bool rotation, bool scale)
     {
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField($"{label}: {value}");
         if (GUILayout.Button("复制", GUILayout.Width(40f)))
         {
             EditorGUIUtility.systemCopyBuffer = $"{value.x:F3}, {value.y:F3}, {value.z:F3}";
-            Debug.Log($"{label}已复制到剪贴板: {value}");
+            CopyWorldTransform(position, rotation, scale);
+        }
+
+        if (GUILayout.Button("粘贴", GUILayout.Width(40f)))
+        {
+            PasteWorldTransform(position, rotation, scale);
         }
 
         EditorGUILayout.EndHorizontal();
@@ -116,7 +121,8 @@ public class TransformCopyPasteEditor : Editor
 
         if (scale)
         {
-            EditorPrefs.SetString(PrefScale, JsonUtility.ToJson(transform.localScale));
+            // 存世界缩放，粘贴到任意深度节点时保持一致
+            EditorPrefs.SetString(PrefScale, JsonUtility.ToJson(transform.lossyScale));
         }
 
         if (position && rotation && scale)
@@ -133,7 +139,7 @@ public class TransformCopyPasteEditor : Editor
         }
         else if (scale)
         {
-            Debug.Log("缩放已复制");
+            Debug.Log("世界缩放已复制");
         }
     }
 
@@ -157,6 +163,7 @@ public class TransformCopyPasteEditor : Editor
 
         Undo.RecordObject(transform, "Paste World Transform");
 
+        // 先写位置/旋转，再按当前层级换算世界缩放，避免顺序影响结果
         if (position)
         {
             transform.position = JsonUtility.FromJson<Vector3>(EditorPrefs.GetString(PrefPosition));
@@ -169,7 +176,7 @@ public class TransformCopyPasteEditor : Editor
 
         if (scale)
         {
-            transform.localScale = JsonUtility.FromJson<Vector3>(EditorPrefs.GetString(PrefScale));
+            SetWorldScale(transform, JsonUtility.FromJson<Vector3>(EditorPrefs.GetString(PrefScale)));
         }
 
         if (position && rotation && scale)
@@ -186,7 +193,31 @@ public class TransformCopyPasteEditor : Editor
         }
         else if (scale)
         {
-            Debug.Log("缩放已粘贴");
+            Debug.Log("世界缩放已粘贴");
         }
+    }
+
+    /// <summary>
+    /// 按目标节点父级换算 localScale，使 lossyScale 与指定世界缩放一致。
+    /// </summary>
+    private static void SetWorldScale(Transform transform, Vector3 worldScale)
+    {
+        if (transform.parent == null)
+        {
+            transform.localScale = worldScale;
+            return;
+        }
+
+        transform.localScale = Vector3.one;
+        var parentContribution = transform.lossyScale;
+        transform.localScale = new Vector3(
+            SafeDivide(worldScale.x, parentContribution.x),
+            SafeDivide(worldScale.y, parentContribution.y),
+            SafeDivide(worldScale.z, parentContribution.z));
+    }
+
+    private static float SafeDivide(float numerator, float denominator)
+    {
+        return Mathf.Approximately(denominator, 0f) ? 0f : numerator / denominator;
     }
 }
