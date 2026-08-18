@@ -1,11 +1,5 @@
-# 将此文件复制到各 GitHub 仓库的 .github/workflows/trigger-gitcode-sync.yml
-# 当该仓库有 push/delete 事件时，自动通知中央调度仓库执行 GitCode 同步
-#
-# 前置条件：在组织级别配置以下 Secrets（所有仓库可访问）：
-#   - APP_ID          GitHub App ID
-#   - APP_PRIVATE_KEY GitHub App 私钥
-#
-# 也可使用 scripts/bootstrap_triggers.py 批量安装
+# GitCode 同步触发工作流（由 gitcode-sync-config 自动安装）
+# 前置条件：组织级 Secrets 配置 APP_ID、APP_PRIVATE_KEY
 
 name: Trigger GitCode Sync
 
@@ -31,9 +25,19 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.event.after || github.sha }}"
+          REF="${{ github.ref }}"
+          PAYLOAD=$(jq -nc \
+            --arg repo "${{ github.repository }}" \
+            --arg event "${{ github.event_name }}" \
+            --arg before "$BEFORE" \
+            --arg after "$AFTER" \
+            --arg ref "$REF" \
+            '{repo:$repo,event:$event,before:$before,after:$after,ref:$ref}')
           curl -sf -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/NonsensicalHub/gitcode-sync-config/dispatches" \
-            -d "{\"event_type\":\"sync\",\"client_payload\":{\"repo\":\"${{ github.repository }}\",\"event\":\"${{ github.event_name }}\"}}"
+            -d "{\"event_type\":\"sync\",\"client_payload\":$PAYLOAD}"
