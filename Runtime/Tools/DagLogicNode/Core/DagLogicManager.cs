@@ -177,24 +177,23 @@ namespace NonsensicalKit.Core.DagLogicNode
             return false;
         }
 
+        /// <summary>
+        /// 沿当前激活链路返回上一级。默认父边仅用于构建激活链路，不参与本方法的回退决策。
+        /// </summary>
         public void ReturnPreviousLevel()
         {
-            if (CrtSelectNode == null)
+            if (CrtSelectNode == null || _activationChain.Count < 2)
             {
                 return;
             }
 
-            var fallbackParent = CrtSelectNode.DefaultParentNode;
-            if (fallbackParent != null)
+            var previousId = _activationChain[_activationChain.Count - 2];
+            if (_nodesById.TryGetValue(previousId, out var previousNode) == false || previousNode == null)
             {
-                DoSwitchNode(fallbackParent, true, null);
                 return;
             }
 
-            if (CrtSelectNode.ParentNodes.Count > 0)
-            {
-                DoSwitchNode(CrtSelectNode.ParentNodes[0], true, null);
-            }
+            DoSwitchNode(previousNode, true, null);
         }
 
         public bool CheckState(string nodeID, DagNodeCheckType checkType)

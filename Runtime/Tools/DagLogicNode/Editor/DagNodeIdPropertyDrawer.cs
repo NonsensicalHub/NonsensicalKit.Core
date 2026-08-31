@@ -8,11 +8,163 @@ using UnityEngine;
 
 namespace NonsensicalKit.Core.DagLogicNode.Editor
 {
+    /// <summary>
+    /// 项目内 DagGraph 查找结果缓存。Inspector 每帧绘制多个 [DagNodeId] 时复用，避免反复 FindAssets。
+    /// </summary>
+    internal static class DagNodeIdLookupCache
+    {
+        private static List<DagGraph> s_assetGraphs;
+        private static Dictionary<string, string> s_idToGraphName;
+        private static bool s_dirty = true;
+        private static bool s_hooked;
+
+        private static Component s_mergedTarget;
+        private static List<DagGraph> s_mergedGraphs;
+        private static EventType s_cachedEventType;
+
+        public static void Invalidate()
+        {
+            s_dirty = true;
+            s_mergedTarget = null;
+            s_mergedGraphs = null;
+        }
+
+        public static List<DagGraph> GetGraphs(Component target)
+        {
+            EnsureAssetCache();
+
+            var eventType = Event.current != null ? Event.current.type : EventType.Ignore;
+            if (s_mergedGraphs != null && s_mergedTarget == target && s_cachedEventType == eventType)
+                return s_mergedGraphs;
+
+            s_mergedTarget = target;
+            s_cachedEventType = eventType;
+            s_mergedGraphs = MergeLocalGraphs(target, s_assetGraphs);
+            RebuildLookup(s_mergedGraphs);
+            return s_mergedGraphs;
+        }
+
+        public static string GetDisplayText(Component target, string currentValue, bool allowEmpty)
+        {
+            GetGraphs(target);
+
+            if (string.IsNullOrEmpty(currentValue))
+                return allowEmpty ? DagNodeIdPropertyDrawer.EmptyLabel : "(Select)";
+
+            if (s_idToGraphName != null && s_idToGraphName.TryGetValue(currentValue, out var graphName))
+                return string.IsNullOrEmpty(graphName) ? currentValue : $"[{graphName}] {currentValue}";
+
+            return currentValue + DagNodeIdPropertyDrawer.MissingSuffix;
+        }
+
+        private static void EnsureHooks()
+        {
+            if (s_hooked)
+                return;
+            s_hooked = true;
+            EditorApplication.projectChanged += Invalidate;
+        }
+
+        private static void EnsureAssetCache()
+        {
+            EnsureHooks();
+            if (!s_dirty && s_assetGraphs != null)
+                return;
+
+            s_assetGraphs = new List<DagGraph>();
+            var guids = AssetDatabase.FindAssets("t:DagGraphConfig");
+            foreach (var guid in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var config = AssetDatabase.LoadAssetAtPath<DagGraphConfig>(path);
+                var graph = config?.DagGraph;
+                if (graph != null && !s_assetGraphs.Contains(graph))
+                    s_assetGraphs.Add(graph);
+            }
+
+            s_dirty = false;
+            s_mergedTarget = null;
+            s_mergedGraphs = null;
+        }
+
+        private static void RebuildLookup(List<DagGraph> graphs)
+        {
+            if (s_idToGraphName == null)
+                s_idToGraphName = new Dictionary<string, string>();
+            else
+                s_idToGraphName.Clear();
+
+            if (graphs == null)
+                return;
+
+            foreach (var graph in graphs)
+            {
+                if (graph?.nodes == null)
+                    continue;
+                var graphName = string.IsNullOrWhiteSpace(graph.GraphName) ? "Unnamed Graph" : graph.GraphName.Trim();
+                foreach (var node in graph.nodes)
+                {
+                    if (node == null || string.IsNullOrWhiteSpace(node.nodeId))
+                        continue;
+                    var id = node.nodeId.Trim();
+                    if (!s_idToGraphName.ContainsKey(id))
+                        s_idToGraphName[id] = graphName;
+                }
+            }
+        }
+
+        private static List<DagGraph> MergeLocalGraphs(Component target, List<DagGraph> assets)
+        {
+            if (target == null)
+                return assets;
+
+            List<DagGraph> merged = null;
+
+            void AddLocal(DagGraphConfig config)
+            {
+                var graph = config?.DagGraph;
+                if (graph == null)
+                    return;
+                if (assets != null && assets.Contains(graph))
+                    return;
+                if (merged == null)
+                    merged = new List<DagGraph>((assets?.Count ?? 0) + 2) { graph };
+                else if (!merged.Contains(graph))
+                    merged.Insert(0, graph);
+            }
+
+            if (target is DagGraphConfigurator selfConfigurator)
+                AddLocal(selfConfigurator.GraphConfig);
+
+            var local = target.GetComponent<DagGraphConfigurator>();
+            if (local != null)
+                AddLocal(local.GraphConfig);
+
+            var parent = target.GetComponentInParent<DagGraphConfigurator>(true);
+            if (parent != null)
+                AddLocal(parent.GraphConfig);
+
+            if (merged == null)
+                return assets ?? new List<DagGraph>();
+
+            if (assets != null)
+            {
+                foreach (var g in assets)
+                {
+                    if (!merged.Contains(g))
+                        merged.Add(g);
+                }
+            }
+
+            return merged;
+        }
+    }
+
     [CustomPropertyDrawer(typeof(DagNodeIdAttribute))]
     public class DagNodeIdPropertyDrawer : PropertyDrawer
     {
-        private static readonly string EmptyLabel = "(None)";
-        private static readonly string MissingSuffix = " (Missing)";
+        internal const string EmptyLabel = "(None)";
+        internal const string MissingSuffix = " (Missing)";
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -22,8 +174,9 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                 return;
             }
 
-            var graphs = ResolveGraphs(property.serializedObject.targetObject as Component);
-            if (graphs.Count == 0)
+            var target = property.serializedObject.targetObject as Component;
+            var graphs = DagNodeIdLookupCache.GetGraphs(target);
+            if (graphs == null || graphs.Count == 0)
             {
                 EditorGUI.PropertyField(position, property, label);
                 return;
@@ -31,29 +184,15 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
 
             var attr = (DagNodeIdAttribute)attribute;
             string currentValue = property.stringValue ?? string.Empty;
-
-            // 计算显示文本
-            string displayText;
-            if (string.IsNullOrEmpty(currentValue))
-            {
-                displayText = attr.AllowEmpty ? EmptyLabel : "(Select)";
-            }
-            else
-            {
-                // 尝试找到当前值对应的图形名称
-                string graphName = FindGraphNameForNode(graphs, currentValue);
-                displayText = string.IsNullOrEmpty(graphName) ? currentValue : $"[{graphName}] {currentValue}";
-                if (string.IsNullOrEmpty(graphName) && !NodeExistsInGraphs(graphs, currentValue))
-                {
-                    displayText = currentValue + MissingSuffix;
-                }
-            }
+            var display = new GUIContent(DagNodeIdLookupCache.GetDisplayText(target, currentValue, attr.AllowEmpty));
 
             Rect fieldRect = EditorGUI.PrefixLabel(position, label);
-            bool isPressed = EditorGUI.DropdownButton(fieldRect, new GUIContent(displayText), FocusType.Passive);
+            bool isPressed = EditorGUI.DropdownButton(fieldRect, display, FocusType.Passive);
 
             if (isPressed)
             {
+                DagNodeIdLookupCache.Invalidate();
+                graphs = DagNodeIdLookupCache.GetGraphs(target);
                 var dropdown = new DagNodeIdAdvancedDropdown(
                     new AdvancedDropdownState(),
                     graphs,
@@ -66,38 +205,6 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                     });
                 dropdown.Show(fieldRect);
             }
-        }
-
-        private static string FindGraphNameForNode(List<DagGraph> graphs, string nodeId)
-        {
-            foreach (var graph in graphs)
-            {
-                if (graph?.nodes == null) continue;
-                foreach (var node in graph.nodes)
-                {
-                    if (node != null && node.nodeId == nodeId)
-                    {
-                        return string.IsNullOrWhiteSpace(graph.GraphName) ? "Unnamed Graph" : graph.GraphName.Trim();
-                    }
-                }
-            }
-            return null;
-        }
-
-        private static bool NodeExistsInGraphs(List<DagGraph> graphs, string nodeId)
-        {
-            foreach (var graph in graphs)
-            {
-                if (graph?.nodes == null) continue;
-                foreach (var node in graph.nodes)
-                {
-                    if (node != null && node.nodeId == nodeId)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         /// <summary>
@@ -132,7 +239,6 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
 
                 int itemId = 0;
 
-                // Empty 选项
                 if (_allowEmpty)
                 {
                     var emptyItem = new AdvancedDropdownItem(EmptyLabel) { id = itemId++ };
@@ -148,9 +254,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                 foreach (var graph in _graphs)
                 {
                     if (graph?.nodes == null || graph.nodes.Count == 0)
-                    {
                         continue;
-                    }
 
                     string graphName = string.IsNullOrWhiteSpace(graph.GraphName) ? "Unnamed Graph" : graph.GraphName.Trim();
 
@@ -162,15 +266,12 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                     }
                     else
                     {
-                        // 只有一个图时，不额外创建分组，直接挂在 root 下
                         groupItem = root;
                     }
 
-                    // 按 nodeId 排序
                     var sortedNodes = graph.nodes
                         .Where(n => n != null && !string.IsNullOrWhiteSpace(n.nodeId))
-                        .OrderBy(n => n.nodeId)
-                        .ToList();
+                        .OrderBy(n => n.nodeId);
 
                     foreach (var node in sortedNodes)
                     {
@@ -199,63 +300,8 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                     return;
                 }
 
-                // 找到对应的 nodeId（item.name 即为 nodeId）
                 _onSelected?.Invoke(item.name);
             }
-        }
-
-        /// <summary>
-        /// 从项目 Asset 查找所有 DagGraphConfig 配置文件。
-        /// 同时保留对当前组件附近 DagGraphConfigurator 的检查，作为局部上下文的补充。
-        /// </summary>
-        private static List<DagGraph> ResolveGraphs(Component target)
-        {
-            if (target == null)
-            {
-                return new List<DagGraph>();
-            }
-
-            var graphs = new List<DagGraph>();
-
-            void AddGraph(DagGraphConfig config)
-            {
-                var graph = config?.DagGraph;
-                if (graph != null && graphs.Contains(graph) == false)
-                {
-                    graphs.Add(graph);
-                }
-            }
-
-            // 1. 自身（如果是 DagGraphConfigurator）
-            if (target is DagGraphConfigurator selfConfigurator && selfConfigurator.GraphConfig != null)
-            {
-                AddGraph(selfConfigurator.GraphConfig);
-            }
-
-            // 2. 同物体上的 DagGraphConfigurator
-            var localConfigurator = target.GetComponent<DagGraphConfigurator>();
-            if (localConfigurator != null && localConfigurator.GraphConfig != null)
-            {
-                AddGraph(localConfigurator.GraphConfig);
-            }
-
-            // 3. 父级的 DagGraphConfigurator
-            var parentConfigurator = target.GetComponentInParent<DagGraphConfigurator>(true);
-            if (parentConfigurator != null && parentConfigurator.GraphConfig != null)
-            {
-                AddGraph(parentConfigurator.GraphConfig);
-            }
-
-            // 4. 查找项目中所有 DagGraphConfig 资产（主要来源）
-            var guids = AssetDatabase.FindAssets("t:DagGraphConfig");
-            foreach (var guid in guids)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var config = AssetDatabase.LoadAssetAtPath<DagGraphConfig>(path);
-                AddGraph(config);
-            }
-
-            return graphs;
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using Cysharp.Threading.Tasks;
 
 namespace NonsensicalKit.Core.Timer
 {
@@ -79,11 +78,16 @@ namespace NonsensicalKit.Core.Timer
 
     public enum TimeUnit
     {
-        Millisecound,
-        Secound,
-        Minute,
-        Hour,
-        Day
+        Millisecond = 0,
+        Second = 1,
+        Minute = 2,
+        Hour = 3,
+        Day = 4,
+
+        [Obsolete("Use TimeUnit.Millisecond")]
+        Millisecound = Millisecond,
+        [Obsolete("Use TimeUnit.Second")]
+        Secound = Second,
     }
 
     public enum TaskType

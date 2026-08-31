@@ -42,7 +42,12 @@ namespace NonsensicalKit.Core.Timer
             timeTaskList.Clear();
             tempFrameTaskList.Clear();
             frameTaskList.Clear();
+            tempDelTimeList.Clear();
+            tempDelFrameList.Clear();
+            delIds.Clear();
             id = 0;
+            sinceframeCount = 0;
+            nowTime = 0;
         }
 
         public void StartSeverTimer(int interval)
@@ -96,8 +101,9 @@ namespace NonsensicalKit.Core.Timer
 
         public DateTime GetLocalDateTime()
         {
+            // 日历时间始终基于真实 UTC，避免 GetNow 使用游戏内时间（如 Time.time）时算错
             TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
-            DateTime dt = TimeZoneInfo.ConvertTimeFromUtc(startDateTime.AddMilliseconds(nowTime), timeZoneInfo);
+            DateTime dt = TimeZoneInfo.ConvertTimeFromUtc(startDateTime.AddMilliseconds(GetUTCMilliseconds()), timeZoneInfo);
             return dt;
         }
 
@@ -148,30 +154,26 @@ namespace NonsensicalKit.Core.Timer
             }
 
             nowTime = GetNowTime();
-            //Debug.Log("------ "+nowTime);
             for (int i = 0; i < timeTaskList.Count; i++)
             {
                 TimeTask task = timeTaskList[i];
                 if (nowTime.CompareTo(task.destTime) < 0) continue;
-                else
-                {
-                    Action<int> cb = task.callBack;
-                    try
-                    {
-                        if (cb != null && taskHandle != null) taskHandle.Invoke(cb, task.id);
-                        else if (cb != null) cb.Invoke(task.id);
-                    }
-                    catch (Exception e)
-                    {
-                        LogInfo(e.ToString(), LogLevel.Error);
-                    }
-                }
 
+                Action<int> cb = task.callBack;
+                try
+                {
+                    if (cb != null && taskHandle != null) taskHandle.Invoke(cb, task.id);
+                    else if (cb != null) cb.Invoke(task.id);
+                }
+                catch (Exception e)
+                {
+                    LogInfo(e.ToString(), LogLevel.Error);
+                }
 
                 if (task.count == 1)
                 {
                     RemoveTimeListItem(i);
-                    ///*lock (lockTime) */deleteIds.Add(task.id);
+                    --i; // swap-remove 后处理换上来的项
                 }
                 else
                 {
@@ -187,13 +189,13 @@ namespace NonsensicalKit.Core.Timer
         }
 
         public IDPack AddTimerTask(Action<int> callBack, double delay, int count = 1,
-            TimeUnit unit = TimeUnit.Millisecound)
+            TimeUnit unit = TimeUnit.Millisecond)
         {
             switch (unit)
             {
-                case TimeUnit.Millisecound:
+                case TimeUnit.Millisecond:
                     break;
-                case TimeUnit.Secound:
+                case TimeUnit.Second:
                     delay *= 1000;
                     break;
                 case TimeUnit.Minute:
@@ -236,8 +238,21 @@ namespace NonsensicalKit.Core.Timer
             {
                 if (idDic.ContainsKey(id) && idDic[id].active)
                 {
-                    var task = timeTaskList[idDic[id].index];
-                    task.destTime = GetNowTime() + timeTaskList[idDic[id].index].delay;
+                    int index = idDic[id].index;
+                    var task = timeTaskList[index];
+                    task.destTime = GetNowTime() + task.delay;
+                    timeTaskList[index] = task;
+                    return;
+                }
+
+                for (int i = 0; i < tempTimeTaskList.Count; i++)
+                {
+                    if (tempTimeTaskList[i].id != id) continue;
+
+                    var task = tempTimeTaskList[i];
+                    task.destTime = GetNowTime() + task.delay;
+                    tempTimeTaskList[i] = task;
+                    break;
                 }
             }
         }
@@ -276,13 +291,13 @@ namespace NonsensicalKit.Core.Timer
         }
 
         public bool ReplaceTimeTask(int id, Action<int> callBack, double delay, int count = 1,
-            TimeUnit unit = TimeUnit.Millisecound)
+            TimeUnit unit = TimeUnit.Millisecond)
         {
             switch (unit)
             {
-                case TimeUnit.Millisecound:
+                case TimeUnit.Millisecond:
                     break;
-                case TimeUnit.Secound:
+                case TimeUnit.Second:
                     delay *= 1000;
                     break;
                 case TimeUnit.Minute:
@@ -412,24 +427,22 @@ namespace NonsensicalKit.Core.Timer
             {
                 FrameTask task = frameTaskList[i];
                 if (sinceframeCount < task.destFrame) continue;
-                else
+
+                Action<int> cb = task.callBack;
+                try
                 {
-                    Action<int> cb = task.callBack;
-                    try
-                    {
-                        if (cb != null && taskHandle != null) taskHandle.Invoke(cb, task.id);
-                        else if (cb != null) cb.Invoke(task.id);
-                    }
-                    catch (Exception e)
-                    {
-                        LogInfo(e.ToString(), LogLevel.Error);
-                    }
+                    if (cb != null && taskHandle != null) taskHandle.Invoke(cb, task.id);
+                    else if (cb != null) cb.Invoke(task.id);
+                }
+                catch (Exception e)
+                {
+                    LogInfo(e.ToString(), LogLevel.Error);
                 }
 
                 if (task.count == 1)
                 {
                     RemoveFrameListItem(i);
-                    //deleteIds.Add(task.id);
+                    --i; // swap-remove 后处理换上来的项
                 }
                 else
                 {
@@ -641,6 +654,8 @@ namespace NonsensicalKit.Core.Timer
                     {
                         idDic.Remove(delIds[i]);
                     }
+
+                    delIds.Clear();
                 }
             }
         }

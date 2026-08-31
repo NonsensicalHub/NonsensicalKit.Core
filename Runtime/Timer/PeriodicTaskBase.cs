@@ -14,36 +14,52 @@ namespace NonsensicalKit.Core.Timer
         [SerializeField] private bool m_enableOnAwake;
 
         private IDPack _timerID;
+        private bool _isRunning;
 
         protected virtual void Awake()
         {
             if (m_enableOnAwake)
             {
-                _timerID = TimerSystem.Instance.AddTimerTask(PeriodicTask, m_interval, m_requestCount, TimeUnit.Secound,
-                    m_initialCall);
+                SetStatus(true);
             }
         }
 
         protected virtual void OnDestroy()
         {
-            TimerSystem.Instance.DeleteTimeTask(_timerID.id);
+            if (!_isRunning) return;
+
+            // 退出时勿通过 Instance 重建 TimerSystem
+            if (TimerSystem.HasInstance)
+            {
+                TimerSystem.Instance.DeleteTimeTask(_timerID.id);
+            }
+
+            _isRunning = false;
         }
 
         public virtual void SetStatus(bool enable)
         {
             if (enable)
             {
-                _timerID = TimerSystem.Instance.AddTimerTask(PeriodicTask, m_interval, m_requestCount, TimeUnit.Secound,
+                if (_isRunning) return;
+
+                _timerID = TimerSystem.Instance.AddTimerTask(PeriodicTask, m_interval, m_requestCount, TimeUnit.Second,
                     m_initialCall);
+                _isRunning = true;
             }
             else
             {
+                if (!_isRunning) return;
+
                 TimerSystem.Instance.DeleteTimeTask(_timerID.id);
+                _isRunning = false;
             }
         }
 
         protected virtual void ResetTimer()
         {
+            if (!_isRunning) return;
+
             TimerSystem.Instance.ResetTimeTask(_timerID.id);
         }
 

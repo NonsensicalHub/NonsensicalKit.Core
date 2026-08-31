@@ -7,6 +7,8 @@ namespace NonsensicalKit.Core.Timer
     {
         private static TimerSystem instance;
 
+        public static bool HasInstance => instance != null;
+
         public static TimerSystem Instance
         {
             get
@@ -25,6 +27,15 @@ namespace NonsensicalKit.Core.Timer
 
         private void Awake()
         {
+            if (instance != null && instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+
             _nonsensicalTimer = new NonsensicalTimer();
             _nonsensicalTimer.GetNow = GetNow;
             _nonsensicalTimer.SetLog((str, level) =>
@@ -48,6 +59,14 @@ namespace NonsensicalKit.Core.Timer
             start = true;
         }
 
+        private void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
+            }
+        }
+
         private void Update()
         {
             if (start) _nonsensicalTimer.Tick();
@@ -66,7 +85,7 @@ namespace NonsensicalKit.Core.Timer
         #region TimeTask
 
         public IDPack AddTimerTask(Action<int> callBack, double delay, int count = 1,
-            TimeUnit unit = TimeUnit.Millisecound, bool initialcall = false)
+            TimeUnit unit = TimeUnit.Millisecond, bool initialcall = false)
         {
             if (initialcall)
             {
@@ -87,7 +106,7 @@ namespace NonsensicalKit.Core.Timer
         }
 
         public bool ReplaceTimeTask(int id, Action<int> callBack, double delay, int count = 1,
-            TimeUnit unit = TimeUnit.Millisecound)
+            TimeUnit unit = TimeUnit.Millisecond)
         {
             return _nonsensicalTimer.ReplaceTimeTask(id, callBack, delay, count, unit);
         }
