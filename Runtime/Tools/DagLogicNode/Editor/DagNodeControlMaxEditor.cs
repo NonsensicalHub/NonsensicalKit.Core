@@ -10,7 +10,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
     [CustomEditor(typeof(DagNodeControlMax))]
     internal sealed class DagNodeControlMaxEditor : UnityEditor.Editor
     {
-        private const float IndentPx = 12f;
+        private const float IndentPx = 14f;
         private const int MaxUncappedListItems = 50;
 
         private static readonly GUIContent GcKind = new GUIContent("节点类型");
@@ -33,7 +33,6 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
         private SerializedProperty _controlCompsProp;
 
         private readonly Dictionary<int, bool> _groupExpanded = new Dictionary<int, bool>();
-        private bool _previewExpanded = true;
         private bool _showAllControlGos;
         private bool _showAllControlComps;
 
@@ -100,7 +99,9 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
             }
 
             EditorGUILayout.LabelField("激活条件（逻辑树）", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("逻辑块可折叠。删除会移除整棵子树。", EditorStyles.miniLabel);
+            EditorGUILayout.HelpBox(
+                "扁平表存储，无序列化深度限制。逻辑块可折叠。逻辑块内添加子项；子项关系选 且 / 或；删除会移除整棵子树。",
+                MessageType.None);
 
             var rootIdx = _rootIndexProp.intValue;
             DrawNode(ctrl, rootIdx, -1, null, -1, true, 0);
@@ -181,29 +182,11 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                 _groupExpanded[nodeIndex] = expanded;
             }
 
-            EditorGUILayout.PropertyField(kindProp, GcKind, GUILayout.MinWidth(140f));
-
-            if (isGroup)
-            {
-                var combineProp = nodeProp.FindPropertyRelative("Combine");
-                EditorGUILayout.PropertyField(combineProp, GcCombine, GUILayout.MinWidth(120f));
-            }
-
-            GUILayout.FlexibleSpace();
-
-            if (isGroup)
-            {
-                if (GUILayout.Button(GcAddCondition, EditorStyles.miniButton, GUILayout.Width(58f)))
-                    QueueAddChild(ctrl, nodeIndex, ChildKind.Leaf);
-                if (GUILayout.Button(GcAddAnd, EditorStyles.miniButton, GUILayout.Width(58f)))
-                    QueueAddChild(ctrl, nodeIndex, ChildKind.GroupAnd);
-                if (GUILayout.Button(GcAddOr, EditorStyles.miniButton, GUILayout.Width(58f)))
-                    QueueAddChild(ctrl, nodeIndex, ChildKind.GroupOr);
-            }
+            EditorGUILayout.PropertyField(kindProp, GcKind, GUILayout.MinWidth(180f));
 
             if (!isRoot && parentChildIndicesProp != null && slotInParent >= 0 && parentNodeIndex >= 0)
             {
-                if (GUILayout.Button(GcDelete, EditorStyles.miniButton, GUILayout.Width(40f)))
+                if (GUILayout.Button(GcDelete, GUILayout.Width(44f)))
                 {
                     var capturedNode = nodeIndex;
                     var capturedParent = parentNodeIndex;
@@ -217,7 +200,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                 }
 
                 EditorGUI.BeginDisabledGroup(slotInParent <= 0);
-                if (GUILayout.Button(GcUp, EditorStyles.miniButton, GUILayout.Width(22f)))
+                if (GUILayout.Button(GcUp, GUILayout.Width(22f)))
                 {
                     var capturedParent = parentNodeIndex;
                     var capturedSlot = slotInParent;
@@ -231,7 +214,7 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
                 EditorGUI.EndDisabledGroup();
 
                 EditorGUI.BeginDisabledGroup(slotInParent >= parentChildIndicesProp.arraySize - 1);
-                if (GUILayout.Button(GcDown, EditorStyles.miniButton, GUILayout.Width(22f)))
+                if (GUILayout.Button(GcDown, GUILayout.Width(22f)))
                 {
                     var capturedParent = parentNodeIndex;
                     var capturedSlot = slotInParent;
@@ -251,28 +234,54 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
             {
                 DrawLeafFields(nodeProp);
             }
-            else if (isGroup)
+            else
             {
-                var childrenProp = nodeProp.FindPropertyRelative("ChildIndices");
-                if (childrenProp != null && childrenProp.isArray && childrenProp.arraySize == 0)
-                    EditorGUILayout.LabelField("（尚无子项：请用上方按钮添加）", EditorStyles.miniLabel);
+                var combineProp = nodeProp.FindPropertyRelative("Combine");
+                EditorGUILayout.PropertyField(combineProp, GcCombine);
+
+                if (expanded)
+                {
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(GcAddCondition, GUILayout.Width(72f)))
+                        QueueAddChild(ctrl, nodeIndex, ChildKind.Leaf);
+                    if (GUILayout.Button(GcAddAnd, GUILayout.Width(72f)))
+                        QueueAddChild(ctrl, nodeIndex, ChildKind.GroupAnd);
+                    if (GUILayout.Button(GcAddOr, GUILayout.Width(72f)))
+                        QueueAddChild(ctrl, nodeIndex, ChildKind.GroupOr);
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.Space(2);
+                    var childrenProp = nodeProp.FindPropertyRelative("ChildIndices");
+                    if (childrenProp != null && childrenProp.isArray)
+                    {
+                        if (childrenProp.arraySize == 0)
+                        {
+                            EditorGUILayout.HelpBox("（尚无子项：请用上方按钮添加）", MessageType.None);
+                        }
+                        else
+                        {
+                            for (var i = 0; i < childrenProp.arraySize; i++)
+                            {
+                                var childNodeIndex = childrenProp.GetArrayElementAtIndex(i).intValue;
+                                DrawNode(ctrl, childNodeIndex, nodeIndex, childrenProp, i, false, depth + 1);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var childrenProp = nodeProp.FindPropertyRelative("ChildIndices");
+                    var count = childrenProp != null && childrenProp.isArray ? childrenProp.arraySize : 0;
+                    EditorGUILayout.LabelField(
+                        count == 0 ? "（已折叠）" : $"（已折叠，{count} 个子项）",
+                        EditorStyles.miniLabel);
+                }
             }
 
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
-
-            if (!isGroup || !expanded)
-                return;
-
-            var children = nodeProp.FindPropertyRelative("ChildIndices");
-            if (children == null || !children.isArray)
-                return;
-
-            for (var i = 0; i < children.arraySize; i++)
-            {
-                var childNodeIndex = children.GetArrayElementAtIndex(i).intValue;
-                DrawNode(ctrl, childNodeIndex, nodeIndex, children, i, false, depth + 1);
-            }
         }
 
         private static void DrawLeafFields(SerializedProperty nodeProp)
@@ -331,10 +340,9 @@ namespace NonsensicalKit.Core.DagLogicNode.Editor
             if (string.IsNullOrEmpty(_previewCache))
                 return;
 
-            EditorGUILayout.Space(4);
-            _previewExpanded = EditorGUILayout.Foldout(_previewExpanded, "表达式预览", true);
-            if (_previewExpanded)
-                EditorGUILayout.HelpBox(_previewCache, MessageType.None);
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("表达式预览", EditorStyles.miniBoldLabel);
+            EditorGUILayout.HelpBox(_previewCache, MessageType.None);
         }
 
         private static string BuildPreview(SerializedProperty nodesProp, int nodeIndex)
