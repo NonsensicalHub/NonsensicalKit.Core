@@ -5,8 +5,9 @@
         "GUID:75469ad4d38634e559750d17036d5f7c",
         "GUID:4307f53044263cf4b835bd812fc161a4",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "NonsensicalKit.NaughtyAttributes",
-        "Unity.RenderPipelines.Universal.Runtime"
+        "GUID:f553ae3bf46e27d4fb3b909e00305fa9",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:f06555f75b070af458a003d92f9efb00"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

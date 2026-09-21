@@ -6,7 +6,7 @@ namespace NonsensicalKit.Core
 {
     /// <summary>
     /// 控制反转容器InversionOfControlContainer
-    /// 对MessageAggregator和ObjectAggregator的封装
+    /// 对MessageAggregator、ObjectAggregator和MethodAggregator的封装
     /// </summary>
     public static class IOCC
     {
@@ -370,6 +370,370 @@ namespace NonsensicalKit.Core
         public static void PublishWithID<T1, T2, T3>([DisallowNull] string name, [DisallowNull] string id, T1 value1, T2 value2, T3 value3)
         {
             MessageAggregator<T1, T2, T3>.Instance.PublishWithID(name, id, value1, value2, value3);
+        }
+
+        #endregion
+
+        #region MethodAggregator
+
+        public static void AddHandler<TResult>(int index, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.AddHandler(index, handler);
+        }
+
+        public static void AddHandler<T, TResult>(int index, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.AddHandler(index, handler);
+        }
+
+        public static void AddHandler<T1, T2, TResult>(int index, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(index, handler);
+        }
+
+        public static void AddHandler<T1, T2, T3, TResult>(int index, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(index, handler);
+        }
+
+        public static void AddHandler<TResult>([DisallowNull] Enum index, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.AddHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void AddHandler<T, TResult>([DisallowNull] Enum index, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.AddHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void AddHandler<T1, T2, TResult>([DisallowNull] Enum index, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void AddHandler<T1, T2, T3, TResult>([DisallowNull] Enum index, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void AddHandler<TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.AddHandler(index, id, handler);
+        }
+
+        public static void AddHandler<T, TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.AddHandler(index, id, handler);
+        }
+
+        public static void AddHandler<T1, T2, TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(index, id, handler);
+        }
+
+        public static void AddHandler<T1, T2, T3, TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(index, id, handler);
+        }
+
+        public static void AddHandler<TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.AddHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static void AddHandler<T, TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.AddHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static void AddHandler<T1, T2, TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static void AddHandler<T1, T2, T3, TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static void RemoveHandler<TResult>(int index, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.RemoveHandler(index, handler);
+        }
+
+        public static void RemoveHandler<T, TResult>(int index, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.RemoveHandler(index, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, TResult>(int index, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(index, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, T3, TResult>(int index, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(index, handler);
+        }
+
+        public static void RemoveHandler<TResult>([DisallowNull] Enum index, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.RemoveHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void RemoveHandler<T, TResult>([DisallowNull] Enum index, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.RemoveHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void RemoveHandler<T1, T2, TResult>([DisallowNull] Enum index, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void RemoveHandler<T1, T2, T3, TResult>([DisallowNull] Enum index, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(Convert.ToInt32(index), handler);
+        }
+
+        public static void RemoveHandler<TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.RemoveHandler(index, id, handler);
+        }
+
+        public static void RemoveHandler<T, TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.RemoveHandler(index, id, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(index, id, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, T3, TResult>(int index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(index, id, handler);
+        }
+
+        public static void RemoveHandler<TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.RemoveHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static void RemoveHandler<T, TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.RemoveHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, T3, TResult>([DisallowNull] Enum index, [DisallowNull] string id, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(Convert.ToInt32(index), id, handler);
+        }
+
+        public static TResult Execute<TResult>(int index, TResult defaultValue = default)
+        {
+            return MethodAggregator<TResult>.Instance.Execute(index, defaultValue);
+        }
+
+        public static TResult Execute<T, TResult>(int index, T value, TResult defaultValue = default)
+        {
+            return MethodAggregator<T, TResult>.Instance.Execute(index, value, defaultValue);
+        }
+
+        public static TResult Execute<T1, T2, TResult>(int index, T1 value1, T2 value2, TResult defaultValue = default)
+        {
+            return MethodAggregator<T1, T2, TResult>.Instance.Execute(index, value1, value2, defaultValue);
+        }
+
+        public static TResult Execute<T1, T2, T3, TResult>(int index, T1 value1, T2 value2, T3 value3, TResult defaultValue = default)
+        {
+            return MethodAggregator<T1, T2, T3, TResult>.Instance.Execute(index, value1, value2, value3, defaultValue);
+        }
+
+        public static TResult Execute<TResult>([DisallowNull] Enum index, TResult defaultValue = default)
+        {
+            return MethodAggregator<TResult>.Instance.Execute(Convert.ToInt32(index), defaultValue);
+        }
+
+        public static TResult Execute<T, TResult>([DisallowNull] Enum index, T value, TResult defaultValue = default)
+        {
+            return MethodAggregator<T, TResult>.Instance.Execute(Convert.ToInt32(index), value, defaultValue);
+        }
+
+        public static TResult Execute<T1, T2, TResult>([DisallowNull] Enum index, T1 value1, T2 value2, TResult defaultValue = default)
+        {
+            return MethodAggregator<T1, T2, TResult>.Instance.Execute(Convert.ToInt32(index), value1, value2, defaultValue);
+        }
+
+        public static TResult Execute<T1, T2, T3, TResult>([DisallowNull] Enum index, T1 value1, T2 value2, T3 value3, TResult defaultValue = default)
+        {
+            return MethodAggregator<T1, T2, T3, TResult>.Instance.Execute(Convert.ToInt32(index), value1, value2, value3, defaultValue);
+        }
+
+        public static TResult ExecuteWithID<TResult>(int index, [DisallowNull] string id)
+        {
+            return MethodAggregator<TResult>.Instance.ExecuteWithID(index, id);
+        }
+
+        public static TResult ExecuteWithID<T, TResult>(int index, [DisallowNull] string id, T value)
+        {
+            return MethodAggregator<T, TResult>.Instance.ExecuteWithID(index, id, value);
+        }
+
+        public static TResult ExecuteWithID<T1, T2, TResult>(int index, [DisallowNull] string id, T1 value1, T2 value2)
+        {
+            return MethodAggregator<T1, T2, TResult>.Instance.ExecuteWithID(index, id, value1, value2);
+        }
+
+        public static TResult ExecuteWithID<T1, T2, T3, TResult>(int index, [DisallowNull] string id, T1 value1, T2 value2, T3 value3)
+        {
+            return MethodAggregator<T1, T2, T3, TResult>.Instance.ExecuteWithID(index, id, value1, value2, value3);
+        }
+
+        public static TResult ExecuteWithID<TResult>([DisallowNull] Enum index, [DisallowNull] string id)
+        {
+            return MethodAggregator<TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id);
+        }
+
+        public static TResult ExecuteWithID<T, TResult>([DisallowNull] Enum index, [DisallowNull] string id, T value)
+        {
+            return MethodAggregator<T, TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id, value);
+        }
+
+        public static TResult ExecuteWithID<T1, T2, TResult>([DisallowNull] Enum index, [DisallowNull] string id, T1 value1, T2 value2)
+        {
+            return MethodAggregator<T1, T2, TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id, value1, value2);
+        }
+
+        public static TResult ExecuteWithID<T1, T2, T3, TResult>([DisallowNull] Enum index, [DisallowNull] string id, T1 value1, T2 value2, T3 value3)
+        {
+            return MethodAggregator<T1, T2, T3, TResult>.Instance.ExecuteWithID(Convert.ToInt32(index), id, value1, value2, value3);
+        }
+
+        public static void AddHandler<TResult>([DisallowNull] string name, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.AddHandler(name, handler);
+        }
+
+        public static void AddHandler<T, TResult>([DisallowNull] string name, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.AddHandler(name, handler);
+        }
+
+        public static void AddHandler<T1, T2, TResult>([DisallowNull] string name, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(name, handler);
+        }
+
+        public static void AddHandler<T1, T2, T3, TResult>([DisallowNull] string name, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(name, handler);
+        }
+
+        public static void AddHandler<TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.AddHandler(name, id, handler);
+        }
+
+        public static void AddHandler<T, TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.AddHandler(name, id, handler);
+        }
+
+        public static void AddHandler<T1, T2, TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.AddHandler(name, id, handler);
+        }
+
+        public static void AddHandler<T1, T2, T3, TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.AddHandler(name, id, handler);
+        }
+
+        public static void RemoveHandler<TResult>([DisallowNull] string name, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.RemoveHandler(name, handler);
+        }
+
+        public static void RemoveHandler<T, TResult>([DisallowNull] string name, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.RemoveHandler(name, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, TResult>([DisallowNull] string name, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(name, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, T3, TResult>([DisallowNull] string name, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(name, handler);
+        }
+
+        public static void RemoveHandler<TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<TResult> handler)
+        {
+            MethodAggregator<TResult>.Instance.RemoveHandler(name, id, handler);
+        }
+
+        public static void RemoveHandler<T, TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<T, TResult> handler)
+        {
+            MethodAggregator<T, TResult>.Instance.RemoveHandler(name, id, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<T1, T2, TResult> handler)
+        {
+            MethodAggregator<T1, T2, TResult>.Instance.RemoveHandler(name, id, handler);
+        }
+
+        public static void RemoveHandler<T1, T2, T3, TResult>([DisallowNull] string name, [DisallowNull] string id, [DisallowNull] Func<T1, T2, T3, TResult> handler)
+        {
+            MethodAggregator<T1, T2, T3, TResult>.Instance.RemoveHandler(name, id, handler);
+        }
+
+        public static TResult Execute<TResult>([DisallowNull] string name, TResult defaultValue = default)
+        {
+            return MethodAggregator<TResult>.Instance.Execute(name, defaultValue);
+        }
+
+        public static TResult Execute<T, TResult>([DisallowNull] string name, T value, TResult defaultValue = default)
+        {
+            return MethodAggregator<T, TResult>.Instance.Execute(name, value, defaultValue);
+        }
+
+        public static TResult Execute<T1, T2, TResult>([DisallowNull] string name, T1 value1, T2 value2, TResult defaultValue = default)
+        {
+            return MethodAggregator<T1, T2, TResult>.Instance.Execute(name, value1, value2, defaultValue);
+        }
+
+        public static TResult Execute<T1, T2, T3, TResult>([DisallowNull] string name, T1 value1, T2 value2, T3 value3, TResult defaultValue = default)
+        {
+            return MethodAggregator<T1, T2, T3, TResult>.Instance.Execute(name, value1, value2, value3, defaultValue);
+        }
+
+        public static TResult ExecuteWithID<TResult>([DisallowNull] string name, [DisallowNull] string id)
+        {
+            return MethodAggregator<TResult>.Instance.ExecuteWithID(name, id);
+        }
+
+        public static TResult ExecuteWithID<T, TResult>([DisallowNull] string name, [DisallowNull] string id, T value)
+        {
+            return MethodAggregator<T, TResult>.Instance.ExecuteWithID(name, id, value);
+        }
+
+        public static TResult ExecuteWithID<T1, T2, TResult>([DisallowNull] string name, [DisallowNull] string id, T1 value1, T2 value2)
+        {
+            return MethodAggregator<T1, T2, TResult>.Instance.ExecuteWithID(name, id, value1, value2);
+        }
+
+        public static TResult ExecuteWithID<T1, T2, T3, TResult>([DisallowNull] string name, [DisallowNull] string id, T1 value1, T2 value2, T3 value3)
+        {
+            return MethodAggregator<T1, T2, T3, TResult>.Instance.ExecuteWithID(name, id, value1, value2, value3);
         }
 
         #endregion
