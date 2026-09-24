@@ -2,16 +2,19 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
-#if UNITY_6000_0_OR_NEWER
-using Unity.Cinemachine;
-#else
-using Cinemachine;
-#endif
-
+/// <summary>
+/// 启动时确保 MainCamera 有 CinemachineBrain，并把子节点上所有
+/// Timeline 的 Cinemachine Track 绑定到该 Brain。
+/// 兼容 Cinemachine 2.x（命名空间 Cinemachine）与 3.x（Unity.Cinemachine）。
+/// </summary>
 public class AutoSetupCinemachineBrain : MonoBehaviour
 {
     private void Start()
     {
+#if !CINEMACHINE_2 && !CINEMACHINE_3
+        Debug.LogError("AutoSetupCinemachineBrain: 未安装 Cinemachine（需要 2.x 或 3.x）。", this);
+        return;
+#else
         Camera mainCam = Camera.main;
         if (mainCam == null)
         {
@@ -19,42 +22,38 @@ public class AutoSetupCinemachineBrain : MonoBehaviour
             return;
         }
 
-#if UNITY_6000_0_OR_NEWER
-        // Unity 6+ / Cinemachine 3.x
-        var manager = mainCam.GetComponent<CinemachineCameraManager>();
-        if (manager == null)
-            manager = mainCam.gameObject.AddComponent<CinemachineCameraManager>();
-
-        var directors = GetComponentsInChildren<PlayableDirector>(true);
-        foreach (var director in directors)
-        {
-            if (director.playableAsset is not TimelineAsset timelineAsset) continue;
-            foreach (var track in timelineAsset.GetOutputTracks())
-            {
-                if (track is CinemachineTrack)
-                {
-                    director.SetGenericBinding(track, manager);
-                    break;
-                }
-            }
-        }
-#else
-        // Unity 2022 及以下 / Cinemachine 2.x
-        var brain = mainCam.GetComponent<CinemachineBrain>();
+#if CINEMACHINE_3
+        var brain = mainCam.GetComponent<Unity.Cinemachine.CinemachineBrain>();
         if (brain == null)
-            brain = mainCam.gameObject.AddComponent<CinemachineBrain>();
+            brain = mainCam.gameObject.AddComponent<Unity.Cinemachine.CinemachineBrain>();
+#elif CINEMACHINE_2
+        var brain = mainCam.GetComponent<Cinemachine.CinemachineBrain>();
+        if (brain == null)
+            brain = mainCam.gameObject.AddComponent<Cinemachine.CinemachineBrain>();
+#endif
 
         var directors = GetComponentsInChildren<PlayableDirector>(true);
+        if (directors.Length == 0)
+        {
+            Debug.LogWarning("AutoSetupCinemachineBrain: 子节点上未找到 PlayableDirector。", this);
+            return;
+        }
+
         foreach (var director in directors)
         {
-            if (director.playableAsset is not TimelineAsset timelineAsset) continue;
+            var timelineAsset = director.playableAsset as TimelineAsset;
+            if (timelineAsset == null)
+                continue;
+
             foreach (var track in timelineAsset.GetOutputTracks())
             {
-                if (track is CinemachineTrack)
-                {
+#if CINEMACHINE_3
+                if (track is Unity.Cinemachine.CinemachineTrack)
                     director.SetGenericBinding(track, brain);
-                    break;
-                }
+#elif CINEMACHINE_2
+                if (track is Cinemachine.CinemachineTrack)
+                    director.SetGenericBinding(track, brain);
+#endif
             }
         }
 #endif
