@@ -1,0 +1,195 @@
+/* 覆盖 Default Runtime Theme：控件高度、下拉字色、滚动条、滑块透明底 */
+/* 默认运行时字体没有汉字，打包后会缺字 */
+
+#nk-setting-root,
+#nk-setting-root .unity-text-element,
+#nk-setting-root .unity-label,
+#nk-setting-root .unity-button,
+#nk-setting-root .unity-base-field__label,
+#nk-setting-root .unity-base-field__input,
+#nk-setting-root .unity-base-popup-field__text,
+#nk-setting-root .unity-toggle__text,
+#nk-setting-window,
+#nk-setting-window .unity-text-element,
+#nk-setting-window .unity-label,
+#nk-setting-window .unity-button,
+#nk-setting-window .unity-base-field__label,
+#nk-setting-window .unity-base-field__input,
+#nk-setting-window .unity-base-popup-field__text,
+#nk-setting-window .unity-toggle__text {
+    -unity-font: resource("UIToolkit/SettingPanelFont");
+}
+
+#nk-setting-window {
+    overflow: hidden;
+}
+
+#nk-setting-window .unity-button {
+    height: 44px;
+    min-height: 44px;
+    font-size: 17px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow: visible;
+    -unity-text-align: middle-center;
+}
+
+/* 文本/下拉输入（不要用 .unity-base-field__input，会误伤 Slider） */
+#nk-setting-window .unity-base-text-field,
+#nk-setting-window .unity-base-popup-field {
+    height: 44px;
+    min-height: 44px;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 17px;
+    overflow: visible;
+    flex-shrink: 1;
+    color: rgb(26, 28, 33);
+}
+
+#nk-setting-window .unity-base-text-field__input,
+#nk-setting-window .unity-base-popup-field__input {
+    height: 44px;
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    overflow: visible;
+    -unity-text-align: middle-left;
+    font-size: 17px;
+    justify-content: center;
+    color: rgb(26, 28, 33);
+    background-color: rgb(235, 237, 242);
+}
+
+#nk-setting-window .unity-base-popup-field__text,
+#nk-setting-window .unity-base-popup-field__input > .unity-text-element,
+#nk-setting-window .unity-base-text-field__input > .unity-text-element {
+    font-size: 17px;
+    overflow: visible;
+    -unity-text-align: middle-left;
+    color: rgb(26, 28, 33);
+}
+
+/* Slider：透明底；拖柄加高并骑在轨道上（具体 top 由代码按 tracker 居中） */
+#nk-setting-window .unity-base-slider,
+#nk-setting-window .unity-base-slider > .unity-base-field__input,
+#nk-setting-window .unity-base-slider__input,
+#nk-setting-window .unity-base-slider__drag-container {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+#nk-setting-window .unity-base-slider {
+    height: 36px;
+    min-height: 36px;
+}
+
+#nk-setting-window .unity-base-slider__tracker {
+    background-color: rgb(70, 74, 82);
+    height: 4px;
+    border-width: 0;
+}
+
+#nk-setting-window .unity-base-slider__dragger {
+    background-color: rgb(230, 233, 238);
+    width: 16px;
+    height: 28px;
+    border-width: 0;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+
+#nk-setting-window .unity-toggle {
+    height: 44px;
+    min-height: 44px;
+    font-size: 17px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#nk-setting-window .unity-toggle > .unity-label {
+    font-size: 17px;
+}
+
+/* 标题栏高级设置：勾选与文字贴近 */
+#nk-setting-advanced-toggle {
+    flex-direction: row;
+    align-items: center;
+}
+
+#nk-setting-advanced-toggle > .unity-toggle__input {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+#nk-setting-advanced-toggle > .unity-toggle__label,
+#nk-setting-advanced-toggle > .unity-label {
+    margin-left: 4px;
+    padding-left: 0;
+    margin-right: 0;
+}
+
+#nk-setting-window .unity-label {
+    overflow: visible;
+}
+
+/* —— 竖向滚动条 —— */
+#nk-setting-content-scroll {
+    margin-right: 0;
+    padding-right: 0;
+}
+
+#nk-setting-content-scroll > .unity-scroll-view__content-and-vertical-scroll-container {
+    flex-grow: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#nk-setting-content-scroll .unity-scroll-view__content-viewport {
+    flex-grow: 1;
+    margin: 0;
+    padding-right: 4px;
+}
+
+#nk-setting-content-scroll .unity-scroll-view__content-container {
+    padding-right: 6px;
+}
+
+#nk-setting-content-scroll .unity-scroller--vertical {
+    width: 14px;
+    min-width: 14px;
+    margin: 0 0 0 2px;
+    padding: 0;
+    border-width: 0;
+    display: flex;
+    background-color: rgb(30, 32, 36);
+}
+
+#nk-setting-content-scroll .unity-scroller--vertical .unity-base-slider__tracker {
+    margin: 0;
+    border-width: 0;
+    background-color: rgb(55, 58, 64);
+}
+
+#nk-setting-content-scroll .unity-scroller--vertical .unity-base-slider__dragger {
+    width: 10px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border-width: 0;
+    background-color: rgb(150, 155, 165);
+}
+
+#nk-setting-content-scroll .unity-scroller--vertical .unity-repeat-button {
+    height: 14px;
+    min-height: 14px;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    background-color: rgb(40, 42, 48);
+}

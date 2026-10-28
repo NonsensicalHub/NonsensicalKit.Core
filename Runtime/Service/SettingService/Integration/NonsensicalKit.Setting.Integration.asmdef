@@ -1,0 +1,17 @@
+{
+    "name": "NonsensicalKit.Setting.Integration",
+    "rootNamespace": "NonsensicalKit.Core.Service.Setting",
+    "references": [
+        "NonsensicalKit.Setting",
+        "NonsensicalKit.Core.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

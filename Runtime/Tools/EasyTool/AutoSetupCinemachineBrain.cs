@@ -51,7 +51,8 @@ public class AutoSetupCinemachineBrain : MonoBehaviour
                 if (track is Unity.Cinemachine.CinemachineTrack)
                     director.SetGenericBinding(track, brain);
 #elif CINEMACHINE_2
-                if (track is Cinemachine.CinemachineTrack)
+                // CM2 的 CinemachineTrack 在全局命名空间（非 Cinemachine.*）
+                if (track is CinemachineTrack)
                     director.SetGenericBinding(track, brain);
 #endif
             }

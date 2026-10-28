@@ -1,0 +1,20 @@
+{
+    "name": "NonsensicalKit.Setting.Editor",
+    "rootNamespace": "NonsensicalKit.Setting.Editor",
+    "references": [
+        "NonsensicalKit.Setting",
+        "NonsensicalKit.Setting.Integration",
+        "NonsensicalKit.Core.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
