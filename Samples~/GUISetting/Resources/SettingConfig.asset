@@ -24,4 +24,59 @@ MonoBehaviour:
       m_UsePercentage: 1
       m_WindowHeightPercentage: 0.82
       m_ShowAdvancedByDefault: 0
-    m_SettingJson: "{\n  \"version\": 2,\n  \"system\": {\n    \"enabled\": true,\n    \"advanced\": true,\n    \"include\": [\"display\", \"quality\", \"audio\", \"performance\"]\n  },\n  \"tabs\": [\n    {\n      \"id\": \"project.demo\",\n      \"label\": \"\u9879\u76EE\u793A\u4F8B\",\n      \"order\": 100,\n      \"kind\": \"project\",\n      \"groups\": [\n        {\n          \"id\": \"demo\",\n          \"label\": \"\u793A\u4F8B\u9879\",\n          \"items\": [\n            {\n              \"key\": \"hideObj\",\n              \"type\": \"button\",\n              \"label\": \"\u5207\u6362\u6D4B\u8BD5\u7269\u4F53\",\n              \"description\": \"\u9879\u76EE\u81EA\u5B9A\u4E49\u6309\u94AE\",\n              \"buttonAction\": \"hideObj\"\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
+    m_SettingJson: "{\r\n  \"version\": 2,\r\n  \"system\": {\r\n    \"enabled\":
+      true,\r\n    \"advanced\": true,\r\n    \"include\": [\"display\", \"quality\",
+      \"audio\", \"performance\"]\r\n  },\r\n  \"tabs\": [\r\n    {\r\n      \"id\":
+      \"project.demo\",\r\n      \"label\": \"\u9879\u76EE\u793A\u4F8B\",\r\n     
+      \"order\": 100,\r\n      \"kind\": \"project\",\r\n      \"groups\": [\r\n       
+      {\r\n          \"id\": \"look\",\r\n          \"label\": \"\u5916\u89C2\",\r\n         
+      \"description\": \"\u6539\u5B8C\u540E\u70B9\u5E95\u90E8\u300C\u5E94\u7528\u300D\u3002\u4E2D\u95F4\u65B9\u5757\u4F1A\u9A6C\u4E0A\u53D8\u3002\",\r\n         
+      \"items\": [\r\n            {\r\n              \"type\": \"info\",\r\n             
+      \"key\": \"project.help\",\r\n              \"label\": \"\u600E\u4E48\u770B\u6548\u679C\",\r\n             
+      \"description\": \"\u9634\u5F71\u8DDD\u79BB\u770B\u53F3\u4FA7\u7531\u8FD1\u5230\u8FDC\u7684\u65B9\u5757\u5F71\u5B50\u3002\u9634\u5F71\u8D28\u91CF\u770B\u8FD1\u5904\u5F71\u5B50\u786C\u8F6F\u3002LOD
+      \u504F\u79FB\u770B\u5DE6\u4FA7\u6A21\u578B\u4ECE\u5706\u7403\u6362\u6210\u65B9\u5757\u3002\u5404\u5411\u5F02\u6027\u8FC7\u6EE4\u770B\u5730\u9762\u659C\u5411\u683C\u5B50\u3002\u4E3B\u97F3\u91CF\u542C\u5FAA\u73AF\u63D0\u793A\u97F3\u3002\u6E32\u67D3\u6BD4\u4F8B\u4F1A\u8BA9\u6574\u5C4F\u53D8\u7CCA\u6216\u53D8\u6E05\u6670\u3002\"\r\n           
+      },\r\n            {\r\n              \"key\": \"project.color\",\r\n             
+      \"type\": \"enum\",\r\n              \"label\": \"\u65B9\u5757\u989C\u8272\",\r\n             
+      \"description\": \"\u4E2D\u95F4\u65B9\u5757\u7684\u989C\u8272\",\r\n             
+      \"default\": \"white\",\r\n              \"options\": [\r\n               
+      { \"value\": \"white\", \"label\": \"\u767D\" },\r\n                { \"value\":
+      \"red\", \"label\": \"\u7EA2\" },\r\n                { \"value\": \"green\",
+      \"label\": \"\u7EFF\" },\r\n                { \"value\": \"blue\", \"label\":
+      \"\u84DD\" },\r\n                { \"value\": \"yellow\", \"label\": \"\u9EC4\"
+      }\r\n              ]\r\n            },\r\n            {\r\n              \"key\":
+      \"project.spinSpeed\",\r\n              \"type\": \"float\",\r\n             
+      \"label\": \"\u8F6C\u901F\",\r\n              \"description\": \"\u65B9\u5757\u6BCF\u79D2\u8F6C\u591A\u5C11\u5EA6\",\r\n             
+      \"default\": 45,\r\n              \"min\": 0,\r\n              \"max\": 240,\r\n             
+      \"step\": 1,\r\n              \"unit\": \"\xB0/s\"\r\n            },\r\n           
+      {\r\n              \"key\": \"project.scale\",\r\n              \"type\": \"float\",\r\n             
+      \"label\": \"\u7F29\u653E\",\r\n              \"default\": 1,\r\n             
+      \"min\": 0.4,\r\n              \"max\": 2.5,\r\n              \"step\": 0.05\r\n           
+      },\r\n            {\r\n              \"key\": \"project.caption\",\r\n             
+      \"type\": \"string\",\r\n              \"label\": \"\u6807\u9898\",\r\n             
+      \"description\": \"\u663E\u793A\u5728\u753B\u9762\u9876\u90E8\",\r\n             
+      \"default\": \"\u8BBE\u7F6E\u6F14\u793A\"\r\n            }\r\n          ]\r\n       
+      },\r\n        {\r\n          \"id\": \"marker\",\r\n          \"label\": \"\u6807\u8BB0\",\r\n         
+      \"description\": \"\u6807\u8BB0\u5173\u6389\u540E\uFF0C\u9AD8\u5EA6\u8FD9\u4E00\u9879\u4F1A\u9690\u85CF\u3002\",\r\n         
+      \"items\": [\r\n            {\r\n              \"key\": \"project.showMarker\",\r\n             
+      \"type\": \"bool\",\r\n              \"label\": \"\u663E\u793A\u6807\u8BB0\",\r\n             
+      \"default\": true\r\n            },\r\n            {\r\n              \"key\":
+      \"project.markerHeight\",\r\n              \"type\": \"float\",\r\n             
+      \"label\": \"\u6807\u8BB0\u9AD8\u5EA6\",\r\n              \"default\": 2.2,\r\n             
+      \"min\": 0.4,\r\n              \"max\": 6,\r\n              \"step\": 0.1,\r\n             
+      \"unit\": \"m\",\r\n              \"visibleIf\": \"project.showMarker=true\"\r\n           
+      }\r\n          ]\r\n        },\r\n        {\r\n          \"id\": \"lights\",\r\n         
+      \"label\": \"\u9644\u52A0\u5149\",\r\n          \"description\": \"\u5173\u6389\u9644\u52A0\u5149\u540E\uFF0C\u5F3A\u5EA6\u4E0D\u80FD\u62D6\u3002\",\r\n         
+      \"items\": [\r\n            {\r\n              \"key\": \"project.extraLights\",\r\n             
+      \"type\": \"bool\",\r\n              \"label\": \"\u9644\u52A0\u5149\",\r\n             
+      \"default\": true\r\n            },\r\n            {\r\n              \"key\":
+      \"project.lightIntensity\",\r\n              \"type\": \"float\",\r\n             
+      \"label\": \"\u9644\u52A0\u5149\u5F3A\u5EA6\",\r\n              \"default\":
+      1.5,\r\n              \"min\": 0,\r\n              \"max\": 4,\r\n             
+      \"step\": 0.05,\r\n              \"enabledIf\": \"project.extraLights=true\"\r\n           
+      }\r\n          ]\r\n        },\r\n        {\r\n          \"id\": \"actions\",\r\n         
+      \"label\": \"\u64CD\u4F5C\",\r\n          \"items\": [\r\n            {\r\n             
+      \"key\": \"project.pulse\",\r\n              \"type\": \"button\",\r\n             
+      \"label\": \"\u8DF3\u52A8\u4E00\u4E0B\",\r\n              \"description\":
+      \"\u8BA9\u4E2D\u95F4\u65B9\u5757\u77ED\u6682\u53D8\u5927\",\r\n             
+      \"buttonAction\": \"pulseSubject\"\r\n            }\r\n          ]\r\n       
+      }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n"
