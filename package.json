@@ -4,12 +4,11 @@
   "author": {
     "name": "NonsensicalLab"
   },
-  "version": "1.0.7",
+  "version": "1.0.8",
   "unity": "2021.3",
   "license": "MIT",
-  "description": "NonsensicalKit.Core为NonsensicalKit的核心包，此工具集的任意其他包都依赖于此包。\r\n此包包含项目简易框架、各种工具类。\n兼容2021.3到6000.0",
+  "description": "NonsensicalKit.Core为NonsensicalKit的核心包，此工具集的任意其他包都依赖于此包。\r\n此包包含项目简易框架、各种工具类。\n兼容2021.3到6000.0\n需要 UniTask 程序集：放在 Assets 中，或自行通过 Package Manager 安装均可。本包不声明 com.cysharp.unitask 依赖。",
   "dependencies": {
-    "com.cysharp.unitask": "2.5.5",
     "com.unity.cinemachine": "2.10.3",
     "com.unity.inputsystem": "1.7.0",
     "com.unity.nuget.newtonsoft-json": "3.2.1",

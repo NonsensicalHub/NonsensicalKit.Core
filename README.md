@@ -3,6 +3,10 @@
 `com.nonsensicallab.nonsensicalkit.core` 是 NonsensicalKit 的核心能力包，也是其他 NonsensicalKit 扩展包的基础依赖。  
 它提供了项目级框架能力（Service / Log / Timer / Aggregator）、运行时工具集以及编辑器效率工具。
 
+编译需要项目里能引用到 `UniTask` 程序集。放在 `Assets` 中即可，也可以自行用 Package Manager 安装。Core 不声明 `com.cysharp.unitask` 包依赖，因此不会在已有 UniTask 时再强制拉取一份。
+
+另外通过 Package Manager 依赖 Cinemachine、Input System、Newtonsoft JSON、URP、Timeline。
+
 ---
 
 ## 核心模块一览

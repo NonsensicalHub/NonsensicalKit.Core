@@ -69,6 +69,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - 添加SaveService和NonsensicalConsole
 
+## [1.0.8] - 2026-11-20
+
+### Changed
+
+- UniTask 改为外部程序集依赖。项目 Assets 里已有 UniTask，或自行安装 UniTask 包，都可以。Core 不再声明 `com.cysharp.unitask`，避免 Package Manager 强制再装一份。
+
 ## [1.0.7] - 2026-05-07
 
 ### Added
