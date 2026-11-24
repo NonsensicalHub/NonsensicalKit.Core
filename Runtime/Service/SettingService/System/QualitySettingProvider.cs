@@ -261,7 +261,7 @@ namespace NonsensicalKit.Setting
 
         private static bool IsUrpAvailable()
         {
-            RenderPipelineAsset asset = GraphicsSettings.renderPipelineAsset;
+            RenderPipelineAsset asset = GraphicsSettings.defaultRenderPipeline;
             if (asset == null)
             {
                 return false;
@@ -273,7 +273,7 @@ namespace NonsensicalKit.Setting
 
         private static float GetUrpRenderScale()
         {
-            object asset = GraphicsSettings.renderPipelineAsset;
+            object asset = GraphicsSettings.defaultRenderPipeline;
             if (asset == null)
             {
                 return 1f;
@@ -291,7 +291,7 @@ namespace NonsensicalKit.Setting
 
         private static void SetUrpRenderScale(float scale)
         {
-            object asset = GraphicsSettings.renderPipelineAsset;
+            object asset = GraphicsSettings.defaultRenderPipeline;
             if (asset == null)
             {
                 return;
@@ -307,7 +307,7 @@ namespace NonsensicalKit.Setting
 
         private static void TrySetUrpMsaa(int samples)
         {
-            object asset = GraphicsSettings.renderPipelineAsset;
+            object asset = GraphicsSettings.defaultRenderPipeline;
             if (asset == null)
             {
                 return;
@@ -323,7 +323,7 @@ namespace NonsensicalKit.Setting
 
         private static void TrySetUrpShadowDistance(float distance)
         {
-            object asset = GraphicsSettings.renderPipelineAsset;
+            object asset = GraphicsSettings.defaultRenderPipeline;
             if (asset == null)
             {
                 return;

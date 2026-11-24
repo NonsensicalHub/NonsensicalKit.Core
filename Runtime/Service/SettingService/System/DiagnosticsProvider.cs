@@ -74,7 +74,7 @@ namespace NonsensicalKit.Setting
 
         private static string GetPipelineName()
         {
-            RenderPipelineAsset asset = GraphicsSettings.renderPipelineAsset;
+            RenderPipelineAsset asset = GraphicsSettings.defaultRenderPipeline;
             if (asset == null)
             {
                 return "内置渲染管线 (Built-in)";
